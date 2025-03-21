@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0 # 可选，保持完整历史记录
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3 
+        uses: pnpm/action-setup@v3
         with:
           version: 10
 
@@ -33,7 +33,7 @@ jobs:
         with:
           node-version: 20
           cache: pnpm # 使用 pnpm 缓存依赖
-      
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
@@ -43,11 +43,11 @@ jobs:
       - name: Build all Slidev projects
         run: |
           pnpm -r build
-          mkdir -p dist/SlideStack
+          mkdir -p dist
           for pkg in packages/*; do
             if [ -d "$pkg/dist" ]; then
               pkg_name=$(basename $pkg)
-              cp -r "$pkg/dist" "dist/SlideStack/$pkg_name"
+              cp -r "$pkg/dist" "dist/$pkg_name"
             fi
           done
 
