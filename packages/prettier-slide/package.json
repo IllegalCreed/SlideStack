@@ -3,7 +3,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "slidev build --base /prettier-slide/",
+    "build": "slidev build --base /SlideStack/prettier-slide/",
     "dev": "slidev --open",
     "export": "slidev export"
   },

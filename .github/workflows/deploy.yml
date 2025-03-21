@@ -43,11 +43,11 @@ jobs:
       - name: Build all Slidev projects
         run: |
           pnpm -r build
-          mkdir -p dist
+          mkdir -p dist/SlideStack
           for pkg in packages/*; do
             if [ -d "$pkg/dist" ]; then
               pkg_name=$(basename $pkg)
-              cp -r "$pkg/dist" "dist/$pkg_name"
+              cp -r "$pkg/dist" "dist/SlideStack/$pkg_name"
             fi
           done
 
