@@ -24,18 +24,15 @@ jobs:
           fetch-depth: 0 # 可选，保持完整历史记录
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: latest
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm # 使用 pnpm 缓存依赖
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+          node-version: 'lts/*'
+          cache: pnpm 
 
       - name: Install dependencies
         run: pnpm install
@@ -50,6 +47,10 @@ jobs:
               cp -r "$pkg/dist" "dist/$pkg_name"
             fi
           done
+          cp 404.html dist/404.html
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
