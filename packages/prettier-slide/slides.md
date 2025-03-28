@@ -54,7 +54,7 @@ transition: fade-out
 Prettier 是帮助我们按主流标准统一代码风格的格式化神器
 
 - “固执己见”的风格，极简配置自带规则，告别争论
-- 支持 Web 开发常用语言：JS、TS、CSS 等
+- 支持 Web 开发常用语言：`JS`、`TS`、`CSS` 等
 - 集成编辑器插件，一键格式化轻松搞定
   <br>
   <br>
@@ -72,10 +72,11 @@ function hello(name) {
 ```
 
 </div>
-<br>
 
-<div v-click="'+3'">
-Read more about [What is Prettier?](https://prettier.io/docs/)
+<div v-click="'+3'" text-xs>
+
+*Read more about* [*What is Prettier?*](https://prettier.io/docs/)
+
 </div>
 
 <style>
@@ -141,6 +142,12 @@ const greet = (name) => {
 
 </div>
 
+<div v-click="'+2'" text-xs>
+
+*Read more about* [*rationale*](https://prettier.io/docs/rationale/)
+
+</div>
+
 <style>
 h1 {
   background-color: #2B90B6;
@@ -164,77 +171,165 @@ Prettier 的核心规则是什么？
 -->
 
 ---
-layout: two-cols
-layoutClass: gap-16
+layout: two-cols-header
+transition: fade-out
+layoutClass: gap-x-16
 ---
 
-# Table of contents
+# 安装与运行 Prettier
 
-You can use the `Toc` component to generate a table of contents for your slides:
+快速上手，轻松格式化
 
-```html
-<Toc minDepth="1" maxDepth="1" />
-```
+::left::
 
-The title will be inferred from your slide content, or you can override it with `title` and `level` in your frontmatter.
+- **安装**:  
+  ```bash
+  pnpm add -D -E prettier
+  ```
+  <p text-xs text-gray>
+
+  `-E` *表示精确版本，锁定依赖, 避免依赖升级导致团队间版本不一致。*
+
+  </p>
+
+- **运行**: 
+  ```bash
+  pnpm exec prettier . --write
+  ```
+  <p text-xs>
+  
+  格式化当前目录所有文件
+
+  </p>
 
 ::right::
 
-<Toc text-sm minDepth="1" maxDepth="2" />
+<div v-click>
 
----
-layout: image-right
-image: https://cover.sli.dev
----
+- **CLI 常见指令**
 
-# Code
+  - 检查格式：`--check`
+  - 指定配置文件：`--config .prettierrc`
+  - 忽略配置文件：`--no-config`
+  - 指定文件全名：`--stdin-filepath x.js`
+  - 忽略未知类型：`--ignore-unknown`
 
-Use code snippets and get the highlighting directly, and even types hover!
+<br>
 
-```ts {all|5|7|7-8|10|all} twoslash
-// TwoSlash enables TypeScript hover information
-// and errors in markdown code blocks
-// More at https://shiki.style/packages/twoslash
+</div>
 
-import { computed, ref } from "vue";
+<div v-click>
 
-const count = ref(0);
-const doubled = computed(() => count.value * 2);
+- **API 调用**
 
-doubled.value = 2;
+```js
+import * as prettier from "prettier";
+
+prettier.format(source, options)
 ```
 
-<arrow v-click="[4, 5]" x1="350" y1="310" x2="195" y2="334" color="#953" width="2" arrowSize="1" />
+</div>
 
-<!-- This allow you to embed external code blocks -->
+::bottom::
 
-<<< @/snippets/external.ts#snippet
+<div v-click text-xs text-right>
 
-<!-- Footer -->
+*Read more about* [*install*](https://prettier.io/docs/install/)
 
-[Learn more](https://sli.dev/features/line-highlighting)
+</div>
 
-<!-- Inline style -->
 <style>
-.footnotes-sep {
-  @apply mt-5 opacity-10;
-}
-.footnotes {
-  @apply text-sm opacity-75;
-}
-.footnote-backref {
-  display: none;
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
 }
 </style>
 
-<!--
-Notes can also sync with clicks
+<!-- 
+Prettier 的安装和运行超简单！ 
 
-[click] This will be highlighted after the first click
+用 pnpm 安装，`-D` 表示开发依赖
 
-[click] Highlighted with `count = ref(0)`
+`-E` 锁定精确版本，避免意外升级。 
 
-[click:3] Last click (skip two clicks)
+然后运行 `pnpm exec prettier . --write`，就能一键格式化所有文件。 
+
+[click] CLI 还支持检查格式、指定配置、忽略未知文件等实用选项。 
+
+[click] 想更灵活？可以用 API，像 `prettier.format` 直接在代码里调用！ 
+
+-->
+
+---
+layout: image-right
+transition: fade-out
+image: https://cover.sli.dev
+---
+
+# Prettier 配置
+
+个性化你的格式化规则
+
+### 配置文件
+
+<br>
+
+- **格式**: `JSON`, `YAML`, `JS` 等  
+- **默认文件**: `.prettierrc`
+
+<div v-click>
+
+```json
+{
+  "singleQuote": true,
+  "semi": false,
+  "tabWidth": 2,
+  "printWidth": 80,
+  "arrowParens": "avoid"
+}
+```
+
+<p class="text-sm text-gray text-right">
+
+*非必要不修改*
+
+</p>
+
+</div>
+
+<br>
+
+<div v-click text-xs text-right>
+
+*Read more about* [*options*](https://prettier.io/docs/options/)
+
+</div>
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+<!-- 
+Prettier 的配置让你可以个性化格式化规则。
+
+配置文件可以用 JSON、YAML 或 JS 格式，默认是 `.prettierrc`。 
+
+[click] 这里展示了一个简单配置：用单引号、不加分号、缩进 2 个空格、行宽80，还有箭头函数括号的处理。 
+
+[click] 想了解更多？右下角有完整选项文档链接！ 
 -->
 
 ---
@@ -604,7 +699,7 @@ Learn more: [Mermaid Diagrams](https://sli.dev/features/mermaid) and [PlantUML D
 ---
 foo: bar
 dragPos:
-  square: 717,41,141,_,-16
+  square: -16,-159,0,0
 ---
 
 # Draggable Elements
