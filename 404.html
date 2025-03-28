@@ -23,15 +23,15 @@
       // https://username.github.io/repo-name/?/one/two&a=b~and~c=d#qwe
       // Otherwise, leave pathSegmentsToKeep as 0.
       // 配置项
+      // 配置项
       const config = {
         pathSegmentsToKeep: 2, // 项目页面的目录深度
         paramSeparator: "~and~", // 参数分隔符
       };
 
-      // 获取当前URL
-      const location = window.location;
-      const pathname = location.pathname;
-      const search = location.search;
+      // 获取当前URL相关信息
+      const pathname = window.location.pathname;
+      const search = window.location.search;
       const pathSegments = pathname.split("/").filter((segment) => segment);
 
       // 检查是否已经在重定向后的URL格式，避免无限循环
@@ -40,7 +40,6 @@
         pathSegments.length <= config.pathSegmentsToKeep
       ) {
         // 如果已经是目标格式或路径段不足，直接退出
-        // 这里可以选择加载SPA的index.html或显示自定义404内容
         document.body.innerHTML = "<h1>404 - Page Not Found</h1>";
       } else {
         // 分割基础路径和路由路径
@@ -61,11 +60,11 @@
           .replace(/&/g, config.paramSeparator);
 
         // 重定向到新URL
-        const newUrl = `${location.protocol}//${location.hostname}${
-          location.port ? ":" + location.port : ""
-        }/${basePath}/?${newSearch}${location.hash}`;
+        const newUrl = `${window.location.protocol}//${window.location.hostname}${
+          window.location.port ? ":" + window.location.port : ""
+        }/${basePath}/?${newSearch}${window.location.hash}`;
 
-        location.replace(newUrl);
+        window.location.replace(newUrl);
       }
     </script>
   </head>
