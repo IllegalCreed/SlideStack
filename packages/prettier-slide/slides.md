@@ -123,17 +123,18 @@ transition: fade-out
 
 ````md magic-move {at:2}
 ```js
-// 输入
-function greet(name) {let message="Hello"+name+ "welcome";return message}
+const greet=(name)=>{const words={prefix:"Hello",suffix:"welcome"};return words.prefix+name+words.suffix}
 ```
 
 ```js
-// 输出
-function greet(name) {
-  let message = 'Hello' +
+const greet = (name) => {
+  const words = {
+    prefix: "Hello",
+    suffix: "welcome"
+  };
+  return words.prefix +
     name +
-    'welcome';
-  return message;
+    words.suffix;
 }
 ```
 ````
