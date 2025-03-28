@@ -63,7 +63,10 @@ Prettier 是帮助我们按主流标准统一代码风格的格式化神器
 
 ```js {none|1,2|}{at:2}
 // 未格式化
-function hello(name){console.log("Hello,"+name);return name}
+function hello(name) {
+  console.log("Hello," + name);
+  return name;
+}
 
 // 格式化后
 function hello(name) {
@@ -75,7 +78,7 @@ function hello(name) {
 
 <div v-click="'+3'" text-xs>
 
-*Read more about* [*What is Prettier?*](https://prettier.io/docs/)
+_Read more about_ [_What is Prettier?_](https://prettier.io/docs/)
 
 </div>
 
@@ -124,19 +127,20 @@ transition: fade-out
 
 ````md magic-move {at:2}
 ```js
-const greet=(name)=>{const words={prefix:"Hello",suffix:"welcome"};return words.prefix+name+words.suffix}
+const greet = (name) => {
+  const words = { prefix: "Hello", suffix: "welcome" };
+  return words.prefix + name + words.suffix;
+};
 ```
 
 ```js
 const greet = (name) => {
   const words = {
     prefix: "Hello",
-    suffix: "welcome"
+    suffix: "welcome",
   };
-  return words.prefix +
-    name +
-    words.suffix;
-}
+  return words.prefix + name + words.suffix;
+};
 ```
 ````
 
@@ -144,7 +148,7 @@ const greet = (name) => {
 
 <div v-click="'+2'" text-xs>
 
-*Read more about* [*rationale*](https://prettier.io/docs/rationale/)
+_Read more about_ [_rationale_](https://prettier.io/docs/rationale/)
 
 </div>
 
@@ -160,14 +164,14 @@ h1 {
 }
 </style>
 
-<!-- 
-Prettier 的核心规则是什么？ 
+<!--
+Prettier 的核心规则是什么？
 
-它让代码更美观，但保证逻辑始终如一。 
+它让代码更美观，但保证逻辑始终如一。
 
 [click] 比如这段代码，输入时缩进混乱、引号混杂、空格随意，还挤在一行，
 
-[click] Prettier 格式化后，缩进整齐、换行清晰、引号统一、空格规范， 但函数的功能一点没变，只是变得更好看。 
+[click] Prettier 格式化后，缩进整齐、换行清晰、引号统一、空格规范， 但函数的功能一点没变，只是变得更好看。
 -->
 
 ---
@@ -182,22 +186,26 @@ layoutClass: gap-x-16
 
 ::left::
 
-- **安装**:  
+- **安装**:
+
   ```bash
   pnpm add -D -E prettier
   ```
+
   <p text-xs text-gray>
 
-  `-E` *表示精确版本，锁定依赖, 避免依赖升级导致团队间版本不一致。*
+  `-E` _表示精确版本，锁定依赖, 避免依赖升级导致团队间版本不一致。_
 
   </p>
 
-- **运行**: 
+- **运行**:
+
   ```bash
   pnpm exec prettier . --write
   ```
+
   <p text-xs>
-  
+
   格式化当前目录所有文件
 
   </p>
@@ -225,7 +233,7 @@ layoutClass: gap-x-16
 ```js
 import * as prettier from "prettier";
 
-prettier.format(source, options)
+prettier.format(source, options);
 ```
 
 </div>
@@ -234,7 +242,7 @@ prettier.format(source, options)
 
 <div v-click text-xs text-right>
 
-*Read more about* [*install*](https://prettier.io/docs/install/)
+_Read more about_ [_install_](https://prettier.io/docs/install/)
 
 </div>
 
@@ -250,18 +258,18 @@ h1 {
 }
 </style>
 
-<!-- 
-Prettier 的安装和运行超简单！ 
+<!--
+Prettier 的安装和运行超简单！
 
 用 pnpm 安装，`-D` 表示开发依赖
 
-`-E` 锁定精确版本，避免意外升级。 
+`-E` 锁定精确版本，避免意外升级。
 
-然后运行 `pnpm exec prettier . --write`，就能一键格式化所有文件。 
+然后运行 `pnpm exec prettier . --write`，就能一键格式化所有文件。
 
-[click] CLI 还支持检查格式、指定配置、忽略未知文件等实用选项。 
+[click] CLI 还支持检查格式、指定配置、忽略未知文件等实用选项。
 
-[click] 想更灵活？可以用 API，像 `prettier.format` 直接在代码里调用！ 
+[click] 想更灵活？可以用 API，像 `prettier.format` 直接在代码里调用！
 
 -->
 
@@ -279,7 +287,7 @@ image: https://cover.sli.dev
 
 <br>
 
-- **格式**: `JSON`, `YAML`, `JS` 等  
+- **格式**: `JSON`, `YAML`, `JS` 等
 - **默认文件**: `.prettierrc`
 
 <div v-click>
@@ -296,7 +304,7 @@ image: https://cover.sli.dev
 
 <p class="text-sm text-gray text-right">
 
-*非必要不修改*
+_非必要不修改_
 
 </p>
 
@@ -306,7 +314,84 @@ image: https://cover.sli.dev
 
 <div v-click text-xs text-right>
 
-*Read more about* [*options*](https://prettier.io/docs/options/)
+_Read more about_ [_options_](https://prettier.io/docs/options/)
+
+</div>
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+<!--
+Prettier 的配置让你可以个性化格式化规则。
+
+配置文件可以用 JSON、YAML 或 JS 格式，默认是 `.prettierrc`。
+
+[click] 这里展示了一个简单配置：用单引号、不加分号、缩进 2 个空格、行宽80，还有箭头函数括号的处理。
+
+[click] 想了解更多？右下角有完整选项文档链接！
+-->
+
+---
+layout: two-cols-header
+transition: fade-out
+layoutClass: gap-x-16 grid-rows-[120px_1fr_40px]!
+---
+
+# 和 Linter 集成
+
+Prettier + ESLint = 完美组合
+
+::left::
+
+### 为什么集成？
+
+<br>
+
+- `Prettier` 负责代码风格，`ESLint` 负责代码质量
+- 用 `eslint-config-prettier` 避免规则冲突
+
+::right::
+
+<div v-click>
+
+1. **安装依赖**:
+
+```bash
+pnpm add -D eslint-config-prettier
+```
+
+</div>
+
+<br>
+
+<div v-click>
+
+2. **配置 ESLint**:
+
+```js
+// eslint.config.js
+import someConfig from "some-other-config-you-use";
+import eslintConfigPrettier from "eslint-config-prettier/flat";
+
+export default [someConfig, eslintConfigPrettier];
+```
+
+</div>
+
+::bottom::
+
+<div v-click text-xs text-right>
+
+_Read more about_ [_ntegrating with Linters_](https://prettier.io/docs/integrating-with-linters/)
 
 </div>
 
@@ -323,88 +408,19 @@ h1 {
 </style>
 
 <!-- 
-Prettier 的配置让你可以个性化格式化规则。
 
-配置文件可以用 JSON、YAML 或 JS 格式，默认是 `.prettierrc`。 
+Prettier 和 ESLint 集成是完美的组合！ 
 
-[click] 这里展示了一个简单配置：用单引号、不加分号、缩进 2 个空格、行宽80，还有箭头函数括号的处理。 
+Prettier 专注格式化，ESLint 保证代码质量，用 `eslint-config-prettier` 避免冲突。 
 
-[click] 想了解更多？右下角有完整选项文档链接！ 
+[click]  第一步，安装核心依赖和 `eslint-config-prettier`。
+
+[click]  第二步，在 ESLint 配置中扩展 Prettier，关闭冲突规则。 
+ 
+注意：不推荐用像 `eslint-plugin-prettier` 这样的插件，它们会增加复杂性和性能开销。 
+
 -->
 
----
-level: 2
----
-
-# Shiki Magic Move
-
-Powered by [shiki-magic-move](https://shiki-magic-move.netlify.app/), Slidev supports animations across multiple code snippets.
-
-Add multiple code blocks and wrap them with <code>````md magic-move</code> (four backticks) to enable the magic move. For example:
-
-````md magic-move {lines: true}
-```ts {*|2|*}
-// step 1
-const author = reactive({
-  name: "John Doe",
-  books: [
-    "Vue 2 - Advanced Guide",
-    "Vue 3 - Basic Guide",
-    "Vue 4 - The Mystery",
-  ],
-});
-```
-
-```ts {*|1-2|3-4|3-4,8}
-// step 2
-export default {
-  data() {
-    return {
-      author: {
-        name: "John Doe",
-        books: [
-          "Vue 2 - Advanced Guide",
-          "Vue 3 - Basic Guide",
-          "Vue 4 - The Mystery",
-        ],
-      },
-    };
-  },
-};
-```
-
-```ts
-// step 3
-export default {
-  data: () => ({
-    author: {
-      name: "John Doe",
-      books: [
-        "Vue 2 - Advanced Guide",
-        "Vue 3 - Basic Guide",
-        "Vue 4 - The Mystery",
-      ],
-    },
-  }),
-};
-```
-
-Non-code blocks are ignored.
-
-```vue
-<!-- step 4 -->
-<script setup>
-const author = {
-  name: "John Doe",
-  books: [
-    "Vue 2 - Advanced Guide",
-    "Vue 3 - Basic Guide",
-    "Vue 4 - The Mystery",
-  ],
-};
-</script>
-```
-````
 
 ---
 
@@ -449,8 +465,8 @@ Also, HTML elements are valid:
 -->
 
 ---
-class: px-20
----
+
+## class: px-20
 
 # Themes
 
@@ -607,7 +623,9 @@ LaTeX is supported out-of-box. Powered by [KaTeX](https://katex.org/).
 Inline $\sqrt{3x-1}+(1+x)^2$
 
 Block
-$$ {1|3|all}
+
+$$
+{1|3|all}
 \begin{aligned}
 \nabla \cdot \vec{E} &= \frac{\rho}{\varepsilon_0} \\
 \nabla \cdot \vec{B} &= 0 \\
@@ -697,9 +715,14 @@ database "MySql" {
 Learn more: [Mermaid Diagrams](https://sli.dev/features/mermaid) and [PlantUML Diagrams](https://sli.dev/features/plantuml)
 
 ---
+
 foo: bar
 dragPos:
-  square: -16,-159,0,0
+square: 0,-251,0,0
+
+---
+dragPos:
+  square: 0,-62,0,0
 ---
 
 # Draggable Elements
@@ -742,9 +765,12 @@ Double-click on the draggable elements to edit their positions.
 <v-drag-arrow pos="67,452,253,46" two-way op70 />
 
 ---
+
 src: ./pages/imported-slides.md
 hide: false
+
 ---
+
 
 ---
 
@@ -778,8 +804,10 @@ console.log(
 ```
 
 ---
+
 layout: center
 class: text-center
+
 ---
 
 # Learn More
