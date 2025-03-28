@@ -622,16 +622,19 @@ layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
 ### 引用插件
 
 - **安装与配置**
+
   ```bash
   pnpm add -D prettier-plugin-foo
   ```
+
+  <br>
+
   ```json
   //.prettierrc
   {
     "plugins": ["prettier-plugin-foo"]
   }
   ```
-  <br>
 - **常用插件**
   - `prettier-plugin-tailwindcss`
   - `@prettier/plugin-xml`
@@ -644,9 +647,13 @@ layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
 
 ### 引用他人配置
 - **直接引用 npm 包**
+
   ```bash
   pnpm add -D prettier-config-standard
   ```
+
+  <br>
+
   ```json
   // .prettierrc
   "prettier-config-standard"
