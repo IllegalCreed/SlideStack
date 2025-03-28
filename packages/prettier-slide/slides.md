@@ -606,41 +606,92 @@ Prettier 在 VSCode 中用起来超方便！
    
 
 ---
+layout: two-cols-header
+transition: fade-out
+layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
+---
 
-# Clicks Animations
+# 共享配置和插件
 
-You can add `v-click` to elements to add a click animation.
+复用与扩展 Prettier
+
+::left::
 
 <div v-click>
 
-This shows up when you click the slide:
+### 引用插件
 
-```html
-<div v-click>This shows up when you click the slide.</div>
-```
+- **安装与配置**
+  ```bash
+  pnpm add -D prettier-plugin-foo
+  ```
+  ```json
+  //.prettierrc
+  {
+    "plugins": ["prettier-plugin-foo"]
+  }
+  ```
+  <br>
+- **常用插件**
+  - `prettier-plugin-tailwindcss`
+  - `@prettier/plugin-xml`
+
+</div>
+
+::right::
+
+<div v-click>
+
+### 引用他人配置
+- **直接引用 npm 包**
+  ```bash
+  pnpm add -D prettier-config-standard
+  ```
+  ```json
+  // .prettierrc
+  "prettier-config-standard"
+  ```
 
 </div>
 
 <br>
 
-<v-click>
+<div v-click text-gray>
 
-The <span v-mark.red="3"><code>v-mark</code> directive</span>
-also allows you to add
-<span v-mark.circle.orange="4">inline marks</span>
-, powered by [Rough Notation](https://roughnotation.com/):
-
-```html
-<span v-mark.underline.orange>inline markers</span>
-```
-
-</v-click>
-
-<div mt-20 v-click>
-
-[Learn more](https://sli.dev/guide/animations#click-animation)
+*自己创建配置和插件？可以发布 npm 包复用！*
 
 </div>
+
+::bottom::
+
+<div v-click text-xs text-right>
+
+_Read more about_ [_plugins_](https://prettier.io/docs/plugins/)
+
+</div>
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+<!-- 
+Prettier 的共享配置和插件让复用和扩展超简单！ 
+
+[click] 插件可以扩展语言，安装后在 .prettierrc 中配置 plugins 字段。 
+
+[click] 要用别人的配置？装个 npm 包，在 .prettierrc 中引用就行。 
+
+[click] 想自己动手？可以创建配置或插件，发布 npm 包分享给团队或社区！
+-->
+
 
 ---
 
