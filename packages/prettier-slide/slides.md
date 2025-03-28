@@ -53,7 +53,7 @@ transition: fade-out
 
 Prettier 是帮助我们按主流标准统一代码风格的格式化神器
 
-- “固执己见”的风格，极简配置自带规则，告别争论
+- 「固执己见」 的风格，极简配置；自带规则；告别争论
 - 支持 Web 开发常用语言：`JS`、`TS`、`CSS` 等
 - 集成编辑器插件，一键格式化轻松搞定
   <br>
@@ -408,7 +408,6 @@ h1 {
 </style>
 
 <!-- 
-
 Prettier 和 ESLint 集成是完美的组合！ 
 
 Prettier 专注格式化，ESLint 保证代码质量，用 `eslint-config-prettier` 避免冲突。 
@@ -418,82 +417,193 @@ Prettier 专注格式化，ESLint 保证代码质量，用 `eslint-config-pretti
 [click]  第二步，在 ESLint 配置中扩展 Prettier，关闭冲突规则。 
  
 注意：不推荐用像 `eslint-plugin-prettier` 这样的插件，它们会增加复杂性和性能开销。 
-
--->
-
-
----
-
-# Components
-
-<div grid="~ cols-2 gap-4">
-<div>
-
-You can use Vue components directly inside your slides.
-
-We have provided a few built-in components like `<Tweet/>` and `<Youtube/>` that you can use directly. And adding your custom components is also super easy.
-
-```html
-<Counter :count="10" />
-```
-
-<!-- ./components/Counter.vue -->
-<Counter :count="10" m="t-4" />
-
-Check out [the guides](https://sli.dev/builtin/components.html) for more.
-
-</div>
-<div>
-
-```html
-<Tweet id="1390115482657726468" />
-```
-
-<Tweet id="1390115482657726468" scale="0.65" />
-
-</div>
-</div>
-
-<!--
-Presenter note with **bold**, *italic*, and ~~striked~~ text.
-
-Also, HTML elements are valid:
-<div class="flex w-full">
-  <span style="flex-grow: 1;">Left content</span>
-  <span>Right content</span>
-</div>
 -->
 
 ---
-
-## class: px-20
-
-# Themes
-
-Slidev comes with powerful theming support. Themes can provide styles, layouts, components, or even configurations for tools. Switching between themes by just **one edit** in your frontmatter:
-
-<div grid="~ cols-2 gap-2" m="t-2">
-
-```yaml
+layout: two-cols-header
+transition: fade-out
+layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
 ---
-theme: default
----
+
+# 和 CI 集成
+
+自动化格式化，提交更规范
+
+::left::
+
+### 相关依赖
+
+- `Husky`: Git 钩子，提交时触发
+- `Lint-Staged`: 只格式化改动文件
+
+<br>
+
+<div v-click>
+
+1. **安装依赖**:
+```bash
+pnpm add -D husky lint-staged
 ```
-
-```yaml
----
-theme: seriph
----
-```
-
-<img border="rounded" src="https://github.com/slidevjs/themes/blob/main/screenshots/theme-default/01.png?raw=true" alt="">
-
-<img border="rounded" src="https://github.com/slidevjs/themes/blob/main/screenshots/theme-seriph/01.png?raw=true" alt="">
 
 </div>
 
-Read more about [How to use a theme](https://sli.dev/guide/theme-addon#use-theme) and
-check out the [Awesome Themes Gallery](https://sli.dev/resources/theme-gallery).
+<div v-click>
+
+2. **初始化 Husky**：
+```bash
+pnpm exec husky init
+```
+
+</div>
+
+<div v-click>
+
+3. **配置预提交脚本**：
+```bash
+echo "pnpm lint-staged" > .husky/pre-commit
+```
+
+</div>
+
+::right::
+
+<div v-click>
+
+4. **配置 Lint-Staged**：
+```json
+// package.json
+"lint-staged": {
+  "*.{js,ts,vue}": [
+    "prettier --write"
+  ]
+}
+```
+
+</div>
+
+<div v-click>
+
+5. **配置 CI 文件**：
+```yaml
+# .github/workflows/prettier.yml
+env:
+  HUSKY: 0
+```
+
+```yaml
+# gitlab-ci.yml
+variables:
+  HUSKY: "0"
+```
+
+</div>
+
+::bottom::
+
+<div v-click text-xs text-right>
+
+_Read more about_ [_precommit_](https://prettier.io/docs/precommit/)
+
+</div>
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+<!-- 
+Prettier 集成到 CI 能让提交更规范，自动化格式化一步到位！
+
+[click] 首先，安装 Husky 和 Lint-Staged，Husky 负责 Git 钩子，Lint-Staged 只处理改动文件。 
+
+[click] 然后，初始化 Husky，设置 Git 钩子环境。 
+
+[click] 接着，配置预提交脚本，告诉 Husky 在提交时运行 Lint-Staged。 
+
+[click] 右边，在 package.json 中配置 Lint-Staged，让它对 JS、TS、Vue 文件运行 Prettier。 
+
+[click] 最后，在 CI 文件中设置 HUSKY=0，避免 CI 环境触发钩子。 
+
+ -->
+
+
+---
+layout: image-left
+transition: fade-out
+image: https://cover.sli.dev
+---
+
+# 和编辑器集成
+
+VSCode 中的 Prettier 体验
+
+<div v-click>
+
+1. **安装扩展**:  
+   - 搜索 `Prettier - Code formatter`  
+   - 点击“安装”
+
+</div>
+
+<br>
+
+<div v-click>
+
+2. **设置默认格式化工具**:  
+   ```json
+   // settings.json
+   {
+     "editor.defaultFormatter": 
+        "esbenp.prettier-vscode",
+     "editor.formatOnSave": true
+   }
+   ```
+
+  <p text-xs text-gray text-right>
+
+  _`formatOnSave`_ _保存时自动格式化_
+
+  </p>
+</div>
+
+<br>
+
+<div v-click text-xs text-right>
+
+_Read more about_ [_editors_](https://prettier.io/docs/editors/)
+
+</div>
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+<!-- 
+Prettier 在 VSCode 中用起来超方便！ 
+
+[click] 第一步，在扩展市场安装 Prettier 插件，搜索并点击安装。 
+
+[click] 第二步，在 VSCode 的 settings.json 中设置 Prettier 为默认格式化工具，并开启保存时格式化。
+
+这样就能享受保存自动格式化，并且支持多种语言，还能无缝适配 VSCode 的其他设置。
+ 
+-->
+   
 
 ---
 
