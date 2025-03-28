@@ -53,26 +53,30 @@ transition: fade-out
 
 Prettier 是帮助我们按主流标准统一代码风格的格式化神器
 
-- “固执己见”的风格，通过极简配置，自带规则消除争吵
+- “固执己见”的风格，极简配置自带规则，告别争论
 - 支持 Web 开发常用语言：JS、TS、CSS 等
-- 集成编辑器插件，实现一键格式化
+- 集成编辑器插件，一键格式化轻松搞定
   <br>
   <br>
 
-```js
+<div v-click>
+
+```js {none|1,2|}{at:2}
 // 未格式化
-function hello(name) {
-  console.log("Hello, " + name);
-}
+function hello(name){console.log("Hello,"+name);return name}
 
 // 格式化后
 function hello(name) {
   console.log("Hello, " + name);
 }
 ```
+
+</div>
 <br>
 
+<div v-click="'+3'">
 Read more about [What is Prettier?](https://prettier.io/docs/)
+</div>
 
 <style>
 h1 {
@@ -88,41 +92,75 @@ h1 {
 
 <!--
 Prettier 是什么？
+
 它是一个帮我们把代码风格统一到主流标准的利器，简单又好用。
+
 它的配置非常少，自带一套规则，开箱即用，不需要我们反复调整。
+
 它支持 Web 开发中常见的语言，比如 JavaScript、CSS 等等。
+
 更棒的是，搭配编辑器插件，保存一下，代码就自动变得整齐漂亮。
+
 就像这个例子，乱糟糟的代码瞬间焕然一新。
 -->
 
 ---
-transition: slide-up
-level: 2
+transition: fade-out
 ---
 
-# Navigation
+# Prettier 核心规则
 
-Hover on the bottom-left corner to see the navigation's controls panel, [learn more](https://sli.dev/guide/ui#navigation-bar)
+美化代码，逻辑如一
 
-## Keyboard Shortcuts
+- 缩进一致，层次分明
+- 换行合理，长代码更清晰
+- 引号统一，风格无争议
+- 空格规范，细节更整齐
+  <br>
+  <br>
 
-|                                                    |                             |
-| -------------------------------------------------- | --------------------------- |
-| <kbd>right</kbd> / <kbd>space</kbd>                | next animation or slide     |
-| <kbd>left</kbd> / <kbd>shift</kbd><kbd>space</kbd> | previous animation or slide |
-| <kbd>up</kbd>                                      | previous slide              |
-| <kbd>down</kbd>                                    | next slide                  |
+<div v-click>
 
-<!-- https://sli.dev/guide/animations.html#click-animation -->
+````md magic-move {at:2}
+```js
+// 输入
+function greet(name) {let message="Hello"+name+ "welcome";return message}
+```
 
-<img
-  v-click
-  class="absolute -bottom-9 -left-7 w-80 opacity-50"
-  src="https://sli.dev/assets/arrow-bottom-left.svg"
-  alt=""
-/>
+```js
+// 输出
+function greet(name) {
+  let message = 'Hello' +
+    name +
+    'welcome';
+  return message;
+}
+```
+````
 
-<p v-after class="absolute bottom-23 left-45 opacity-30 transform -rotate-10">Here!</p>
+</div>
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+<!-- 
+Prettier 的核心规则是什么？ 
+
+它让代码更美观，但保证逻辑始终如一。 
+
+[click] 比如这段代码，输入时缩进混乱、引号混杂、空格随意，还挤在一行，
+
+[click] Prettier 格式化后，缩进整齐、换行清晰、引号统一、空格规范， 但函数的功能一点没变，只是变得更好看。 
+-->
 
 ---
 layout: two-cols
