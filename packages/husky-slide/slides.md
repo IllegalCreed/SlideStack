@@ -47,9 +47,15 @@ image: https://cover.sli.dev
 
 Git 提交的智能助手
 
+<v-clicks>
+
 - 痛点：手动检查代码和提交信息费时又易出错
 - 解决方案：Husky 自动化 `pre-commit` 和 `pre-push` 钩子
 - 优势：轻量、易集成、跨平台支持
+
+</v-clicks>
+
+<br>
 
 <div v-click text-xs text-right>
 
@@ -80,7 +86,7 @@ Husky 帮你自动搞定 pre-commit 和 pre-push，省时又可靠！
 ---
 layout: two-cols-header
 transition: fade-out
-layoutClass: gap-x-16 grid-rows-[120px_1fr_40px]!
+layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
 ---
 
 # 安装与配置 Husky
@@ -89,27 +95,42 @@ layoutClass: gap-x-16 grid-rows-[120px_1fr_40px]!
 
 ::left::
 
+<div v-click>
+
 - **安装**:
 
   ```bash
   pnpm add -D husky
   ```
 
+</div>
+
+<div v-click>
+
 - **初始化**
+
   ```bash
   pnpm exec husky init
   ```
+
+</div>
 
 ::right::
 
 <div v-click>
 
 - **验证**
+
   ```bash
   git commit -m "Keep calm and commit"
   ```
 
+</div>
+
+<div v-click>
+
 - **临时禁用 Husky**
+
   ```bash
   HUSKY=0 git commit -m "test"
   ```
@@ -163,11 +184,17 @@ layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
 
 ::left::
 
+<div v-click>
+
 - **安装**:
 
   ```bash
   pnpm add -D lint-staged
   ```
+
+</div>
+
+<div v-click>
 
 - **配置**:
 
@@ -181,11 +208,13 @@ layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
   }
   ```
 
-  <p class="text-xs text-gray">
+  <div class="text-xs text-gray">
 
   _先执行 Lint，后执行格式化_
 
-  </p>
+  </div>
+
+</div>
 
 ::right::
 
@@ -243,18 +272,29 @@ image: https://cover.sli.dev
 # 配合 CI 使用
 CI 设置 `HUSKY=0` 禁用 Husky 钩子
 
+<div v-click>
+
 - **GitLab CI**
+
   ``` yaml
   variables:
     HUSKY: "0"
   ```
 
+</div>
+
+<div v-click>
+
 - **GitHub Actions**
+
   ``` yaml
   # https://docs.github.com/en/actions/learn-github-actions/variables
   env:
     HUSKY: 0
   ```
+</div>
+
+<br>
 
 <div v-click text-xs text-right>
 
@@ -292,6 +332,10 @@ layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
 # 更多 Git 钩子
 
 
+---
+layout: two-cols-header
+transition: fade-out
+layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
 ---
 
 # 最佳实践
