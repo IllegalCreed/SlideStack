@@ -331,6 +331,68 @@ layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
 
 # 更多 Git 钩子
 
+支持多种 Git 钩子，灵活定制流程
+
+::left::
+
+<div v-click>
+
+- **常见钩子**
+
+  - pre-commit：提交前检查
+  - commit-msg：验证消息
+  - pre-push：推送前校验
+
+</div>
+
+<br>
+
+<div v-click>
+
+更多：请参阅 [https://git-scm.com/docs/githooks](https://git-scm.com/docs/githooks)
+
+</div>
+
+::right::
+
+<div v-click>
+
+- **添加新钩子**
+
+  ```bash
+  echo "npm test" > .husky/pre-commit
+  ```
+
+</div>
+
+::bottom::
+
+<div v-click text-xs text-right>
+
+ _Read more about_ [_Adding a New Hook_](https://typicode.github.io/husky/how-to.html#adding-a-new-hook)
+
+</div>
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+<!--
+想定制 Git 流程？
+
+Husky 支持十几种钩子，像 pre-commit、commit-msg 随便加！
+
+添加新钩子，一行命令搞定！
+-->
+
 
 ---
 layout: two-cols-header
@@ -340,6 +402,18 @@ layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
 
 # 最佳实践
 
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
 
 ---
 layout: intro
@@ -347,6 +421,18 @@ transition: fade-out
 ---
 
 # 结尾与号召
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
 
 
 ---
