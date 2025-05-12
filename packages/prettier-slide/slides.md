@@ -50,30 +50,32 @@ transition: fade-out
 
 Prettier 是帮助我们按主流标准统一代码风格的格式化神器
 
+<v-clicks>
+
 - 「固执己见」 的风格，极简配置；自带规则；告别争论
 - 支持 Web 开发常用语言：`JS`、`TS`、`CSS` 等
 - 集成编辑器插件，一键格式化轻松搞定
-  <br>
-  <br>
+
+</v-clicks>
+  
+<br>
 
 <div v-click>
 
-```js {none|1,2|}{at:2}
+```js {none|1,2|4-8|}{at:5}
 // 未格式化
-function hello(name) {
-  console.log("Hello," + name);
-  return name;
-}
+function hello(name){console.log("Hello," + name);return name;}
 
 // 格式化后
 function hello(name) {
   console.log("Hello, " + name);
+  return name;
 }
 ```
 
 </div>
 
-<div v-click="'+3'" text-xs>
+<div v-click="'+4'" text-xs>
 
 _Read more about_ [_What is Prettier?_](https://prettier.io/docs/)
 
@@ -96,13 +98,13 @@ Prettier 是什么？
 
 它是一个帮我们把代码风格统一到主流标准的利器，简单又好用。
 
-它的配置非常少，自带一套规则，开箱即用，不需要我们反复调整。
+[click] 它的配置非常少，自带一套规则，开箱即用，不需要我们反复调整。
 
-它支持 Web 开发中常见的语言，比如 JavaScript、CSS 等等。
+[click] 它支持 Web 开发中常见的语言，比如 JavaScript、CSS 等等。
 
-更棒的是，搭配编辑器插件，保存一下，代码就自动变得整齐漂亮。
+[click] 更棒的是，搭配编辑器插件，保存一下，代码就自动变得整齐漂亮。
 
-就像这个例子，乱糟糟的代码瞬间焕然一新。
+[click] 就像这个例子，乱糟糟的代码瞬间焕然一新。
 -->
 
 ---
@@ -113,21 +115,22 @@ transition: fade-out
 
 美化代码，逻辑如一
 
+<v-clicks>
+
 - 缩进一致，层次分明
 - 换行合理，长代码更清晰
 - 引号统一，风格无争议
 - 空格规范，细节更整齐
-  <br>
-  <br>
+
+</v-clicks>
+
+<br>
 
 <div v-click>
 
-````md magic-move {at:2}
+````md magic-move {at:6}
 ```js
-const greet = (name) => {
-  const words = { prefix: "Hello", suffix: "welcome" };
-  return words.prefix + name + words.suffix;
-};
+const greet=(name)=>{const words={prefix: "Hello",suffix: "welcome"};return words.prefix+name+words.suffix;};
 ```
 
 ```js
@@ -136,7 +139,9 @@ const greet = (name) => {
     prefix: "Hello",
     suffix: "welcome",
   };
-  return words.prefix + name + words.suffix;
+  return words.prefix + 
+    name + 
+    words.suffix;
 };
 ```
 ````
@@ -164,9 +169,9 @@ h1 {
 <!--
 Prettier 的核心规则是什么？
 
-它让代码更美观，但保证逻辑始终如一。
+[click] 它让代码更美观，但保证逻辑始终如一。
 
-[click] 比如这段代码，输入时缩进混乱、引号混杂、空格随意，还挤在一行，
+[click:4] 比如这段代码，输入时缩进混乱、引号混杂、空格随意，还挤在一行，
 
 [click] Prettier 格式化后，缩进整齐、换行清晰、引号统一、空格规范， 但函数的功能一点没变，只是变得更好看。
 -->
@@ -183,17 +188,23 @@ layoutClass: gap-x-16
 
 ::left::
 
+<div v-click>
+
 - **安装**:
 
   ```bash
   pnpm add -D -E prettier
   ```
 
-  <p text-xs text-gray>
+  <span text-xs text-gray>
 
   `-E` _表示精确版本，锁定依赖, 避免依赖升级导致团队间版本不一致。_
 
-  </p>
+  </span>
+
+</div>
+
+<div v-click>
 
 - **运行**:
 
@@ -201,11 +212,13 @@ layoutClass: gap-x-16
   pnpm exec prettier . --write
   ```
 
-  <p text-xs>
+  <span text-xs>
 
   格式化当前目录所有文件
 
-  </p>
+  </span>
+
+</div>
 
 ::right::
 
@@ -258,11 +271,11 @@ h1 {
 <!--
 Prettier 的安装和运行超简单！
 
-用 pnpm 安装，`-D` 表示开发依赖
+[click] 用 pnpm 安装，`-D` 表示开发依赖
 
 `-E` 锁定精确版本，避免意外升级。
 
-然后运行 `pnpm exec prettier . --write`，就能一键格式化所有文件。
+[click] 然后运行 `pnpm exec prettier . --write`，就能一键格式化所有文件。
 
 [click] CLI 还支持检查格式、指定配置、忽略未知文件等实用选项。
 
@@ -280,12 +293,19 @@ image: https://cover.sli.dev
 
 个性化你的格式化规则
 
-### 配置文件
+<div v-click>
 
 <br>
 
-- **格式**: `JSON`, `YAML`, `JS` 等
-- **默认文件**: `.prettierrc`
+- **配置文件格式**: `JSON`, `YAML`, `JS` 等
+
+</div>
+
+<div v-click>
+
+- **默认配置文件**: `.prettierrc`
+
+</div>
 
 <div v-click>
 
@@ -299,14 +319,15 @@ image: https://cover.sli.dev
 }
 ```
 
-<p class="text-sm text-gray text-right">
+<span class="text-sm text-gray text-right">
 
 _非必要不修改_
 
-</p>
+</span>
 
 </div>
 
+<br>
 <br>
 
 <div v-click text-xs text-right>
@@ -330,7 +351,9 @@ h1 {
 <!--
 Prettier 的配置让你可以个性化格式化规则。
 
-配置文件可以用 JSON、YAML 或 JS 格式，默认是 `.prettierrc`。
+[click] 配置文件可以用 JSON、YAML 或 JS 格式
+
+[click] 默认是 `.prettierrc`。
 
 [click] 这里展示了一个简单配置：用单引号、不加分号、缩进 2 个空格、行宽80，还有箭头函数括号的处理。
 
@@ -349,12 +372,16 @@ Prettier + ESLint = 完美组合
 
 ::left::
 
+<div v-click>
+
 ### 为什么集成？
 
 <br>
 
 - `Prettier` 负责代码风格，`ESLint` 负责代码质量
 - 用 `eslint-config-prettier` 避免规则冲突
+
+</div>
 
 ::right::
 
@@ -407,11 +434,11 @@ h1 {
 <!-- 
 Prettier 和 ESLint 集成是完美的组合！ 
 
-Prettier 专注格式化，ESLint 保证代码质量，用 `eslint-config-prettier` 避免冲突。 
+[click] Prettier 专注格式化，ESLint 保证代码质量，用 `eslint-config-prettier` 避免冲突。 
 
-[click]  第一步，安装核心依赖和 `eslint-config-prettier`。
+[click] 第一步，安装核心依赖和 `eslint-config-prettier`。
 
-[click]  第二步，在 ESLint 配置中扩展 Prettier，关闭冲突规则。 
+[click] 第二步，在 ESLint 配置中扩展 Prettier，关闭冲突规则。 
  
 注意：不推荐用像 `eslint-plugin-prettier` 这样的插件，它们会增加复杂性和性能开销。 
 -->
@@ -428,10 +455,14 @@ layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
 
 ::left::
 
+<div v-click>
+            
 ### 相关依赖
 
 - `Husky`: Git 钩子，提交时触发
 - `Lint-Staged`: 只格式化改动文件
+
+</div>
 
 <br>
 
@@ -520,7 +551,7 @@ Prettier 集成到 CI 能让提交更规范，自动化格式化一步到位！
 
 [click] 首先，安装 Husky 和 Lint-Staged，Husky 负责 Git 钩子，Lint-Staged 只处理改动文件。 
 
-[click] 然后，初始化 Husky，设置 Git 钩子环境。 
+[click:2] 然后，初始化 Husky，设置 Git 钩子环境。 
 
 [click] 接着，配置预提交脚本，告诉 Husky 在提交时运行 Lint-Staged。 
 
@@ -563,11 +594,11 @@ VSCode 中的 Prettier 体验
    }
    ```
 
-  <p text-xs text-gray text-right>
+  <span text-xs text-gray text-right>
 
   _`formatOnSave`_ _保存时自动格式化_
 
-  </p>
+  </span>
 </div>
 
 <br>
