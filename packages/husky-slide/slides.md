@@ -1,0 +1,310 @@
+---
+theme: seriph
+background: https://cover.sli.dev
+title: Welcome to Husky
+info: |
+  Presentation Husky for developers.
+
+  Learn more at [https://typicode.github.io/husky/](https://typicode.github.io/husky/)
+class: text-center
+drawings:
+  persist: false
+transition: slide-left
+mdc: true
+---
+
+<span class="text-32">🐶</span>
+
+<br/>
+
+## Husky: 提升你的提交代码体验
+
+自动检查您的提交信息、代码，并在提交或推送时运行测试
+
+<div @click="$slidev.nav.next" class="mt-12 py-1" hover:bg="white op-10">
+  Press Space for next page <carbon:arrow-right />
+</div>
+
+<div class="abs-br m-6 text-xl">
+  <a href="https://github.com/IllegalCreed/SlideStack" target="_blank" class="slidev-icon-btn">
+    <carbon:logo-github />
+  </a>
+</div>
+
+<!--
+大家好！今天我们要聊的是 Husky —— 一个可以提升你的提交代码体验的工具。
+
+它是怎么做到的？为什么值得一试？让我们马上开始！
+-->
+
+---
+layout: image-right
+transition: fade-out
+image: https://cover.sli.dev
+---
+
+# 为什么选择 Husky?
+
+Git 提交的智能助手
+
+- 痛点：手动检查代码和提交信息费时又易出错
+- 解决方案：Husky 自动化 `pre-commit` 和 `pre-push` 钩子
+- 优势：轻量、易集成、跨平台支持
+
+<div v-click text-xs text-right>
+
+_Read more about_ [_Introduction_](https://typicode.github.io/husky/)
+
+</div>
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+<!--
+手动检查代码和提交信息是不是很头疼？
+
+Husky 帮你自动搞定 pre-commit 和 pre-push，省时又可靠！
+
+想知道怎么用？一起来看看吧！
+-->
+
+---
+layout: two-cols-header
+transition: fade-out
+layoutClass: gap-x-16 grid-rows-[120px_1fr_40px]!
+---
+
+# 安装与配置 Husky
+
+几个步骤让 Husky 跑起来
+
+::left::
+
+- **安装**:
+
+  ```bash
+  pnpm add -D husky
+  ```
+
+- **初始化**
+  ```bash
+  pnpm exec husky init
+  ```
+
+::right::
+
+<div v-click>
+
+- **验证**
+  ```bash
+  git commit -m "Keep calm and commit"
+  ```
+
+- **临时禁用 Husky**
+  ```bash
+  HUSKY=0 git commit -m "test"
+  ```
+
+  <div class="text-xs text-gray">
+
+  _如果想要临时禁用 Husky 的钩子，可以设置环境变量_ `HUSKY=0`
+
+  </div>
+
+</div>
+
+::bottom::
+
+<div v-click text-xs text-right>
+
+_Read more about_ [_Get Started_](https://typicode.github.io/husky/get-started.html)
+
+</div>
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+<!--
+准备好让 Husky 上场了吗？
+
+用 pnpm 三步搞定：安装、初始化、添加测试钩子，提交就能自动检查！ 
+
+简单又高效！
+-->
+
+
+---
+layout: two-cols-header
+transition: fade-out
+layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
+---
+
+# 集成 lint-staged
+
+只对暂存文件运行钩子脚本，让提交更高效
+
+::left::
+
+- **安装**:
+
+  ```bash
+  pnpm add -D lint-staged
+  ```
+
+- **配置**:
+
+  ```json
+  // package.json
+  "lint-staged": {
+    "*.{js,ts,vue}": [
+      "eslint --fix"
+      "prettier --write",
+    ]
+  }
+  ```
+
+  <p class="text-xs text-gray">
+
+  _先执行 Lint，后执行格式化_
+
+  </p>
+
+::right::
+
+<div v-click>
+
+- **与 Husky 搭配**
+
+  ```bash
+  echo "pnpm lint-staged" >> .husky/pre-commit
+  ```
+
+  <div class="text-xs text-gray">
+
+  _确保编码为_ `UTF-8`
+
+  </div>
+
+</div>
+
+::bottom::
+
+<div v-click text-xs text-right>
+
+_Read more about_ [_lint-staged_](https://github.com/lint-staged/lint-staged)
+
+</div>
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+<!--
+想让提交代码更规范？
+
+lint-staged 只检查暂存文件，配合 Husky 自动运行 ESLint 和 Prettier！  
+
+几行配置，效率翻倍！
+-->
+
+
+---
+layout: image-left
+transition: fade-out
+image: https://cover.sli.dev
+---
+
+# 配合 CI 使用
+CI 设置 `HUSKY=0` 禁用 Husky 钩子
+
+- **GitLab CI**
+  ``` yaml
+  variables:
+    HUSKY: "0"
+  ```
+
+- **GitHub Actions**
+  ``` yaml
+  # https://docs.github.com/en/actions/learn-github-actions/variables
+  env:
+    HUSKY: 0
+  ```
+
+<div v-click text-xs text-right>
+
+_Read more about_ [_CI server and Docker_](https://typicode.github.io/husky/how-to.html#ci-server-and-docker)
+
+</div>
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+<!--
+不想让 Husky 干扰 CI 构建？
+
+CI 设置 `HUSKY=0` 禁用 Husky 钩子！
+
+让 CI 更安全，更高效！
+-->
+
+
+---
+layout: two-cols-header
+transition: fade-out
+layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
+---
+
+# 更多 Git 钩子
+
+
+---
+
+# 最佳实践
+
+
+---
+layout: intro
+transition: fade-out
+---
+
+# 结尾与号召
+
+
+---
+layout: end
+---

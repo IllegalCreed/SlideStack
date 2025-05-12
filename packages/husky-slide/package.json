@@ -1,9 +1,9 @@
 {
-  "name": "prettier-slide",
+  "name": "husky-slide",
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "slidev build --base /SlideStack/prettier-slide/",
+    "build": "slidev build --base /SlideStack/husky-slide/",
     "dev": "slidev --open",
     "export": "slidev export"
   },

@@ -5,13 +5,10 @@ title: Welcome to Prettier
 info: |
   Presentation prettier for developers.
 
-  Learn more at [https://prettier.io/](https://https://prettier.io/)
-# https://sli.dev/features/drawing
+  Learn more at [https://prettier.io/](https://prettier.io/)
 drawings:
   persist: false
-# slide transition: https://sli.dev/guide/animations.html#slide-transitions
 transition: slide-left
-# enable MDC Syntax: https://sli.dev/features/mdc
 mdc: true
 ---
 
@@ -41,7 +38,7 @@ mdc: true
 </div>
 
 <!--
-大家好！今天我们要聊的是 Prettier——一个让你的代码瞬间变美、毫不费力的工具。
+大家好！今天我们要聊的是 Prettier —— 一个让你的代码瞬间变美、毫不费力的工具。
 它是怎么做到的？为什么值得一试？让我们马上开始！
 -->
 
