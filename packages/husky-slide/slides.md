@@ -270,6 +270,7 @@ image: https://cover.sli.dev
 ---
 
 # 配合 CI 使用
+
 CI 设置 `HUSKY=0` 禁用 Husky 钩子
 
 <div v-click>
@@ -402,6 +403,75 @@ layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
 
 # 最佳实践
 
+让 Husky 用得更顺手
+
+::left::
+
+<div v-click>
+
+- **启动文件**
+
+  ```bash
+  ~/.config/husky/init.sh
+  ```
+
+  <div class="text-xs text-gray">
+
+  _Husky 允许你在运行钩子之前执行本地命令_
+
+  </div>
+
+</div>
+
+<div v-click>
+
+- **非 shell 钩子**
+
+  ```bash
+  # .husky/pre-commit
+
+  node .husky/pre-commit.js
+  ```
+
+  <div class="text-xs text-gray">
+
+  _Husky 允许你用 Python、Node.js 写钩子，灵活扩展_
+
+  </div>
+
+</div>
+ 
+::right::
+
+<div v-click>
+
+- **中断提交**
+
+  ```bash
+  # .husky/pre-commit
+
+  # Your WIP script
+  # ...
+
+  exit 1
+  ```
+
+  <div class="text-xs text-gray">
+
+  _将 exit 1 添加到钩子脚本中以中止 Git 命令，用于测试_
+
+  </div>
+
+</div>
+
+::bottom::
+
+<div v-click text-xs text-right>
+
+ _Read more about_ [_how-to_](https://typicode.github.io/husky/how-to.html)
+
+</div>
+
 <style>
 h1 {
   background-color: #2B90B6;
@@ -414,6 +484,14 @@ h1 {
 }
 </style>
 
+<!--
+想让 Husky 更高效？
+
+Husky 支持启动文件、中断提交、非 shell 钩子等多种用法。
+
+让 Husky 用得更顺手！
+-->
+
 
 ---
 layout: intro
@@ -421,6 +499,24 @@ transition: fade-out
 ---
 
 # 结尾与号召
+
+让 Husky 守护你的提交！
+
+- 自动化检查，提升代码质量
+- 简单集成，适配各种项目
+- 现在就试试，提交从此省心！
+
+<div class="abs-br m-6 text-xl">
+  <a href="https://typicode.github.io/" target="_blank" class="slidev-icon-btn">
+    🐶
+  </a>
+  <a href="https://github.com/typicode/husky" target="_blank" class="slidev-icon-btn">
+    <carbon:logo-github />
+  </a>
+  <a href="https://illegalcreed.github.io/zh/engineering/devops/husky/" target="_blank" class="slidev-icon-btn">
+    <ph:steam-logo />
+  </a>
+</div>
 
 <style>
 h1 {
