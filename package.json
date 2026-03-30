@@ -5,7 +5,8 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "pnpm -r build"
+    "build": "pnpm -r build",
+    "deploy": "bash ./scripts/deploy.sh"
   },
   "keywords": [],
   "author": "",
