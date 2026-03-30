@@ -65,10 +65,8 @@ deploy_package() {
   fi
 
   log_info "部署 ${pkg_name}..."
-  ssh "${SERVER_USER}@${SERVER_HOST}" "mkdir -p ${REMOTE_DIR}/${pkg_name}"
-  rsync -avz --delete \
-    "${local_dist}/" \
-    "${SERVER_USER}@${SERVER_HOST}:${REMOTE_DIR}/${pkg_name}/"
+  ssh "${SERVER_USER}@${SERVER_HOST}" "rm -rf ${REMOTE_DIR}/${pkg_name} && mkdir -p ${REMOTE_DIR}/${pkg_name}"
+  scp -r "${local_dist}/"* "${SERVER_USER}@${SERVER_HOST}:${REMOTE_DIR}/${pkg_name}/"
 }
 
 # 部署全部
