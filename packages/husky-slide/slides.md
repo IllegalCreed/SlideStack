@@ -17,7 +17,7 @@ mdc: true
 
 <br/>
 
-## Husky: 提升你的提交代码体验
+## Husky: 提升你的提交代码体验 <sup>v9.x</sup>
 
 自动检查您的提交信息、代码，并在提交或推送时运行测试
 
@@ -202,7 +202,7 @@ layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
   // package.json
   "lint-staged": {
     "*.{js,ts,vue}": [
-      "eslint --fix"
+      "eslint --fix",
       "prettier --write",
     ]
   }
