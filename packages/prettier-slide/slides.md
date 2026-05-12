@@ -25,7 +25,7 @@ mdc: true
 
 ## Prettier: 让代码美得毫不费力
 
-代码格式化的最佳伙伴
+代码格式化的最佳伙伴（基于 v3.x）
 
 <div @click="$slidev.nav.next" class="mt-12 py-1" hover:bg="white op-10">
   Press Space for next page <carbon:arrow-right />
@@ -243,7 +243,8 @@ layoutClass: gap-x-16
 ```js
 import * as prettier from "prettier";
 
-prettier.format(source, options);
+// v3 起 API 全部为异步
+await prettier.format(source, { parser: "babel" });
 ```
 
 </div>
@@ -449,46 +450,30 @@ transition: fade-out
 layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
 ---
 
-# 和 CI 集成
+# 本地钩子 + CI 集成
 
-自动化格式化，提交更规范
+把 Prettier 嵌进提交流和流水线
 
 ::left::
 
 <div v-click>
-            
-### 相关依赖
 
-- `Husky`: Git 钩子，提交时触发
-- `Lint-Staged`: 只格式化改动文件
+### 本地：Husky + lint-staged
 
-</div>
+- `Husky`：管理 Git 钩子
+- `lint-staged`：只跑暂存文件
 
-<br>
-
-<div v-click>
-
-1. **安装依赖**:
 ```bash
 pnpm add -D husky lint-staged
-```
-
-</div>
-
-<div v-click>
-
-2. **初始化 Husky**：
-```bash
 pnpm exec husky init
+echo "pnpm lint-staged" > .husky/pre-commit
 ```
 
-</div>
-
-<div v-click>
-
-3. **配置预提交脚本**：
-```bash
-echo "pnpm lint-staged" > .husky/pre-commit
+```json
+// package.json
+"lint-staged": {
+  "**/*": "prettier --write --ignore-unknown"
+}
 ```
 
 </div>
@@ -497,31 +482,29 @@ echo "pnpm lint-staged" > .husky/pre-commit
 
 <div v-click>
 
-4. **配置 Lint-Staged**：
-```json
-// package.json
-"lint-staged": {
-  "*.{js,ts,vue}": [
-    "prettier --write"
-  ]
-}
+### CI：两种思路
+
+**1. 仅校验，不通过则失败**
+
+```yaml
+# .github/workflows/prettier.yml
+- run: pnpm prettier . --check
 ```
 
 </div>
 
 <div v-click>
 
-5. **配置 CI 文件**：
-```yaml
-# .github/workflows/prettier.yml
-env:
-  HUSKY: 0
-```
+**2. 自动修复并回提交（官方推荐）**
 
 ```yaml
-# gitlab-ci.yml
-variables:
-  HUSKY: "0"
+# 配合 autofix.ci GitHub App
+- uses: actions/checkout@v4
+- uses: actions/setup-node@v4
+- run: |
+    pnpm install
+    pnpm prettier . --write
+- uses: autofix-ci/action@v1
 ```
 
 </div>
@@ -530,7 +513,7 @@ variables:
 
 <div v-click text-xs text-right>
 
-_Read more about_ [_precommit_](https://prettier.io/docs/precommit/)
+_Read more about_ [_precommit_](https://prettier.io/docs/precommit/) · [_ci_](https://prettier.io/docs/ci/)
 
 </div>
 
@@ -546,20 +529,17 @@ h1 {
 }
 </style>
 
-<!-- 
-Prettier 集成到 CI 能让提交更规范，自动化格式化一步到位！
+<!--
+本地和 CI 是 Prettier 落地的两条线。
 
-[click] 首先，安装 Husky 和 Lint-Staged，Husky 负责 Git 钩子，Lint-Staged 只处理改动文件。 
+[click] 本地用 Husky + lint-staged：husky init 装上钩子，pre-commit 里跑 lint-staged，package.json 里只给暂存文件跑 prettier --write --ignore-unknown，按官方 install 页的推荐写法。
 
-[click:2] 然后，初始化 Husky，设置 Git 钩子环境。 
+[click] CI 的第一种思路是只校验：跑 prettier . --check，发现未格式化的文件就让流水线失败，简单可靠。
 
-[click] 接着，配置预提交脚本，告诉 Husky 在提交时运行 Lint-Staged。 
+[click] 第二种是官方在 "Run Prettier on CI" 里推荐的 autofix.ci：CI 里直接跑 --write，再让 autofix-ci/action 自动把改动 commit/push 回 PR，开发者不用再回头手动跑 prettier。
 
-[click] 右边，在 package.json 中配置 Lint-Staged，让它对 JS、TS、Vue 文件运行 Prettier。 
-
-[click] 最后，在 CI 文件中设置 HUSKY=0，避免 CI 环境触发钩子。 
-
- -->
+注意：不要在 CI 里设置 HUSKY=0 当作"CI 集成"，那只是禁用 husky 钩子，跟 prettier 没关系。
+-->
 
 
 ---
