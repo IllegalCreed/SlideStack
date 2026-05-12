@@ -168,23 +168,12 @@ layoutClass: gap-x-16
 
 <div v-click>
 
-**新项目脚手架**
+**安装**
 
 ```bash
-pnpm dlx create-turbo@latest
+pnpm dlx create-turbo@latest   # 新项目
+pnpm add -Dw turbo             # 已有 monorepo
 ```
-
-**已有 monorepo 加装**
-
-```bash
-pnpm add -Dw turbo
-```
-
-</div>
-
-<br>
-
-<div v-click>
 
 **根 `package.json`**
 
@@ -192,10 +181,7 @@ pnpm add -Dw turbo
 {
   "private": true,
   "packageManager": "pnpm@9.0.0",
-  "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev"
-  }
+  "scripts": { "build": "turbo run build" }
 }
 ```
 
@@ -215,11 +201,7 @@ pnpm add -Dw turbo
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "lint": {},
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
+    "dev": { "cache": false, "persistent": true }
   }
 }
 ```
@@ -265,26 +247,19 @@ transition: fade-out
 <v-click>
 
 ```json
-{
-  "tasks": {
-    "build":  { "dependsOn": ["^build"] },
-    "test":   { "dependsOn": ["build"] },
-    "deploy": { "dependsOn": ["@acme/web#build"] },
-    "lint":   { "dependsOn": [] }
-  }
-}
+"build":  { "dependsOn": ["^build"] },
+"deploy": { "dependsOn": ["@acme/web#build"] },
+"lint":   { "dependsOn": [] }
 ```
 
-| 语法              | 含义                                                  |
-| ----------------- | ----------------------------------------------------- |
-| `^build`          | **上游依赖包**（dependencies 中的内部包）的 `build` 先跑 |
-| `build`           | **同一包**的 `build` 先跑（同包内串接任务）           |
-| `@acme/web#build` | 特定包的特定任务（仅可写在根 `turbo.json`）           |
-| `[]`              | 无依赖，可与上游完全并行                              |
+| 语法              | 含义                                                |
+| ----------------- | --------------------------------------------------- |
+| `^build`          | **上游依赖包**的 `build` 先跑                       |
+| `build`           | **同一包**的 `build` 先跑（同包内串接）             |
+| `@acme/web#build` | 特定包的特定任务（仅可写在根 `turbo.json`）         |
+| `[]`              | 无依赖，可与上游完全并行                            |
 
 </v-click>
-
-<br>
 
 <div v-click text-xs text-right>
 
@@ -399,28 +374,22 @@ transition: fade-out
 <v-click>
 
 ```json
-{
-  "globalEnv": ["NODE_ENV"],
-  "tasks": {
-    "build": {
-      "env":            ["API_URL", "VITE_*"],
-      "passThroughEnv": ["GITHUB_TOKEN"]
-    }
+"globalEnv": ["NODE_ENV"],
+"tasks": {
+  "build": {
+    "env":            ["API_URL", "VITE_*"],
+    "passThroughEnv": ["GITHUB_TOKEN"]
   }
 }
 ```
 
-| 字段             | 进入哈希？ | 任务运行时可见？ |
-| ---------------- | --------- | ---------------- |
-| `globalEnv`      | ✅ 所有任务 | ✅ 所有任务       |
-| `env`            | ✅ 当前任务 | ✅ 当前任务       |
-| `passThroughEnv` | ❌         | ✅ 当前任务       |
-
-- 支持通配符前缀 `MY_API_*`；`NEXT_PUBLIC_*` / `VITE_*` 等框架前缀由 Framework Inference 自动包含
+| 字段             | 进入哈希？ | 任务可见？ | 备注                       |
+| ---------------- | --------- | ---------- | -------------------------- |
+| `globalEnv`      | ✅ 所有任务 | ✅ 所有任务 | 通配符 `MY_API_*` 可用     |
+| `env`            | ✅ 当前任务 | ✅ 当前任务 | 框架前缀由 Inference 自动包含 |
+| `passThroughEnv` | ❌         | ✅ 当前任务 | 适合 CI token              |
 
 </v-click>
-
-<br>
 
 <div v-click text-xs text-right>
 
@@ -608,17 +577,15 @@ env:
 turbo login --manual
 ```
 
+`turbo.json` 启用签名：
+
 ```json
-{
-  "remoteCache": { "signature": true }
-}
+{ "remoteCache": { "signature": true } }
 ```
 
-需要 `TURBO_REMOTE_CACHE_SIGNATURE_KEY`（HMAC-SHA256）做密钥。
+需 `TURBO_REMOTE_CACHE_SIGNATURE_KEY`（HMAC-SHA256）。
 
-社区实现（**非官方**）：
-- `ducktors/turborepo-remote-cache`
-- `brunojppb/turbo-cache-server`
+社区实现（非官方）：`ducktors/turborepo-remote-cache`、`brunojppb/turbo-cache-server`
 
 </div>
 
@@ -664,25 +631,17 @@ transition: fade-out
 {
   "extends": ["//"],
   "tasks": {
-    "build": {
-      "env": ["$TURBO_EXTENDS$", "NEXT_PUBLIC_FOO"]
-    },
-    "test": {
-      "outputs": ["coverage/**"]
-    }
+    "build": { "env": ["$TURBO_EXTENDS$", "NEXT_PUBLIC_FOO"] },
+    "test":  { "outputs": ["coverage/**"] }
   }
 }
 ```
 
-- 继承根：`extends` 数组必须以 `"//"` 起始
-- 数组字段（`dependsOn` / `env` / `inputs` / `outputs` / `passThroughEnv` / `with`）默认**整体替换**
-- 想"在根的基础上追加"，用 `$TURBO_EXTENDS$` 作**数组首元素**
-- **不能**覆盖 `globalEnv` / `globalDependencies`
-- **不能**使用 `pkg#task` 语法（那只能写在根）
+- 继承根：`extends` 数组必须以 `"//"` 起始；数组字段（`dependsOn` / `env` / `inputs` / `outputs` / `passThroughEnv` / `with`）默认整体替换
+- 想在根基础上追加，用 `$TURBO_EXTENDS$` 作**数组首元素**
+- **不能**覆盖 `globalEnv` / `globalDependencies`，**不能**用 `pkg#task` 语法（只能写在根）
 
 </v-click>
-
-<br>
 
 <div v-click text-xs text-right>
 
