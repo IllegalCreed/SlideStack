@@ -534,7 +534,7 @@ pnpm turbo run build test lint --affected
 ```
 
 - 默认等价于 `--filter=...[main...HEAD]`，对比当前默认分支
-- 自定义对比基准：`--affected --affected-base=origin/develop`
+- 自定义基准/HEAD：环境变量 `TURBO_SCM_BASE` / `TURBO_SCM_HEAD`
 - 经验上比手写 `--filter=...[origin/main]` 在 shallow clone 场景更鲁棒
 
 </v-clicks>
