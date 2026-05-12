@@ -129,7 +129,7 @@ my-monorepo/
 
 </div>
 
-<div v-click="'+4'" text-xs>
+<div v-click text-xs>
 
 _Read more about_ [_Structuring a repository_](https://turborepo.com/docs/crafting-your-repository/structuring-a-repository)
 
