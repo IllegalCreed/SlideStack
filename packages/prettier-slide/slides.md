@@ -14,10 +14,10 @@ mdc: true
 
 <LightOrDark>
   <template #light>
-    <img class="mx-auto h-40" src="/prettier-wide-light.svg" alt="Light Logo" />
+    <img class="mx-auto h-40" src="./assets/prettier-wide-light.svg" alt="Light Logo" />
   </template>
   <template #dark>
-    <img class="mx-auto h-40" src="/prettier-wide-dark.svg" alt="Dark Logo" />
+    <img class="mx-auto h-40" src="./assets/prettier-wide-dark.svg" alt="Dark Logo" />
   </template>
 </LightOrDark>
 
