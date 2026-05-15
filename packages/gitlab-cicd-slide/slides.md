@@ -20,7 +20,7 @@ mdc: true
 
 ## GitLab CI/CD：与仓库共生的流水线
 
-`.gitlab-ci.yml` + Runner，配置即代码、自托管即可用
+.gitlab-ci.yml + Runner，配置即代码、自托管即可用
 
 <div @click="$slidev.nav.next" class="mt-12 py-1" hover:bg="white op-10">
   Press Space for next page <carbon:arrow-right />

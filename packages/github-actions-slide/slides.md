@@ -20,7 +20,7 @@ mdc: true
 
 ## GitHub Actions：仓库一体的 CI/CD
 
-`.github/workflows/*.yml` + Marketplace Action，零运维起步
+.github/workflows/\*.yml + Marketplace Action，零运维起步
 
 <div @click="$slidev.nav.next" class="mt-12 py-1" hover:bg="white op-10">
   Press Space for next page <carbon:arrow-right />

@@ -21,7 +21,7 @@ mdc: true
 
 ## Vue I18n：Vue 官方国际化插件
 
-让 SPA 一行 `t('key')` 跨越语言、复数与本地化（基于 v11）
+让 SPA 一行 t('key') 跨越语言、复数与本地化（基于 v11）
 
 <div @click="$slidev.nav.next" class="mt-12 py-1" hover:bg="white op-10">
   Press Space for next page <carbon:arrow-right />
