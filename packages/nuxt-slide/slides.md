@@ -573,6 +573,774 @@ transition: slide-up
 </v-click>
 
 ---
+transition: slide-up
+---
+
+# useFetch 完整选项
+
+```ts
+const { data, pending, error, refresh, status, execute, clear } = await useFetch(
+  "/api/articles",
+  {
+    // ─── 请求行为 ───
+    method: "GET",
+    query: { page: 1, size: 20 },
+    body: { /* POST 时 */ },
+    headers: { "X-Token": token.value },
+    credentials: "include",
+
+    // ─── 响应处理 ───
+    transform: (res) => res.data.map((x) => ({ ...x, slug: slugify(x.title) })),
+    pick: ["id", "title"],          // 仅保留这些字段（payload 瘦身）
+    default: () => [],              // 加载中的占位
+
+    // ─── 调度策略 ───
+    lazy: false,                    // true：不阻塞导航
+    immediate: true,                // false：手动 execute()
+    server: true,                   // false：跳过 SSR
+    watch: [page, size],            // 依赖变更自动 refresh
+
+    // ─── 缓存 ───
+    key: "articles",                // 跨组件共享
+    getCachedData: (key, nuxt) => nuxt.payload.data[key],
+  },
+);
+```
+
+---
+transition: slide-up
+---
+
+# useAsyncData：自定义 fetcher
+
+```ts
+const route = useRoute();
+
+const { data: user } = await useAsyncData(
+  () => `user-${route.params.id}`,  // 动态 key（依赖响应式时用函数）
+  async () => {
+    const [profile, orders] = await Promise.all([
+      $fetch(`/api/users/${route.params.id}`),
+      $fetch(`/api/users/${route.params.id}/orders`),
+    ]);
+    return { profile, orders };
+  },
+  { watch: [() => route.params.id] }, // params 变化自动重新拉
+);
+```
+
+<v-click>
+
+`useFetch` 是 `useAsyncData` 的 URL 简写——单个端点用 `useFetch`，多并发 / 自定义逻辑用 `useAsyncData`。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Hydration 与 Payload
+
+```ts
+// 服务端拉的数据序列化到 HTML（payload），客户端复用避免重发请求
+const { data } = await useFetch("/api/articles");
+//                                   ↑
+// SSR 阶段：服务端发请求 → 拿数据 → 注入 HTML
+// CSR 阶段：客户端从 payload 复用 → 不再请求
+```
+
+<v-click>
+
+**陷阱**：
+
+- 数据含 `Date` / `Map` / `Set` 等非 JSON 类型 → 序列化失败
+- 数据 > 50KB → 用 `pick` 瘦身 / 改 `lazy` 减小 payload
+- 同一 key 的 `useFetch` 跨组件共享数据，**避免重复请求**
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 错误处理：error.vue + useError
+
+```vue
+<!-- app/error.vue：覆盖所有错误页 -->
+<script setup lang="ts">
+const props = defineProps<{
+  error: { statusCode: number; statusMessage: string };
+}>();
+
+const handleError = () => clearError({ redirect: "/" });
+</script>
+
+<template>
+  <div>
+    <h1>{{ error.statusCode }}</h1>
+    <p>{{ error.statusMessage }}</p>
+    <button @click="handleError">回到首页</button>
+  </div>
+</template>
+```
+
+```ts
+// 任意位置抛出
+throw createError({
+  statusCode: 404,
+  statusMessage: "文章不存在",
+  fatal: true, // 触发 error.vue（否则只是页面级错误）
+});
+```
+
+---
+transition: slide-up
+---
+
+# Plugins
+
+```ts
+// app/plugins/api.ts → 客户端 + 服务端都跑
+export default defineNuxtPlugin((nuxtApp) => {
+  const config = useRuntimeConfig();
+
+  const api = $fetch.create({
+    baseURL: config.public.apiBase,
+    onRequest({ options }) {
+      const token = useCookie("token");
+      if (token.value) options.headers.set("Authorization", `Bearer ${token.value}`);
+    },
+    onResponseError({ response }) {
+      if (response.status === 401) navigateTo("/login");
+    },
+  });
+
+  return { provide: { api } };
+});
+```
+
+```vue
+<script setup>
+const { $api } = useNuxtApp();
+const data = await $api("/me");
+</script>
+```
+
+---
+transition: slide-up
+---
+
+# Plugin 命名规则
+
+```
+app/plugins/
+├── 01.firstPlugin.ts          # 先跑（数字前缀控顺序）
+├── 02.secondPlugin.ts
+├── auth.client.ts             # 仅客户端
+├── analytics.server.ts        # 仅服务端
+├── tracking.client.ts         # 仅 CSR
+└── pinia-extension.ts         # 双端
+```
+
+<v-clicks>
+
+- 数字前缀：`01.`/`02.` 控制启动顺序
+- `.client` / `.server` 后缀：单端运行
+- `parallel: true`：与其它 plugin 并行启动（非默认）
+- `dependsOn: ['pinia-extension']`：声明依赖
+
+</v-clicks>
+
+---
+transition: slide-up
+---
+
+# AppConfig vs RuntimeConfig
+
+```ts
+// app/app.config.ts → 构建期常量（前端可访问）
+export default defineAppConfig({
+  theme: { primary: "#00DC82" },
+  feature: { newCheckout: true },
+});
+
+// nuxt.config.ts → 运行期环境变量
+export default defineNuxtConfig({
+  runtimeConfig: {
+    apiSecret: "",                       // 仅服务端可见，从 NUXT_API_SECRET env
+    public: {
+      apiBase: "https://api.example.com", // 客户端可见，从 NUXT_PUBLIC_API_BASE
+    },
+  },
+});
+```
+
+```ts
+// 使用
+const appConfig = useAppConfig();     // 全局共享，构建期
+const runtimeConfig = useRuntimeConfig(); // 运行期，可被 env 覆盖
+```
+
+| 场景 | 选 |
+| --- | --- |
+| Feature flag / 主题色 / 不变常量 | AppConfig |
+| API 地址 / Secret / 多环境差异 | RuntimeConfig |
+
+---
+transition: slide-up
+---
+
+# useState：SSR-safe 全局状态
+
+```ts
+// app/composables/useCart.ts
+export function useCart() {
+  return useState<Item[]>("cart", () => []);
+}
+```
+
+```vue
+<!-- 任意组件 -->
+<script setup>
+const cart = useCart();
+cart.value.push({ id: 1, name: "Widget", price: 99 });
+</script>
+```
+
+<v-click>
+
+**关键特性**：
+
+- **SSR-safe**：服务端创建 → 序列化进 payload → 客户端 hydration 时复用，不会出现两端 state 不同步
+- **跨组件共享**：同 key 的 `useState` 返回同一引用
+- 比 `ref` 在 setup 外创建更安全（避免请求间串数据）
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Pinia Store 进阶
+
+```ts
+// stores/user.ts
+export const useUserStore = defineStore("user", () => {
+  const profile = ref<User | null>(null);
+
+  // Getter
+  const isAdmin = computed(() => profile.value?.role === "admin");
+
+  // Action
+  async function load() {
+    profile.value = await $fetch("/api/me");
+  }
+
+  // 监听
+  watch(profile, (val) => {
+    if (val) localStorage.setItem("user", JSON.stringify(val));
+  });
+
+  return { profile, isAdmin, load };
+});
+```
+
+```ts
+// nuxt.config.ts
+modules: ["@pinia/nuxt"],
+
+// pinia.config.ts → 启用 storeToRefs 自动导入等
+```
+
+---
+transition: slide-up
+---
+
+# SEO：useHead + useSeoMeta
+
+```ts
+// 单页面定制
+useHead({
+  title: "文章详情",
+  meta: [
+    { name: "description", content: article.excerpt },
+    { property: "og:image", content: article.cover },
+  ],
+  link: [{ rel: "canonical", href: `https://x.com/blog/${slug}` }],
+  script: [{ src: "https://cdn.example.com/analytics.js", async: true }],
+});
+
+// 或更类型友好
+useSeoMeta({
+  title: "文章详情",
+  description: article.excerpt,
+  ogImage: article.cover,
+  ogType: "article",
+  twitterCard: "summary_large_image",
+});
+```
+
+<v-click>
+
+`useSeoMeta` 自动展开成 og:* / twitter:* 等具体标签，类型友好（IDE 补全所有合法字段）。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Nitro Caching
+
+```ts
+// server/api/articles.get.ts
+export default defineCachedEventHandler(
+  async (event) => {
+    return await db.articles.findMany();
+  },
+  {
+    maxAge: 60 * 10,             // 10 分钟
+    name: "articles-list",       // cache key 前缀
+    getKey: (event) => `lang-${getQuery(event).lang || "en"}`, // 自定义 key
+    swr: true,                   // SWR：返旧值同时后台 revalidate
+    base: "redis",               // 走 Nitro storage 的 redis driver
+  },
+);
+```
+
+```ts
+// nuxt.config.ts：配 redis storage
+nitro: {
+  storage: {
+    redis: { driver: "redis", url: process.env.REDIS_URL },
+  },
+}
+```
+
+---
+transition: slide-up
+---
+
+# defineCachedFunction
+
+```ts
+// server/utils/get-weather.ts
+export const getWeather = defineCachedFunction(
+  async (city: string) => {
+    return await $fetch(`https://api.weather.com/${city}`);
+  },
+  {
+    maxAge: 60 * 30,   // 缓存 30 分钟
+    name: "weather",
+    getKey: (city) => city.toLowerCase(),
+  },
+);
+
+// server/api/weather/[city].get.ts
+export default defineEventHandler(async (event) => {
+  const city = getRouterParam(event, "city")!;
+  return await getWeather(city); // 自动走缓存
+});
+```
+
+<v-click>
+
+适合：第三方 API 调用结果缓存——同 city 短时间内多次访问共享一次外部请求。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Server Routes Plugins
+
+```ts
+// server/plugins/db.ts → Nitro 启动时调用一次
+export default defineNitroPlugin((nitroApp) => {
+  const db = new PrismaClient();
+  nitroApp.hooks.hook("close", async () => {
+    await db.$disconnect();
+  });
+
+  // 挂到 useStorage('db') 让 handlers 取
+  useStorage("db").setItem("client", db);
+});
+```
+
+```ts
+// server/api/articles.get.ts
+export default defineEventHandler(async (event) => {
+  const db = await useStorage("db").getItem<PrismaClient>("client");
+  return await db.articles.findMany();
+});
+```
+
+---
+transition: slide-up
+---
+
+# @nuxt/image：自适应图片
+
+```vue
+<template>
+  <!-- 自动 srcset + 懒加载 + WebP / AVIF 转换 -->
+  <NuxtImg
+    src="/products/hero.jpg"
+    sizes="sm:100vw md:50vw lg:400px"
+    format="webp"
+    loading="lazy"
+  />
+
+  <!-- 占位 + 渐进显示 -->
+  <NuxtPicture
+    src="/products/hero.jpg"
+    placeholder
+    densities="x1 x2 x3"
+  />
+</template>
+```
+
+```ts
+// nuxt.config.ts
+image: {
+  provider: "ipx",          // 内置；也可 cloudinary / vercel / netlify
+  domains: ["cdn.example.com"],
+  presets: {
+    avatar: { modifiers: { format: "webp", width: 96, height: 96 } },
+  },
+}
+```
+
+---
+transition: slide-up
+---
+
+# @nuxt/content：Markdown 站
+
+```ts
+// content/blog/2026/hello.md
+---
+title: Hello
+date: 2026-05-15
+tags: [intro, nuxt]
+---
+
+# 内容
+
+支持 Vue 组件嵌入 + frontmatter + MDC 语法。
+```
+
+```vue
+<!-- pages/blog/[...slug].vue -->
+<script setup>
+const route = useRoute();
+const { data: page } = await useAsyncData(route.path, () =>
+  queryCollection("blog").path(route.path).first(),
+);
+</script>
+
+<template>
+  <ContentRenderer :value="page" />
+</template>
+```
+
+<v-click>
+
+类 VitePress 但与 Nuxt 应用合体：Markdown 内容 + 动态页面 + API 共一份代码。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 测试：@nuxt/test-utils
+
+```ts
+// tests/example.spec.ts
+import { describe, it, expect } from "vitest";
+import { setup, $fetch, createPage } from "@nuxt/test-utils/e2e";
+
+describe("Articles API", async () => {
+  await setup({
+    server: true,
+    rootDir: fileURLToPath(new URL("..", import.meta.url)),
+  });
+
+  it("GET /api/articles 返回列表", async () => {
+    const articles = await $fetch("/api/articles");
+    expect(Array.isArray(articles)).toBe(true);
+  });
+
+  it("访问 /blog 渲染", async () => {
+    const page = await createPage("/blog");
+    expect(await page.textContent("h1")).toBe("Blog");
+  });
+});
+```
+
+---
+transition: slide-up
+---
+
+# DevTools
+
+```bash
+pnpm dev  # 启动后 dev server 自带 DevTools
+```
+
+按 `Shift+Alt+D` 展开面板：
+
+<v-clicks>
+
+- **Routes**：当前路由表 + 文件位置 + 一键跳源码
+- **Components**：组件树 + props / state 实时检查
+- **Composables**：所有自动导入函数列表 + 用量统计
+- **Modules**：已启用模块状态 + 配置
+- **Hooks**：生命周期钩子执行时序
+- **Plugins**：plugin 执行顺序 + 时长
+- **Payload**：SSR 注入的数据
+- **Server**：API 路由 + 测试请求面板
+- **Tailwind / UnoCSS**：原子类匹配面板
+
+</v-clicks>
+
+---
+transition: slide-up
+---
+
+# Hooks：扩展点
+
+```ts
+// app/plugins/track.ts
+export default defineNuxtPlugin((nuxtApp) => {
+  nuxtApp.hook("page:start", () => console.log("页面开始加载"));
+  nuxtApp.hook("page:finish", () => console.log("页面加载完成"));
+  nuxtApp.hook("app:error", (err) => reportToSentry(err));
+});
+```
+
+```ts
+// server/plugins/db.ts
+export default defineNitroPlugin((nitroApp) => {
+  nitroApp.hooks.hook("request", (event) => { /* ... */ });
+  nitroApp.hooks.hook("close", async () => { /* cleanup */ });
+});
+```
+
+常用 hooks：`app:created` / `app:mounted` / `app:error` / `page:start` / `page:finish` / `vue:setup` / `vue:error` / `link:prefetch`。
+
+---
+transition: slide-up
+---
+
+# Edge Deployment
+
+```ts
+// nuxt.config.ts
+nitro: {
+  preset: "cloudflare-workers", // 或 vercel-edge / deno-deploy
+}
+```
+
+```bash
+pnpm build
+# .output/server/index.mjs → 兼容 Workers / Edge Functions
+```
+
+<v-click>
+
+**Edge 限制**：
+
+- 单实例内存通常 ≤ 128MB
+- 单请求执行 ≤ 30s（部分平台更短）
+- 不支持 Node 内置（fs / child_process）
+- 全部用 Web API（fetch / crypto.subtle / Streams）
+
+适合：API gateway / SSR 渲染 / Auth 验证；不适合：大计算 / 数据库连接池（需用 RESTful DB 代理）。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 性能优化清单
+
+<v-clicks>
+
+- **组件懒加载**：`<LazyHeavy />` 而非 `<Heavy />`，仅当 mount 才加载 chunk
+- **Payload 瘦身**：`useFetch('/api/x', { pick: ['id', 'title'] })`
+- **路由级缓存**：`routeRules` 配 `swr` / `isr`
+- **图片优化**：`<NuxtImg>` 自动 srcset / 格式转换 / 懒加载
+- **预取链接**：`<NuxtLink prefetch>` 视口可见时预取目标 chunk
+- **关闭无用模块**：dev 加 `--no-clear`，prod 移除 DevTools 模块
+- **拆 layer**：管理后台单独 layer + `routeRules: { ssr: false }` 走 SPA
+- **Edge 部署**：把 SSR 推到 edge node 降全球延迟
+
+</v-clicks>
+
+---
+transition: slide-up
+---
+
+# 环境变量 + Runtime Config
+
+```bash
+# .env
+NUXT_API_SECRET=server-only-secret
+NUXT_PUBLIC_API_BASE=https://api.example.com
+```
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  runtimeConfig: {
+    apiSecret: "",                       // 自动读 NUXT_API_SECRET
+    public: { apiBase: "" },             // 自动读 NUXT_PUBLIC_API_BASE
+  },
+});
+```
+
+```ts
+// 服务端
+const { apiSecret } = useRuntimeConfig();
+
+// 客户端
+const { public: { apiBase } } = useRuntimeConfig();
+```
+
+<v-click>
+
+**约定**：`runtimeConfig.public.*` 客户端可见；其它字段仅服务端。**自动 env 映射**：字段 camelCase ↔ env SCREAMING_SNAKE_CASE 加 `NUXT_` 前缀。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Server Components（实验）
+
+```vue
+<!-- app/components/AsyncList.server.vue：仅在服务端渲染 -->
+<script setup>
+const { data } = await useFetch("/api/heavy");
+</script>
+
+<template>
+  <ul><li v-for="x in data">{{ x.title }}</li></ul>
+</template>
+```
+
+```ts
+// nuxt.config.ts
+experimental: {
+  componentIslands: true, // 启用 Server Components / Islands
+}
+```
+
+<v-click>
+
+特点：
+
+- 服务端渲染后**只发 HTML** 到客户端（无 JS 水合）
+- 用 `<NuxtIsland>` 注入交互区域
+- 类似 React Server Components / Astro Islands
+- v4 仍实验中，生产慎用
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 监控 + 日志
+
+```ts
+// app/plugins/monitor.client.ts
+import * as Sentry from "@sentry/vue";
+
+export default defineNuxtPlugin((nuxtApp) => {
+  Sentry.init({
+    app: nuxtApp.vueApp,
+    dsn: useRuntimeConfig().public.sentryDsn,
+    integrations: [
+      Sentry.browserTracingIntegration({ router: useRouter() }),
+    ],
+  });
+
+  nuxtApp.hook("app:error", (error) => Sentry.captureException(error));
+});
+```
+
+```ts
+// server/plugins/log.ts
+export default defineNitroPlugin((nitroApp) => {
+  nitroApp.hooks.hook("error", (error, ctx) => {
+    console.error("[Nitro Error]", { url: ctx.event?.path, error });
+  });
+});
+```
+
+---
+transition: slide-up
+---
+
+# Layer 实战：多端共享
+
+```
+acme-monorepo/
+├── layers/
+│   ├── base/                  # 全部端共用：UI 组件 / utils / theme
+│   ├── auth/                  # 鉴权：login / session / middleware
+│   └── billing/               # 计费：套餐 / 支付 / API
+├── apps/
+│   ├── web/                   # 主站（extends: base, auth, billing）
+│   ├── admin/                 # 后台（extends: base, auth）
+│   └── mobile/                # 移动端（extends: base, auth）
+└── ...
+```
+
+```ts
+// apps/web/nuxt.config.ts
+export default defineNuxtConfig({
+  extends: ["../../layers/base", "../../layers/auth", "../../layers/billing"],
+});
+```
+
+<v-click>
+
+**适合**：电商 / SaaS 等「多端共用基础设施 + 各端独有业务」。比 monorepo + 共享包灵活——layer 可以含 pages / api / 配置。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 升级：Nuxt 3 → 4
+
+```bash
+pnpm dlx nuxt upgrade
+```
+
+主要变更：
+
+<v-clicks>
+
+- **源码搬到 `app/`**：旧 `pages/` 改 `app/pages/`（也可保持兼容模式）
+- **`shallowRef` 默认**：`useFetch` data 是 `shallowRef`，深嵌套更新需 `.value = newVal`
+- **`useFetch` key 共享**：同 key 跨组件返同一 data ref
+- **模块加载顺序**：layer 先 / project 后（v3 反的）
+- **四套 tsconfig**：自动隔离 app / server / node / shared
+- **Node ≥ 22.22.1**：v3 时代 18 / 20 已不支持
+- **`noUncheckedIndexedAccess`**：所有数组下标推断 `T | undefined`
+
+</v-clicks>
+
+---
 layout: center
 class: text-center
 ---

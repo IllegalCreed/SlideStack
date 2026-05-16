@@ -503,6 +503,499 @@ transition: slide-up
 </v-clicks>
 
 ---
+transition: slide-up
+---
+
+# Runner Authentication Token
+
+```bash
+# 17.0 起：Registration Token 完全废弃
+# UI 新建 runner → 生成一次性 token（glrt- 前缀）
+gitlab-runner register --token glrt-xxxxxxxxxxxxxxxxx \
+  --url https://gitlab.com \
+  --executor docker \
+  --description "My Docker Runner" \
+  --tag-list "docker,linux"
+```
+
+<v-click>
+
+**优势**：
+
+- 每个 runner 单独 token，泄露后单独撤销
+- UI 可看每个 runner 的 IP / 系统 / 版本
+- 比 Registration Token 安全（后者一旦泄露需重置 group/project 注册体系）
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Runner Executor 对比
+
+| Executor | 隔离 | 资源 | 适合 |
+| --- | --- | --- | --- |
+| `shell` | 无（裸跑） | 低 | 简单脚本，需访问 host 工具 |
+| `docker` | 容器 | 中 | **首选**：每 job 独立容器 |
+| `docker+machine` | 动态 VM | 中 | 按需扩缩容（已被 Custom Executor 替代）|
+| `kubernetes` | Pod | 中 | K8s 集群中跑 runner |
+| `ssh` | 远端机器 | 中 | 老式部署 / 跨网 |
+| `custom` | 自定义 | 灵活 | 接 Lambda / FaaS / 其它 |
+
+```toml
+# config.toml
+concurrent = 10    # runner 进程全局并发上限
+
+[[runners]]
+  name = "main"
+  url = "https://gitlab.com"
+  token = "glrt-xxx"
+  executor = "docker"
+  limit = 5        # 本 runner 块上限（≤ concurrent）
+  [runners.docker]
+    image = "alpine:latest"
+    pull_policy = ["if-not-present"]
+    privileged = false
+    volumes = ["/cache"]
+```
+
+---
+transition: slide-up
+---
+
+# Docker Build：Kaniko vs DinD vs sock 挂载
+
+| 方式 | 安全 | 性能 | 推荐 |
+| --- | --- | --- | --- |
+| **Kaniko** | ✓ 无 daemon / 无 privileged | 中 | **CI 首选** |
+| Docker-in-Docker | ✗ privileged：拿 host root | 快 | 慎用 |
+| 挂 `/var/run/docker.sock` | ✗ 拿 host docker 控制权 | 最快 | 仅 trusted 项目 |
+
+```yaml
+build:
+  image:
+    name: gcr.io/kaniko-project/executor:v1.20.0-debug
+    entrypoint: [""]
+  script:
+    - |
+      /kaniko/executor \
+        --context "${CI_PROJECT_DIR}" \
+        --dockerfile "${CI_PROJECT_DIR}/Dockerfile" \
+        --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}" \
+        --cache=true
+```
+
+---
+transition: slide-up
+---
+
+# rules 决策树
+
+```yaml
+job:
+  rules:
+    # 1. 跳过的优先（when: never）
+    - if: $CI_COMMIT_MESSAGE =~ /\[skip ci\]/
+      when: never
+
+    # 2. MR pipeline
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "src/**/*"
+        - "package.json"
+
+    # 3. 默认分支自动 deploy
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: on_success
+
+    # 4. tag pipeline
+    - if: $CI_COMMIT_TAG
+
+    # 5. 兜底（不命中任何条件 → job 不跑）
+```
+
+<v-click>
+
+**rules 是「**第一个匹配为准**」的顺序判定**。漏写 `when: never` 时上面的「跳过」条件会被下面的 `when: on_success` 覆盖。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# include + extends：YAML 复用
+
+```yaml
+# .gitlab-ci/templates/node-build.yml
+.node-base:
+  image: node:22
+  before_script:
+    - corepack enable
+    - pnpm install --frozen-lockfile
+
+.build-base:
+  extends: .node-base
+  artifacts:
+    paths: [dist/]
+    expire_in: 1 week
+
+# .gitlab-ci.yml
+include:
+  - local: ".gitlab-ci/templates/node-build.yml"
+  - template: "Security/SAST.gitlab-ci.yml"      # GitLab 内置
+  - remote: "https://example.com/ci-template.yml"
+  - project: "templates/shared-ci"
+    ref: main
+    file: "deploy.yml"
+
+web:build:
+  extends: .build-base
+  script: pnpm build --filter web
+```
+
+---
+transition: slide-up
+---
+
+# needs：DAG 流水线
+
+```yaml
+stages: [prepare, build, test, deploy]
+
+build:lib:
+  stage: build
+  needs: [prepare]
+  script: pnpm build:lib
+
+build:app:
+  stage: build
+  needs: [prepare, build:lib]   # 跨 stage 拉前置
+  script: pnpm build:app
+
+test:unit:
+  stage: test
+  needs: [build:lib]             # build:lib 完就跑，不等 build:app
+  script: pnpm test:unit
+
+test:e2e:
+  stage: test
+  needs: [build:app]
+  script: pnpm test:e2e
+
+deploy:
+  stage: deploy
+  needs: [test:unit, test:e2e]
+```
+
+<v-click>
+
+普通 stage 串行 → DAG 并行：test:unit 不需等 build:app。**生产 CI 优化效果显著**（10min → 4min 不夸张）。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# artifacts：跨 job 文件 + UI 展示
+
+```yaml
+build:
+  script: pnpm build
+  artifacts:
+    paths: [dist/]
+    expire_in: 1 week
+    when: on_success
+    reports:
+      junit: test-results/**/*.xml          # MR Tests tab 展示
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura.xml         # MR 覆盖率显示
+      sast: gl-sast-report.json              # MR 安全面板
+      dotenv: build.env                      # 后续 job 自动加载为变量
+
+deploy:
+  script: deploy.sh $VERSION                 # $VERSION 来自 build.env
+```
+
+<v-click>
+
+`artifacts:reports:dotenv` 是「跨 job 传值」最优雅方案：前 job 写 `VERSION=1.2.3` 入 `.env` 文件 → 后 job 自动 env 注入。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Pipeline 类型
+
+```yaml
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_TAG
+    - when: never                            # 其它都跳过
+```
+
+<v-clicks>
+
+- **Branch Pipeline**：push 触发，对当前 HEAD 跑
+- **MR Pipeline**：MR 时跑，可拿 `CI_MERGE_REQUEST_*` 变量
+- **Merged Results Pipeline**：对临时合并后代码跑 → 避免合并后 main 红（**Premium**）
+- **Merge Train**：MR 队列依次跑「合并前所有 MR 后」的 CI（**Premium**）
+- **Parent-Child / Multi-Project**：跨 pipeline 触发
+
+</v-clicks>
+
+---
+transition: slide-up
+---
+
+# Environment + 部署历史
+
+```yaml
+deploy:staging:
+  stage: deploy
+  environment:
+    name: staging
+    url: https://staging.example.com
+    deployment_tier: staging
+    on_stop: cleanup:staging                  # MR 关闭时调度
+  script: ./deploy.sh staging
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+
+cleanup:staging:
+  stage: deploy
+  environment:
+    name: staging
+    action: stop                               # 销毁该环境
+  script: ./teardown.sh
+  rules:
+    - when: manual
+```
+
+<v-click>
+
+UI **Operate > Environments** 列出每个 environment 当前部署的 commit + 部署历史 + 一键回滚。配 `url` 后点击直达应用。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Protected Environment + 审批
+
+```yaml
+deploy:prod:
+  stage: deploy
+  environment:
+    name: prod
+    url: https://example.com
+    deployment_tier: production
+  rules:
+    - if: $CI_COMMIT_TAG
+      when: manual                             # UI 点 deploy
+```
+
+```
+Settings > CI/CD > Protected Environments:
+  ├── staging  → allowed: developers+
+  └── prod     → allowed: maintainers
+                  approval_rules:
+                    - required_approvals: 2
+                    - rule: "Production Team"
+```
+
+<v-click>
+
+**Protected Environment** = 部署级访问控制 + 审批。比 Protected Branch 颗粒细——保护「部署动作」而非「push 动作」。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Variables 分层
+
+| 层级 | 配置位置 | 用途 |
+| --- | --- | --- |
+| Instance | Admin Area | 全实例默认 |
+| Group | Group Settings > CI/CD | 组内多项目共用 |
+| Project | Settings > CI/CD > Variables | 项目专属 |
+| yml `variables:` | `.gitlab-ci.yml` 顶层 | 全 job 共享 |
+| job `variables:` | job 内 | 单 job 覆盖 |
+
+**优先级**：trigger > schedule > Project > Group > Instance > yml 顶层 > job
+
+```
+[勾选 Masked]    job log 中显示 [MASKED]（值需 8+ 字符、base64 字符集）
+[勾选 Protected] 仅 protected branch/tag 注入（保护 prod token）
+[勾选 Expanded] 变量值中 $VAR 展开
+[Type: File]    值写入文件，env = 文件路径
+```
+
+---
+transition: slide-up
+---
+
+# Vault 集成（HashiCorp）
+
+```yaml
+deploy:
+  id_tokens:
+    VAULT_TOKEN:
+      aud: "https://vault.example.com"
+  secrets:
+    DB_PASSWORD:
+      vault: prod/db/password@kv-v2
+      file: false                              # 默认 true（写文件）；false 直接 env
+  script:
+    - echo "DB password from Vault: $DB_PASSWORD"
+```
+
+<v-click>
+
+**OIDC JWT** + claims 验证 → 临时凭证。无长期 secret 可泄露，比把 Vault token 存 GitLab Variables 安全得多。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Container Registry
+
+```yaml
+build:
+  image: gcr.io/kaniko-project/executor:v1.20.0-debug
+  script:
+    - /kaniko/executor
+        --context $CI_PROJECT_DIR
+        --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+        --destination $CI_REGISTRY_IMAGE:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+```
+
+```yaml
+# Cleanup policies (Settings > Packages and registries)
+cleanup_policy:
+  enabled: true
+  keep_n: 10                                    # 保留最新 10 个 tag
+  older_than: 30d                               # 删 30 天前的
+  name_regex_delete: "^(?!latest$|v\\d+).*"     # 删非 latest / 非 vX 的
+```
+
+<v-click>
+
+**默认不开 cleanup**：几年下来 TB 级存储。私有部署必须配。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Secret Detection
+
+```yaml
+include:
+  - template: "Jobs/Secret-Detection.gitlab-ci.yml"
+
+secret_detection:
+  variables:
+    SECRET_DETECTION_HISTORIC_SCAN: "true"      # 扫全 git history
+```
+
+<v-click>
+
+底层 **Gitleaks** 扫代码 + diff，结果出现在 **MR Security 面板**：
+
+- API key / private key / token / OAuth secret 等模式
+- 自定义规则：`.gitleaks.toml` 加正则
+- 阻断合并：开「Required Status Check」+ Security 分数
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Merge Trains（高级合并）
+
+```
+queue: [MR1, MR2, MR3]
+        ↓
+  跑 base + MR1 的 CI       → ✓ 合并
+  跑 base + MR1 + MR2 的 CI → ✗ MR2 踢出
+  跑 base + MR1 + MR3 的 CI → ✓ 合并
+```
+
+<v-click>
+
+**真正解决「合并后 main 红」**——所有合并都基于已通过 CI 的合并结果。**Premium 起支持**。
+
+启用：Settings > General > Merge requests > **Enable merged results pipelines + Merge trains**。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Parent-Child Pipelines
+
+```yaml
+# .gitlab-ci.yml（parent）
+generate:
+  stage: build
+  script:
+    - ./scripts/detect-changes.sh > child.yml
+  artifacts: { paths: [child.yml] }
+
+trigger:
+  stage: deploy
+  trigger:
+    include:
+      - artifact: child.yml                     # 动态加载子 yml
+        job: generate
+    strategy: depend                             # 等子 pipeline 完成才算成功
+```
+
+<v-click>
+
+**monorepo 按目录拆分**：parent 检测改了哪些子目录 → 生成对应 child yml → 触发 child pipeline。避免一个巨型 yml 难维护。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 性能优化
+
+<v-clicks>
+
+- **`needs` DAG**：打破 stage 串行，节省总时长
+- **`interruptible: true`**：新 push 自动取消旧 pipeline（CI/test job 用，deploy 不开）
+- **`rules.changes`**：仅相关代码改动时跑（按目录分片）
+- **cache vs artifacts**：依赖用 cache（重建可用），产物用 artifacts（必须传）
+- **Docker layer cache**：Kaniko `--cache=true` 复用历史 layer
+- **Runner 调度**：tag 精准路由（重 IO 走 SSD runner / GPU 走 GPU runner）
+- **并发 limit**：concurrent / limit 防 OOM
+- **artifacts expire_in**：避免存储爆
+- **Lint 工具链**：本地 `glab ci lint` + GitLab Pipeline Editor
+
+</v-clicks>
+
+---
 layout: center
 class: text-center
 ---

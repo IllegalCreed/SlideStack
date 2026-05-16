@@ -520,6 +520,520 @@ AWS IAM Trust Policy 的 `sub` 字段可限制：repo / branch / environment / e
 transition: slide-up
 ---
 
+# Composite Action 完整
+
+```yaml
+# .github/actions/setup/action.yml
+name: "Setup pnpm + Node"
+description: "装 pnpm + Node + 复原 cache"
+
+inputs:
+  node-version:
+    required: false
+    default: "22"
+  pnpm-version:
+    required: false
+    default: "9"
+
+outputs:
+  store-path:
+    description: "pnpm store 路径"
+    value: ${{ steps.store.outputs.path }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs.pnpm-version }}
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: "pnpm"
+    - id: store
+      shell: bash
+      run: echo "path=$(pnpm store path)" >> $GITHUB_OUTPUT
+```
+
+---
+transition: slide-up
+---
+
+# Reusable Workflow
+
+```yaml
+# .github/workflows/build.yml
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+    secrets:
+      DEPLOY_TOKEN:
+        required: true
+    outputs:
+      url:
+        value: ${{ jobs.deploy.outputs.url }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - id: deploy
+        run: |
+          URL=$(./deploy.sh ${{ inputs.environment }})
+          echo "url=$URL" >> $GITHUB_OUTPUT
+```
+
+```yaml
+# caller
+jobs:
+  staging:
+    uses: ./.github/workflows/build.yml
+    with: { environment: staging }
+    secrets: inherit
+```
+
+<v-click>
+
+`secrets: inherit` 把 caller 全部 secrets 透传给 callee（callee 仍需在 `on.workflow_call.secrets:` 显式列出）。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# matrix 深入
+
+```yaml
+strategy:
+  fail-fast: false             # 任一失败不取消其它
+  max-parallel: 3              # 并发上限
+  matrix:
+    os: [ubuntu-latest, macos-latest, windows-latest]
+    node: [18, 20, 22]
+    include:                   # 额外组合
+      - os: ubuntu-latest
+        node: 22
+        experimental: true
+    exclude:                   # 排除特定组合
+      - os: windows-latest
+        node: 18
+
+steps:
+  - run: echo "${{ matrix.os }} + Node ${{ matrix.node }}"
+  - if: matrix.experimental == true
+    run: echo "experimental flag"
+```
+
+---
+transition: slide-up
+---
+
+# 动态 matrix（fromJSON）
+
+```yaml
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+    steps:
+      - id: list
+        run: |
+          PKGS=$(ls packages/ | jq -R -s -c 'split("\n")[:-1]')
+          echo "matrix={\"pkg\":$PKGS}" >> $GITHUB_OUTPUT
+
+  test:
+    needs: setup
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
+    steps:
+      - run: pnpm test --filter ${{ matrix.pkg }}
+```
+
+<v-click>
+
+Monorepo 「只测改动的包」常用模式。`fromJSON()` 把 JSON 字符串转对象用作 matrix。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 表达式 + 上下文
+
+```yaml
+if: |
+  github.event_name == 'push' &&
+  github.ref == 'refs/heads/main' &&
+  !contains(github.event.head_commit.message, '[skip ci]')
+
+# always() / success() / failure() / cancelled()
+- if: always()              # 含 cancelled
+- if: success() || failure() # 不含 cancelled
+
+# secrets / vars / env / inputs / needs
+- env:
+    TOKEN: ${{ secrets.API_TOKEN }}
+    REGION: ${{ vars.AWS_REGION }}
+  run: deploy.sh
+
+# needs.<job>.outputs / .result
+- if: needs.test.result == 'success'
+- run: echo "${{ needs.build.outputs.image }}"
+```
+
+---
+transition: slide-up
+---
+
+# GITHUB_OUTPUT / ENV / PATH / STEP_SUMMARY
+
+```yaml
+- id: ver
+  run: |
+    # 现行写法（旧 ::set-output 已废弃）
+    echo "version=1.2.3" >> $GITHUB_OUTPUT
+    echo "DEBUG=true" >> $GITHUB_ENV
+    echo "/opt/custom/bin" >> $GITHUB_PATH
+
+    # 多行用 heredoc
+    {
+      echo "release_notes<<EOF"
+      cat CHANGELOG.md
+      echo "EOF"
+    } >> $GITHUB_OUTPUT
+
+    # Step Summary：Markdown 显示在 run 页面顶部
+    cat <<EOF >> $GITHUB_STEP_SUMMARY
+    ## Build Result
+    - Version: 1.2.3
+    - Size: $(du -sh dist/)
+    EOF
+
+- run: echo "Version is ${{ steps.ver.outputs.version }}"
+```
+
+---
+transition: slide-up
+---
+
+# Permissions：最小权限
+
+```yaml
+# Workflow 顶层默认（推荐：空 = 全禁）
+permissions: {}
+
+jobs:
+  release:
+    permissions:
+      contents: write          # 推 tag
+      pull-requests: write     # 评论 PR
+      id-token: write          # OIDC 联邦
+    runs-on: ubuntu-latest
+```
+
+| 权限 | 默认 | 用途 |
+| --- | --- | --- |
+| `contents` | read | git pull / push tag / 创建 release |
+| `pull-requests` | none | 评论 PR / 改 label |
+| `issues` | none | 评论 issue |
+| `id-token` | none | OIDC 联邦认证（AWS/GCP/Azure） |
+| `packages` | read | ghcr.io 拉/推 |
+| `actions` | none | 跨 workflow 调度 |
+| `pages` | none | GitHub Pages 部署 |
+
+---
+transition: slide-up
+---
+
+# pull_request_target 安全坑
+
+```yaml
+# ❌ 危险
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+jobs:
+  build:
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}   # 危险！
+      - run: npm install && npm run build                   # 跑 PR 提供的脚本
+```
+
+<v-click>
+
+**问题**：恶意 PR 改 `package.json` 的 `postinstall` 脚本 → `npm install` 触发 → 服务端跑任意代码 + 窃取 secrets。
+
+正确做法：
+
+- 仅用 `pull_request`（无 secrets）跑 PR build
+- `pull_request_target` 仅用于需 secrets 的元数据操作（label / comment）
+- 必须 checkout PR head 时严格隔离 secrets，且不跑 PR 提供的脚本
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Action 版本钉死：SHA
+
+```yaml
+# ❌ tag 可被作者重新打（供应链攻击）
+- uses: third-party/risky-action@v1
+
+# ✅ SHA 钉死（不可变）
+- uses: third-party/risky-action@a1b2c3d4e5f6789012345678901234567890abcd # v1.2.3
+```
+
+```yaml
+# Dependabot 自动升级 SHA
+# .github/dependabot.yml
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+```
+
+<v-click>
+
+**官方 actions/* 通常用 tag 即可**（GitHub 维护可信）。第三方 marketplace action 一律 SHA + Dependabot 自动 PR。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Service Container：测试用 DB
+
+```yaml
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+
+    steps:
+      - run: |
+          DATABASE_URL=postgres://postgres:test@localhost:5432/test \
+          REDIS_URL=redis://localhost:6379 \
+          pnpm test
+```
+
+<v-click>
+
+**仅 Linux runner 支持**。macOS / Windows 不可用。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Self-hosted Runner 风险
+
+```yaml
+runs-on: [self-hosted, linux, x64]
+```
+
+<v-click>
+
+**公开仓库慎用 self-hosted**：fork PR 可在你的 runner 上跑任意代码（挖矿 / 扫内网 / 持久化后门）。
+
+**安全配置**：
+
+- 公开仓库：仅 collaborator PR 可触发
+- ARC + ephemeral：每 job 全新 Pod，跑完销毁
+- 网络隔离：runner 在 DMZ 不能访问 prod 网络
+
+```bash
+# ephemeral 模式
+./config.sh --url $URL --token $TOKEN --ephemeral
+```
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Environments：审批 + 部署历史
+
+```yaml
+jobs:
+  deploy-prod:
+    environment:
+      name: production
+      url: https://example.com
+    runs-on: ubuntu-latest
+    steps:
+      - run: ./deploy.sh
+```
+
+```
+Settings > Environments > production:
+  ├── Required reviewers: [@alice, @bob]    # 最多 6 个，至少 1 个 approve
+  ├── Wait timer: 5 minutes                  # 强制等待
+  └── Deployment branches: main only         # 限制可部署分支
+```
+
+<v-click>
+
+- `Required reviewers`：UI 点 approve 才放行 job（最多 6 人）
+- `Wait timer`：0~43200 分钟（最大 30 天）
+- Environment secrets 优先级 > Repository > Organization
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Caching 双层 key
+
+```yaml
+- uses: actions/cache@v4
+  with:
+    path: |
+      ~/.pnpm-store
+      node_modules
+    key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+    restore-keys: |
+      ${{ runner.os }}-pnpm-                   # 前缀回退
+      ${{ runner.os }}-
+```
+
+```yaml
+# v4：分离 save / restore，控制 save 时机
+- uses: actions/cache/restore@v4
+  id: cache
+  with: { ... }
+
+- run: pnpm install
+- run: pnpm test
+
+- uses: actions/cache/save@v4
+  if: steps.cache.outputs.cache-hit != 'true' && success()
+  with: { ... }
+```
+
+<v-click>
+
+`restore-keys` 前缀回退：lockfile 变了仍能拿上次 cache 作基础，少量增量下载。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Concurrency：取消旧运行
+
+```yaml
+# 同一 PR 反复 push 时，自动取消上次 run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# 部署任务串行（同环境不并发）
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false        # 排队而非取消
+```
+
+<v-click>
+
+**`cancel-in-progress: true`** 适合 CI/test（节省 minutes）；**`false`** 适合 deploy（不能取消半截部署）。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# workflow_dispatch：人工触发
+
+```yaml
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "发布版本号"
+        required: true
+        type: string
+        default: "1.0.0"
+      environment:
+        type: choice
+        options: [dev, staging, prod]
+      deploy:
+        type: boolean
+        default: false
+      target_env:
+        type: environment            # 自动列出仓库 environments
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "v=${{ inputs.version }} env=${{ inputs.environment }}"
+```
+
+<v-click>
+
+UI **Actions > Run workflow** 按钮触发。**最多 10 个 input**（GitHub 硬限制）。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 性能优化
+
+<v-clicks>
+
+- **缓存 setup**：cache `~/.pnpm-store` / `~/.npm` / `~/.cargo`
+- **matrix 并行**：单 OS 测多版本时并发跑
+- **Composite Action 拆 setup**：每 workflow 第一步都跑的初始化封装复用
+- **artifacts 瘦身**：仅上传 `dist/`，不上传 `node_modules/`
+- **跳过非必要 trigger**：`paths: ['src/**']` 过滤 docs-only 改动
+- **`fail-fast: true`**：matrix 任一失败立即取消其它（默认）
+- **Concurrency cancel-in-progress**：PR 频繁 push 自动取消旧 run
+- **缓存 Docker 镜像**：`docker/build-push-action` + `cache-from: type=gha`
+- **复用 Action**：跨 workflow 抽 Composite Action 减少重复
+
+</v-clicks>
+
+---
+transition: slide-up
+---
+
 # vs GitLab CI/CD / Jenkins
 
 | 维度        | GitHub Actions             | GitLab CI/CD              | Jenkins             |
