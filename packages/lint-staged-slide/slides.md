@@ -17,7 +17,7 @@ mdc: true
 
 <br/>
 
-## lint-staged: 只检查该检查的 <sup>v15.x</sup>
+## lint-staged: 只检查该检查的 <sup>v17.x</sup>
 
 对暂存文件运行 lint，让每次提交又快又干净
 
@@ -1117,6 +1117,52 @@ h1 {
 lint-staged 还有 Node.js API，可以在代码里直接调用。
 
 适合做自定义工具集成或者脚手架。
+-->
+
+---
+transition: fade-out
+---
+
+# v17 升级要点
+
+v16 → v17 的破坏性变更
+
+<v-clicks>
+
+- **Node.js ≥ 22.22.1**（v16 还兼容 Node 20）—— 升级前先把 CI 镜像 + 同事机器升上去
+- **Git ≥ 2.32.0**（2021 年版本，基本不会卡住）
+- **`yaml` 依赖改为可选**：用 `.lintstagedrc.yaml` 的项目要 `pnpm add yaml`
+- **新增 `--hide-all` flag**：隐藏未暂存改动 + 未跟踪文件，给 Knip / depcheck 用
+- **CLI 解析器从 `commander` 换原生 `node:util.parseArgs`**：bundle 更小
+- **改用 `git update-index --again`** 替代 `git add <files>`：对 worktree / 自定义 index 更稳
+- **Bun runtime 全测试通过**：`bunx lint-staged` 可放心用
+
+</v-clicks>
+
+<div v-click text-xs class="mt-4">
+
+_配置里有手动 `git add` 的会触发 warning—— v17 起 lint-staged 自动入暂存，删掉即可_
+
+</div>
+
+<style>
+h1 {
+  background-color: #2B90B6;
+  background-image: linear-gradient(45deg, #4EC5D4 10%, #146b8c 20%);
+  background-size: 100%;
+  -webkit-background-clip: text;
+  -moz-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-text-fill-color: transparent;
+}
+</style>
+
+<!--
+v17 是个 major bump，要看清楚再升。
+
+最硬的限制是 Node 必须 22.22.1+，不少 CI 镜像还在 Node 20，得先升。
+
+最有用的新功能是 --hide-all，专门给扫死代码工具用。
 -->
 
 ---
