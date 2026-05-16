@@ -425,6 +425,412 @@ handleSubmit((vals) => {
 </v-click>
 
 ---
+transition: slide-up
+---
+
+# defineField vs useField
+
+```ts
+// 推荐：defineField（v4.10+）
+const [email, emailAttrs] = defineField("email", {
+  validateOnInput: true,        // 输入即校验
+  validateOnBlur: false,
+  validateOnChange: false,
+  validateOnModelUpdate: false,
+});
+```
+
+```vue
+<input v-model="email" v-bind="emailAttrs" />
+```
+
+```ts
+// 底层：useField（自己控事件）
+const { value, errors, handleChange, handleBlur } = useField("email", "required|email");
+```
+
+<v-click>
+
+`defineField` 返回 `[model, attrs]`——`v-model` 绑值，`v-bind` 自动绑校验事件。比手写 `@blur="handleBlur"` 等简洁。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 异步规则 + Debounce
+
+```ts
+import { useDebounceFn } from "@vueuse/core";
+
+const checkEmail = useDebounceFn(async (email: string) => {
+  const { exists } = await $fetch(`/api/check-email?email=${email}`);
+  return !exists;
+}, 500);
+
+defineRule("uniqueEmail", async (value: string) => {
+  if (!value) return true;
+  return (await checkEmail(value)) || "邮箱已被注册";
+});
+```
+
+<v-click>
+
+异步校验时 `isValidating: true`，submit 等校验完成。**性能注意**：debounce 500ms+ / 仅 blur 触发 / 服务端用专门「校验唯一性」端点（别用通用搜索 API）。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 完整 Zod 范例
+
+```ts
+const schema = toTypedSchema(
+  z.object({
+    email: z.string().email(),
+    password: z.string().min(8),
+    confirmPassword: z.string(),
+    age: z.coerce.number().int().min(18).max(120),
+    hobbies: z.array(z.string()).min(1, "至少选一个"),
+    address: z.object({
+      country: z.string(),
+      city: z.string().optional(),
+    }),
+    agreement: z.literal(true, {
+      errorMap: () => ({ message: "请同意条款" }),
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "两次密码不一致",
+    path: ["confirmPassword"],
+  })
+);
+```
+
+<v-click>
+
+`.refine()` 做跨字段校验，`path: ['confirmPassword']` 把错误归到该字段；提交时报错就在 confirmPassword 输入框下显示。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Yup vs Zod vs Valibot
+
+| 库 | min bundle | TS 支持 | 适合 |
+| --- | --- | --- | --- |
+| **Zod** | ~57KB | ★★★ TS-first | 主流首选；前后端共享 schema |
+| Yup | ~45KB | ★★ | 老项目 / 文档最多 |
+| Valibot | ~3KB | ★★★ | 移动端 / SDK 集成（bundle 敏感） |
+
+```ts
+// 三者 API 类似，导入 toTypedSchema 不同
+import { toTypedSchema } from "@vee-validate/zod";        // / yup / valibot
+import { z } from "zod";
+
+const schema = toTypedSchema(z.object({ /* ... */ }));
+```
+
+<v-click>
+
+新项目首选 **Zod**——TypeScript 反向推导最强，社区资源多。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# FieldArray 全 API
+
+```ts
+const {
+  fields,    // FieldEntry[]
+  push,      // (item) => void
+  prepend,   // (item) => void
+  insert,    // (idx, item) => void
+  remove,    // (idx) => void
+  swap,      // (a, b) => void
+  move,      // (oldIdx, newIdx) => void
+  replace,   // (newItems) => void
+  update,    // (idx, item) => void
+} = useFieldArray<Link>("links");
+```
+
+```vue
+<div v-for="(item, idx) in fields" :key="item.key">
+  <Field :name="`links[${idx}].url`" />
+  <button @click="remove(idx)">删除</button>
+  <button v-if="!item.isLast" @click="swap(idx, idx + 1)">↓</button>
+</div>
+<button @click="push({ url: '' })">+ 链接</button>
+```
+
+::: warning
+
+数组路径用方括号：`links[0].url` 才是数组路径；`links.0.url` 会被解析为对象。
+
+:::
+
+---
+transition: slide-up
+---
+
+# 嵌套 FieldArray
+
+```vue
+<FieldArrayItems name="groups" v-slot="{ fields: groups, push: pushGroup }">
+  <div v-for="(g, gi) in groups" :key="g.key">
+    <Field :name="`groups[${gi}].title`" />
+    <FieldArrayItems
+      :name="`groups[${gi}].links`"
+      v-slot="{ fields: links, push: pushLink, remove }"
+    >
+      <div v-for="(link, li) in links" :key="link.key">
+        <Field :name="`groups[${gi}].links[${li}].url`" />
+        <button @click="remove(li)">×</button>
+      </div>
+      <button @click="pushLink({ url: '' })">+ 链接</button>
+    </FieldArrayItems>
+  </div>
+  <button @click="pushGroup({ title: '', links: [] })">+ 分组</button>
+</FieldArrayItems>
+```
+
+<v-click>
+
+`<FieldArrayItems>` 是 v4.13+ 的声明式封装。嵌套场景用它比写两层 `useFieldArray` composable 更直观。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 多步向导 keepValuesOnUnmount
+
+```vue
+<script setup lang="ts">
+const step = ref(1);
+
+const { handleSubmit, values, defineField } = useForm({
+  validationSchema: stepSchemas[step.value - 1],
+  keepValuesOnUnmount: true,        // 关键：切 step 时不丢值
+});
+
+const onFinalSubmit = handleSubmit((vals) => {
+  // vals 包含所有 step 的字段
+  api.post("/orders", vals);
+});
+</script>
+
+<template>
+  <Step1 v-if="step === 1" @next="step = 2" />
+  <Step2 v-if="step === 2" @next="step = 3" @back="step = 1" />
+  <Step3 v-if="step === 3" @submit="onFinalSubmit" @back="step = 2" />
+</template>
+```
+
+<v-click>
+
+`keepValuesOnUnmount: true` 让上一步字段 unmount 后仍保留值在 form state——最终 submit 拿完整数据。**Wizard 表单标配**。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 服务端错误回填
+
+```ts
+const onSubmit = handleSubmit(async (values, { setErrors, resetForm }) => {
+  try {
+    await api.post("/users", values);
+    resetForm();
+  } catch (err) {
+    if (err.response?.status === 422) {
+      // 服务端返回 { errors: { email: '已注册', age: '...' } }
+      setErrors(err.response.data.errors);
+    } else {
+      ElMessage.error("提交失败");
+    }
+  }
+});
+```
+
+<v-click>
+
+`setErrors` 设的错误**不影响 schema-level meta.valid**——vee-validate 把它当外部错误。用户改字段后错误自动清除（schema 重新校验通过即清）。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 与组件库集成
+
+```vue
+<!-- Element Plus -->
+<Field name="role" v-slot="{ field, errors }">
+  <el-form-item :error="errors[0]">
+    <el-select v-bind="field">
+      <el-option value="admin" label="管理员" />
+    </el-select>
+  </el-form-item>
+</Field>
+```
+
+```vue
+<!-- 或 defineField -->
+<script setup>
+const [role, roleAttrs] = defineField("role");
+</script>
+
+<template>
+  <el-form-item :error="errors.role">
+    <el-select v-model="role" v-bind="roleAttrs">
+      <el-option value="admin" label="管理员" />
+    </el-select>
+  </el-form-item>
+</template>
+```
+
+<v-click>
+
+关键：`v-model` 绑值 + `v-bind="attrs"` 绑事件。Naive UI / Ant Design Vue 同理。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# Devtools
+
+```bash
+pnpm add -D @vee-validate/devtools
+```
+
+```ts
+// main.ts
+import { devtools } from "@vee-validate/devtools";
+
+if (import.meta.env.DEV) devtools();  // 仅 dev 启用
+```
+
+<v-clicks>
+
+Vue DevTools 多出 "vee-validate" 标签：
+
+- 列出所有 `useForm` 实例
+- 展开看 `values` / `errors` / `meta`
+- 实时刷新（输入即更新）
+- 一键 reset 表单
+
+调试复杂跨字段校验场景必备。
+
+</v-clicks>
+
+---
+transition: slide-up
+---
+
+# 性能优化
+
+<v-clicks>
+
+- **Schema 模块级常量**：`const SCHEMA = toTypedSchema(...)` 而非每次渲染新建
+- **延迟校验**：`validateOnInput: false`，仅 submit 触发（适合大表单）
+- **服务端前置**：复杂业务校验放服务端，前端只校验单字段格式
+- **debounce 异步规则**：500ms+ + 仅 blur 触发
+- **虚拟滚动 + FieldArray**：>100 字段时配 `vue-virtual-scroller`
+- **避免不必要 watch**：deep watch values 大对象慢；按字段精准 watch
+
+</v-clicks>
+
+---
+transition: slide-up
+---
+
+# 测试 (Vitest)
+
+```ts
+import { mount, flushPromises } from "@vue/test-utils";
+import LoginForm from "./LoginForm.vue";
+
+it("校验失败时不调用 submit", async () => {
+  const wrapper = mount(LoginForm);
+
+  await wrapper.find("input[name=email]").setValue("invalid");
+  await wrapper.find("form").trigger("submit");
+  await flushPromises();           // 等异步校验结束
+
+  expect(wrapper.text()).toContain("邮箱格式不正确");
+  expect(submitHandler).not.toHaveBeenCalled();
+});
+```
+
+<v-click>
+
+**关键**：触发 submit 后**必须 `await flushPromises()`**，否则错误消息和 `errors` 还没就绪，断言会失败。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 触发时机决策表
+
+| 场景 | 推荐触发 |
+| --- | --- |
+| 邮箱、用户名格式 | `validateOnBlur`（输入完才校验） |
+| 密码强度提示 | `validateOnInput`（实时反馈） |
+| 数字范围 | `validateOnChange` |
+| 异步唯一性 | `validateOnBlur` + debounce |
+| 跨字段依赖（二次密码） | 任一字段改变都校验，`validateOnInput` |
+| 整表大型校验 | 仅 submit 校验，`validateOnInput: false` |
+
+```ts
+configure({
+  validateOnInput: false,
+  validateOnBlur: true,
+  validateOnChange: false,
+  validateOnModelUpdate: true,
+});
+```
+
+<v-click>
+
+全局默认 + 字段级覆盖。**输入即时校验**虽然及时，但太多会打扰用户；多数场景 `validateOnBlur` 是平衡点。
+
+</v-click>
+
+---
+transition: slide-up
+---
+
+# 常见陷阱
+
+<v-clicks>
+
+- **`useField` 单独用**：v4 推荐 `defineField`；`useField` 在 `useForm` 外不参与 submit
+- **数组路径**：`links[0].url` 是数组路径，`links.0.url` 会被解析为对象
+- **Yup `shape` 多余**：v1+ 直接 `yup.object({...})`，老文档 `.shape({...})` 仍可但没必要
+- **Zod `refine` 缺值不触发**：表单空值 refine 拿 undefined，建议放 `superRefine` 加提前 return
+- **`setErrors` 不影响 meta.valid**：服务端错误属于外部错误，schema 没失败仍 valid
+- **TypeScript 类型丢失**：用 `toTypedSchema()` 而非裸 schema，才能反向推导 values 类型
+
+</v-clicks>
+
+---
 layout: center
 class: text-center
 ---
