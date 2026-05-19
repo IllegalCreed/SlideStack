@@ -114,10 +114,8 @@ transition: slide-up
 |---|---|---|
 | **1.0** | 2021.6 | 首个稳定版，确立 Signals + JSX 范式 |
 | **1.3** | 2022.1 | Suspense / Resource 稳定 |
-| **1.4** | 2022.5 | createSelector / startTransition |
 | **1.5** | 2022.9 | createDeferred、useTransition |
 | **1.7** | 2023.5 | 大量 SSR 优化（streaming、islands） |
-| **1.8** | 2023.10 | hydration mismatch 修复 |
 | **1.9** | 2024.9 | 1.x 收官版，TypeScript / SSR / hydration polishing |
 | **2.0** | 开发中 | @solidjs/signals 新核心 / concurrent transitions |
 
@@ -133,7 +131,7 @@ transition: slide-up
 
 # 心智模型：组件只运行一次
 
-**Solid 的根本差异：组件函数只跑一次，建立响应式图，之后只更新真正订阅了变化信号的 DOM 节点**
+组件函数只跑一次建立响应式图，之后只更新订阅了变化信号的 DOM 节点
 
 ```tsx
 function Counter() {
@@ -149,14 +147,10 @@ function Counter() {
 
 <v-click>
 
-对比 React：
-
 | 维度 | Solid | React 19 |
 |---|---|---|
 | 组件重跑 | **一次** | 每次 state 变化 |
-| 状态原语 | `createSignal` | `useState` |
 | 响应式 | Signals（自动追踪） | hooks（手动依赖） |
-| Virtual DOM | **无** | 有 |
 | 更新粒度 | 单个 textnode / 属性 | 整组件函数 |
 
 </v-click>
@@ -174,9 +168,6 @@ pnpm create solid
 # 极简 Vite + Solid SPA
 pnpm create vite@latest my-app -- --template solid-ts
 
-# degit 拉模板
-npx degit solidjs/templates/ts my-app
-
 cd my-app && pnpm install && pnpm dev
 ```
 
@@ -186,11 +177,8 @@ cd my-app && pnpm install && pnpm dev
 my-app/                       # SolidStart 默认结构
 ├── src/
 │   ├── app.tsx               # Router + Suspense
-│   ├── entry-client.tsx
-│   ├── entry-server.tsx
 │   ├── routes/               # 文件路由根
 │   │   ├── index.tsx         # /
-│   │   ├── about.tsx         # /about
 │   │   ├── [id].tsx          # /:id
 │   │   └── api/hello.ts      # /api/hello
 │   └── components/
@@ -202,7 +190,7 @@ my-app/                       # SolidStart 默认结构
 
 <v-click>
 
-要求 Node 18.18+（推荐 20+）。浏览器打开 `http://localhost:3000`。
+要求 Node 18.18+（推荐 20+）。
 
 </v-click>
 
@@ -217,13 +205,8 @@ import { createSignal } from 'solid-js'
 
 function HelloButton(props: { label: string }) {
   const [count, setCount] = createSignal(0)
-
-  function onClick() {
-    setCount(c => c + 1)
-  }
-
   return (
-    <button class="hello-btn" onClick={onClick}>
+    <button class="hello-btn" onClick={() => setCount(c => c + 1)}>
       {props.label} ({count()})
     </button>
   )
@@ -231,8 +214,6 @@ function HelloButton(props: { label: string }) {
 ```
 
 <v-click>
-
-**关键点**：
 
 - 组件 = 返回 JSX 的普通函数，**只跑一次**
 - `props.label` 访问 props（不能解构）
@@ -250,19 +231,17 @@ transition: slide-up
 ```tsx
 function App() {
   let ref: HTMLDivElement | undefined
-  const [active, setActive] = createSignal(true)
-
   return (
     <div
-      ref={ref}                                    /* 5. ref 是赋值 */
-      class="card"                                 /* 1. class 不是 className */
-      classList={{ active: active() }}             /* 4. 推荐 classList */
-      style="color:red"                            /* 3. style 可以是字符串 */
-      onClick={() => setActive(a => !a)}           /* 2. 委托事件 */
-      on:click={handler}                           /* 6. on: 强制原生事件 */
+      ref={ref}                              /* 5. ref 是赋值 */
+      class="card"                           /* 1. class 不是 className */
+      classList={{ active: active() }}       /* 4. 推荐 classList */
+      style="color:red"                      /* 3. style 可以是字符串 */
+      onClick={handler}                      /* 2. 委托事件 */
+      on:click={handler}                     /* 6. on: 强制原生事件 */
     >
-      <label for="x">Name</label>                  {/* 7. for 不是 htmlFor */}
-      <input use:autofocus />                      {/* 8. use: 自定义指令 */}
+      <label for="x">Name</label>            {/* 7. for 不是 htmlFor */}
+      <input use:autofocus />                {/* 8. use: 自定义指令 */}
     </div>
   )
 }
@@ -270,7 +249,7 @@ function App() {
 
 <v-click>
 
-**第 9 条**：列表用 `<For>` / `<Index>`，条件用 `<Show>` / `<Switch>`，不要用 `.map()` / `&&`。
+**第 9 条**：列表用 `<For>` / `<Index>`，条件用 `<Show>` / `<Switch>`，不用 `.map()` / `&&`。
 
 </v-click>
 
@@ -296,14 +275,9 @@ setCount(c => c + 1)            // 函数式更新，count() === 6
 const [arr, setArr] = createSignal([1, 2, 3], {
   equals: (prev, next) => prev.length === next.length,
 })
-
-// 永远更新（即使值相等）
-const [tick, setTick] = createSignal(0, { equals: false })
 ```
 
 <v-click>
-
-**核心机制**：
 
 - `count()` 在 reactive scope（effect / memo / JSX）内调用 → 自动订阅
 - `setCount()` 触发所有订阅者重跑
@@ -339,11 +313,8 @@ const expensive = createMemo(
 
 <v-click>
 
-**何时用 createMemo**：
-
-- 派生值复用：多处用同一个计算结果
-- 昂贵计算：只有依赖变化才重算
-- 维持引用稳定性：传给子组件作 prop，避免不必要订阅
+- 派生值复用、昂贵计算缓存
+- 维持引用稳定性：传给子组件 prop，避免不必要订阅
 
 </v-click>
 
@@ -362,12 +333,6 @@ createEffect(() => {
   console.log('count =', count())   // 自动订阅
 })
 
-// 上次值
-createEffect<number>((prev) => {
-  console.log(prev, '→', count())
-  return count()
-}, 0)
-
 // 异步清理
 createEffect(() => {
   const id = setInterval(() => console.log(count()), 1000)
@@ -377,11 +342,7 @@ createEffect(() => {
 
 <v-click>
 
-**与 React useEffect 三大差异**：
-
-- 无依赖数组——自动追踪
-- 立即同步执行首次（不在 commit 后）
-- 清理函数用 `onCleanup`（可任意层调用）
+**与 React useEffect 差异**：无依赖数组（自动追踪）、立即同步执行、清理用 `onCleanup`
 
 </v-click>
 
@@ -450,12 +411,8 @@ function Greet(props: { name: string }) {
 import { splitProps, mergeProps } from 'solid-js'
 
 function Btn(props: ButtonProps) {
-  // 拆分：本地用的 + 透传给原生标签
   const [local, others] = splitProps(props, ['label', 'variant'])
-
-  // 默认值
   const merged = mergeProps({ variant: 'primary' as const }, local)
-
   return <button {...others} class={`btn-${merged.variant}`}>{merged.label}</button>
 }
 ```
@@ -566,20 +523,14 @@ transition: slide-up
 # 控制流：&lt;For&gt; vs &lt;Index&gt;
 
 ```tsx
-import { For, Index } from 'solid-js'
-
-// <For>：按对象身份（id）复用 DOM
+// <For>：按对象身份（id）复用 DOM，item 静态，index 是 accessor
 <For each={todos()} fallback={<p>暂无</p>}>
-  {(todo, index) => (
-    <li>#{index()} - {todo.title}</li>     {/* index 是 accessor */}
-  )}
+  {(todo, index) => <li>#{index()} - {todo.title}</li>}
 </For>
 
-// <Index>：按位置复用，item 是 accessor
+// <Index>：按位置复用，item 是 accessor，index 是普通 number
 <Index each={frames()}>
-  {(frame, index) => (
-    <span data-i={index}>{frame()}</span>  {/* frame 是 accessor */}
-  )}
+  {(frame, index) => <span data-i={index}>{frame()}</span>}
 </Index>
 ```
 
@@ -588,8 +539,6 @@ import { For, Index } from 'solid-js'
 | 维度 | `<For>` | `<Index>` |
 |---|---|---|
 | 映射依据 | 数组元素**引用** | 数组**位置（index）** |
-| 元素 | 静态值 | accessor `() => T` |
-| index | accessor | 普通 number |
 | 适合 | 列表项有稳定 id | 固定长度 / 替换值 |
 
 </v-click>
@@ -688,11 +637,7 @@ function Modal(props: { open: boolean; onClose: () => void }) {
 
 <v-click>
 
-**关键 props**：
-
-- `mount`：挂载到哪个 DOM（默认 `document.body`）
-- `useShadow`：用 Shadow DOM 包裹
-- `isSVG`：渲染到 SVG 上下文
+**关键 props**：`mount`（默认 `document.body`）、`useShadow`（Shadow DOM）、`isSVG`
 
 </v-click>
 
@@ -714,15 +659,10 @@ function PostList() {
 
   return (
     <ErrorBoundary fallback={(err, reset) => (
-      <div>
-        Error: {err.message}
-        <button onClick={reset}>Retry</button>
-      </div>
+      <div>Error: {err.message} <button onClick={reset}>Retry</button></div>
     )}>
       <Suspense fallback={<Spinner />}>
-        <For each={posts()}>
-          {(post) => <li>{post.title}</li>}
-        </For>
+        <For each={posts()}>{(post) => <li>{post.title}</li>}</For>
       </Suspense>
     </ErrorBoundary>
   )
@@ -745,16 +685,8 @@ transition: slide-up
 import { onMount, onCleanup } from 'solid-js'
 
 function Component() {
-  onMount(() => {
-    // 首次渲染后跑一次（client only），可访问 DOM
-    console.log('mounted')
-  })
-
-  onCleanup(() => {
-    // scope 销毁时跑
-    console.log('unmounted')
-  })
-
+  onMount(() => console.log('mounted'))     // 首次渲染后跑一次（client only）
+  onCleanup(() => console.log('unmounted')) // scope 销毁时跑
   return <div>Hello</div>
 }
 ```
@@ -766,15 +698,10 @@ function Component() {
 ```tsx
 // React: useEffect(() => { ... }, [count])
 // Solid 等价：
-createEffect(() => {
-  console.log('count changed to', count())
-})
+createEffect(() => console.log('count changed to', count()))
 
 // 跳过首次执行
-import { on, createEffect } from 'solid-js'
-createEffect(on(count, (c, prev) => {
-  console.log(prev, '→', c)
-}, { defer: true }))
+createEffect(on(count, (c, prev) => console.log(prev, '→', c), { defer: true }))
 ```
 
 </v-click>
@@ -788,11 +715,7 @@ transition: slide-up
 ```tsx
 import { createContext, useContext, createSignal, JSX } from 'solid-js'
 
-interface Theme {
-  mode: 'light' | 'dark'
-  toggle: () => void
-}
-
+interface Theme { mode: 'light' | 'dark'; toggle: () => void }
 const ThemeContext = createContext<Theme>()
 
 export function ThemeProvider(props: { children: JSX.Element }) {
@@ -801,11 +724,7 @@ export function ThemeProvider(props: { children: JSX.Element }) {
     get mode() { return mode() },       // getter 保持响应性
     toggle: () => setMode(m => m === 'light' ? 'dark' : 'light'),
   }
-  return (
-    <ThemeContext.Provider value={value}>
-      {props.children}
-    </ThemeContext.Provider>
-  )
+  return <ThemeContext.Provider value={value}>{props.children}</ThemeContext.Provider>
 }
 
 export function useTheme() {
@@ -826,30 +745,20 @@ import { onMount } from 'solid-js'
 
 function FocusInput() {
   let inputRef: HTMLInputElement | undefined
-
-  onMount(() => {
-    inputRef?.focus()
-  })
-
+  onMount(() => inputRef?.focus())
   return <input ref={inputRef} />
 }
 
 // 回调形式（更灵活）
 function FocusInput2() {
-  return (
-    <input ref={(el) => {
-      onMount(() => el.focus())
-    }} />
-  )
+  return <input ref={(el) => onMount(() => el.focus())} />
 }
 ```
 
 <v-click>
 
-**关键差异**：
-
-- Solid 在编译时把 `ref={inputRef}` 改写成 `(val) => inputRef = val`
-- 赋值发生在 **DOM 节点插入文档之前**——`onMount` 之前 ref 已经有值
+- 编译时把 `ref={inputRef}` 改写成 `(val) => inputRef = val`
+- 赋值发生在 DOM 插入文档前——`onMount` 时 ref 已就绪
 - 不是 React 的 `useRef`——Solid 的 ref 就是普通变量
 
 </v-click>
@@ -1134,7 +1043,7 @@ transition: slide-up
 # Router：参数 + 导航
 
 ```tsx
-import { A, useNavigate, useParams, useSearchParams, useLocation } from '@solidjs/router'
+import { A, useNavigate, useParams, useSearchParams } from '@solidjs/router'
 
 function Nav() {
   const navigate = useNavigate()
@@ -1142,9 +1051,7 @@ function Nav() {
     <nav>
       <A href="/" end>Home</A>                              {/* end → 严格匹配 */}
       <A href="/about" activeClass="active">About</A>
-      <button onClick={() => navigate('/about', { replace: true })}>
-        Go About
-      </button>
+      <button onClick={() => navigate('/about', { replace: true })}>Go</button>
     </nav>
   )
 }
@@ -1152,12 +1059,9 @@ function Nav() {
 function UserDetail() {
   const params = useParams<{ id: string }>()
   const [search, setSearch] = useSearchParams<{ tab?: string }>()
-  const location = useLocation()
-
   return (
     <>
-      <h1>User {params.id}</h1>
-      <p>Tab: {search.tab}</p>
+      <h1>User {params.id} (Tab: {search.tab})</h1>
       <button onClick={() => setSearch({ tab: 'posts' })}>Posts</button>
     </>
   )
@@ -1187,12 +1091,7 @@ const About = lazy(() => import('./About'))
 </Router>
 
 function Layout(props) {
-  return (
-    <>
-      <Nav />
-      <main>{props.children}</main>
-    </>
-  )
+  return <><Nav /><main>{props.children}</main></>
 }
 ```
 
@@ -1241,13 +1140,9 @@ transition: slide-up
 
 | 类型 | 用途 |
 |---|---|
-| `Accessor<T>` | `() => T`（signal getter） |
-| `Setter<T>` | signal setter |
-| `Signal<T>` | `[Accessor<T>, Setter<T>]` 元组 |
-| `Component<P>` | 函数组件 |
-| `ParentComponent<P>` | 接收 children 的组件 |
-| `FlowComponent<P, T>` | children 是函数 |
-| `ParentProps<P>` | 给 P 加 children: JSX.Element |
+| `Accessor<T>` / `Setter<T>` / `Signal<T>` | signal getter / setter / 元组 |
+| `Component<P>` / `ParentComponent<P>` | 函数组件 / 接收 children |
+| `ParentProps<P>` | 给 P 加 `children: JSX.Element` |
 | `Resource<T>` | `() => T` + loading/error/state |
 | `JSX.Element` | JSX 表达式合法类型 |
 | `JSX.HTMLAttributes<T>` | 原生 HTML 属性 |
@@ -1265,16 +1160,11 @@ Solid 用 babel-preset-solid 把 JSX 编译成直接 DOM 操作：
 // 源码
 function App() {
   const [count, setCount] = createSignal(0)
-  return (
-    <button onClick={() => setCount(c => c + 1)}>
-      Count: {count()}
-    </button>
-  )
+  return <button onClick={() => setCount(c => c + 1)}>Count: {count()}</button>
 }
 
 // 编译后（简化）
 const _tmpl$ = template(`<button>Count: `)
-
 function App() {
   const [count, setCount] = createSignal(0)
   return (() => {
@@ -1288,7 +1178,7 @@ function App() {
 
 <v-click>
 
-**关键优化**：静态 HTML 模板提到顶层 → cloneNode 复用 → 细粒度更新点 → 事件委托 → 无 vnode diff。
+**优化**：静态模板提顶层 → cloneNode 复用 → 细粒度更新点 → 事件委托 → 无 vnode diff
 
 </v-click>
 
@@ -1388,15 +1278,11 @@ transition: slide-up
 |---|---|---|
 | 组件重跑 | **一次** | 每次 state 变化 |
 | 响应式 | Signals（细粒度） | hooks + reconcile |
-| 状态原语 | `createSignal` | `useState` |
-| 派生 | `createMemo` | `useMemo`（Compiler 后自动） |
 | 异步 | `createResource` | `use(promise)` / RSC |
 | Memoization | 内置 | 需 React.memo / Compiler |
 | Virtual DOM | **无** | 有（Fiber） |
-| Bundle | ~7 KB | ~45 KB |
-| 性能 | 顶级 | 中（Compiler 后接近 Solid） |
-| 生态 | 小 | 最大 |
-| 元框架 | SolidStart | Next.js / Remix |
+| Bundle / 性能 | ~7 KB / 顶级 | ~45 KB / 中 |
+| 生态 / 元框架 | 小 / SolidStart | 最大 / Next.js |
 
 <v-click>
 
@@ -1416,9 +1302,7 @@ transition: slide-up
 | 响应式 | Signals（函数式） | Proxy（对象式） |
 | 编译策略 | JSX → DOM 操作 | 模板 → vnode + patchFlag |
 | Virtual DOM | **无** | 有（小核） |
-| 状态原语 | `createSignal` getter | `ref().value` |
-| 派生 | `createMemo` | `computed` |
-| 副作用 | `createEffect` | `watchEffect` |
+| 派生 / 副作用 | `createMemo` / `createEffect` | `computed` / `watchEffect` |
 | 学习曲线 | 中等（要换思维） | 平缓 |
 
 <v-click>
@@ -1438,15 +1322,11 @@ transition: slide-up
 |---|---|---|
 | 模板 | JSX | `.svelte` SFC |
 | 编译策略 | JSX → DOM 操作 | SFC → 极薄运行时 |
-| 响应式 | Signals（运行时 + 编译辅助） | Runes（编译时） |
+| 响应式 | Signals | Runes（编译时） |
 | Virtual DOM | **无** | **无** |
-| 体积 | ~7 KB | ~5 KB |
-| 元框架 | SolidStart | SvelteKit |
-| 心智契合度 | React 思维 | HTML + 编译魔法 |
+| 体积 / 元框架 | ~7 KB / SolidStart | ~5 KB / SvelteKit |
 
 <v-click>
-
-**怎么选**：
 
 - **Solid**：React JSX 偏好、性能至上
 - **Svelte**：HTML 偏好、体积最小、SvelteKit 文档好

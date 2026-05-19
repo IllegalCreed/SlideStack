@@ -110,19 +110,17 @@ transition: slide-up
 
 | 版本 | 时间 | 关键特性 |
 |---|---|---|
-| **1.0** | 2015.10 | 首个稳定版 |
 | **2.0** | 2016.9 | Virtual DOM、SSR |
-| **2.7** | 2022.7 | Composition API 移植到 Vue 2 |
-| **3.0** | 2020.9 | 重写：Proxy 响应式、Fragments、Teleport、Suspense |
+| **3.0** | 2020.9 | Proxy / Fragments / Teleport / Suspense |
 | **3.2** | 2021.8 | `<script setup>` 稳定 |
-| **3.3** | 2023.5 | `defineEmits` 短签名、Generic Components |
-| **3.4** | 2023.12 | `defineModel` 稳定、`v-bind` 同名简写 |
-| **3.5** | 2024.9 | 响应式 props 解构、`useId` / `useTemplateRef` / `onWatcherCleanup`、Lazy Hydration |
-| **Vapor** | 孵化中 | 跳过 VDOM 编译输出（仍在 `vapor-alpha-branch`） |
+| **3.3** | 2023.5 | Generic Components |
+| **3.4** | 2023.12 | `defineModel` 稳定 |
+| **3.5** | 2024.9 | 响应式 props 解构 / `useId` / Lazy Hydration |
+| **Vapor** | 孵化中 | 跳过 VDOM 编译输出 |
 
 <v-click>
 
-**今天主要讲 3.5**。Vapor 还没进稳定版，正式生产请用标准 `<script setup>`。
+**今天主要讲 3.5**。Vapor 仍在 alpha，生产请用标准 `<script setup>`。
 
 </v-click>
 
@@ -206,12 +204,9 @@ transition: slide-up
 <!-- HelloButton.vue -->
 <script setup lang="ts">
 import { ref } from 'vue'
-
 const props = defineProps<{ label: string }>()
 const emit = defineEmits<{ click: [ts: number] }>()
-
 const count = ref(0)
-
 function onClick() {
   count.value++
   emit('click', Date.now())
@@ -229,7 +224,7 @@ button { padding: 8px 16px; background: #41b883; color: white; }
 
 <v-click>
 
-三段式：`<template>` + `<script setup>` + `<style scoped>`。`scoped` 会给 DOM 加 `data-v-xxx`，CSS 只影响当前组件。
+三段式：`<template>` + `<script setup>` + `<style scoped>`。`scoped` 给 DOM 加 `data-v-xxx`，CSS 只影响当前组件。
 
 </v-click>
 
@@ -247,22 +242,13 @@ transition: slide-up
 const props = defineProps<{ title: string }>()
 const emit = defineEmits<{ close: [] }>()
 
-// 暴露给父组件 ref
+// 暴露给父组件 / 选项 / 类型化 slots
 defineExpose({ greet })
-
-// 等价 Options API 顶层选项
 defineOptions({ name: 'MyComponent', inheritAttrs: false })
+defineSlots<{ default(props: { item: Item }): any }>()
 
-// 类型化 slots
-defineSlots<{
-  default(props: { item: Item }): any
-  header(): any
-}>()
-
-// 双向绑定（3.4+）
+// 双向绑定（3.4+） / 3.5+ 模板 ref + 唯一 id
 const model = defineModel<string>({ required: true })
-
-// 3.5+ 模板 ref + 唯一 id
 const input = useTemplateRef<HTMLInputElement>('input')
 const id = useId()
 </script>
@@ -308,23 +294,14 @@ transition: slide-up
 
 | 维度 | `v-if` | `v-show` |
 |---|---|---|
-| DOM 存在 | 条件 true 才挂 | 始终存在 |
+| DOM 存在 | true 才挂 | 始终存在 |
 | 切换开销 | 高（mount/unmount） | 低（CSS toggle） |
-| 子组件生命周期 | 每次跑 | 不重复跑 |
-| `<template>` 多元素 | 支持 | 不支持 |
 | 适合 | 不频繁切换 | 频繁切换 |
 
 <v-click>
 
-> 经验：进入条件后不再切回的用 `v-if`；像 tooltip / dropdown 频繁开关用 `v-show`。
-
-</v-click>
-
-<v-click>
-
 ```vue
-<!-- v-for 和 v-if 不能同元素：Vue 3 中 v-if 优先级更高 -->
-<!-- ❌ -->
+<!-- ❌ v-for + v-if 同元素：Vue 3 中 v-if 优先 -->
 <li v-for="item in items" v-if="item.active" :key="item.id" />
 
 <!-- ✅ 推荐：computed 过滤 -->
@@ -345,18 +322,14 @@ transition: slide-up
 # 响应式：ref vs reactive
 
 ```ts
-import { ref, reactive } from 'vue'
-
 // ref：单值 + 对象都用
 const count = ref(0)
 const user = ref<{ name: string }>({ name: 'Alice' })
-count.value++                    // 修改要 .value
-console.log(count.value)         // 模板内自动 unwrap
+count.value++                    // 修改要 .value（模板内自动 unwrap）
 
 // reactive：对象深响应（Proxy）
 const state = reactive({ count: 0, user: { age: 30 } })
-state.count++                    // 直接改，无 .value
-state.user.age = 31
+state.count++
 ```
 
 <v-click>
@@ -364,12 +337,9 @@ state.user.age = 31
 **官方推荐优先用 `ref`**：
 
 ```ts
-// ❌ reactive 解构 → 失去响应性
+// ❌ reactive 解构 / 替换整体都失去响应
 const { count } = reactive({ count: 0 })
-
-// ❌ 替换整体 → 旧引用失效
-let s = reactive({ a: 1 })
-s = reactive({ a: 2 })
+let s = reactive({ a: 1 }); s = reactive({ a: 2 })
 
 // ✅ ref 永远安全：解构、跨函数、替换都不出问题
 const count = ref(0)
@@ -419,24 +389,13 @@ transition: slide-up
 # watch vs watchEffect
 
 ```ts
-import { watch, watchEffect } from 'vue'
-
 // watch：显式指定源 + 拿到 oldValue
 watch(count, (newVal, oldVal) => console.log(oldVal, '→', newVal))
-
 // 监听 getter（reactive 内部字段必须用）
 watch(() => state.user.age, (age) => console.log('age', age))
 
-// 监听多个
-watch([count, () => state.user.age], ([c, a]) => { /* ... */ })
-
-// 选项
-watch(count, fn, {
-  immediate: true,   // 立刻跑一次
-  deep: true,        // 深度
-  flush: 'post',     // 'pre' | 'post'（DOM 更新后）| 'sync'
-  once: true,        // 3.4+
-})
+// 选项：immediate / deep / flush 'pre'|'post'|'sync' / once (3.4+)
+watch(count, fn, { immediate: true, flush: 'post' })
 
 // watchEffect：自动追踪
 watchEffect(() => console.log(count.value, userId.value))
@@ -446,10 +405,9 @@ watchEffect(() => console.log(count.value, userId.value))
 
 | 维度 | `watch` | `watchEffect` |
 |---|---|---|
-| 依赖 | 显式 | 自动追踪函数内 ref |
+| 依赖 | 显式 | 自动追踪 |
 | 首次执行 | 默认懒 | 立即 |
 | oldValue | 有 | 没有 |
-| 适合 | 响应特定变化 | 跟踪当前状态做副作用 |
 
 </v-click>
 
@@ -507,22 +465,13 @@ import {
   onBeforeUpdate, onUpdated,
   onBeforeUnmount, onUnmounted,
   onErrorCaptured,
-  onActivated, onDeactivated,    // KeepAlive 缓存切换
-  onServerPrefetch,              // SSR 预取
+  onActivated, onDeactivated,    // KeepAlive
+  onServerPrefetch,              // SSR
 } from 'vue'
 
-onMounted(() => {
-  // DOM 已渲染（首次），可访问 ref 引用的元素
-})
-
-onUnmounted(() => {
-  // 清理：定时器、事件监听、WebSocket
-})
-
-onErrorCaptured((err, instance, info) => {
-  console.error(err)
-  return false   // 阻止冒泡
-})
+onMounted(() => { /* DOM 已渲染，可访问 ref 元素 */ })
+onUnmounted(() => { /* 清理：定时器 / 事件 / WebSocket */ })
+onErrorCaptured((err) => { console.error(err); return false })
 </script>
 ```
 
@@ -541,13 +490,8 @@ transition: slide-up
 ```vue
 <script setup lang="ts">
 import { useTemplateRef, onMounted } from 'vue'
-
-// 新风格：字符串名 + 类型推导
 const input = useTemplateRef<HTMLInputElement>('input-el')
-
-onMounted(() => {
-  input.value?.focus()
-})
+onMounted(() => input.value?.focus())
 </script>
 
 <template>
@@ -564,19 +508,13 @@ const inputEl = ref<HTMLInputElement | null>(null)
 </script>
 <template>
   <input ref="inputEl" />
+
+  <!-- v-for 内多个 ref → 数组 -->
+  <li v-for="item in items" :key="item.id" ref="itemRefs" />
 </template>
 ```
 
 `useTemplateRef` 解决了 dynamic ref 名字、字符串与变量名解耦。
-
-</v-click>
-
-<v-click>
-
-```vue
-<!-- v-for 内多个 ref → 数组 -->
-<li v-for="item in items" :key="item.id" ref="itemRefs">{{ item.name }}</li>
-```
 
 </v-click>
 
@@ -707,35 +645,25 @@ transition: slide-up
 
 ```vue
 <template>
-  <!-- .lazy：blur 时才同步（默认是 input 事件） -->
-  <input v-model.lazy="text" />
-
-  <!-- .number：自动转 number -->
-  <input v-model.number="age" type="number" />
-
-  <!-- .trim：自动去首尾空格 -->
-  <input v-model.trim="username" />
-
-  <!-- 组合 -->
-  <input v-model.lazy.trim="username" />
+  <input v-model.lazy="text" />        <!-- blur 时才同步 -->
+  <input v-model.number="age" />       <!-- 自动转 number -->
+  <input v-model.trim="username" />    <!-- 去首尾空格 -->
+  <input v-model.lazy.trim="username" /> <!-- 组合 -->
 </template>
 ```
 
 <v-click>
 
-**checkbox 多选 → 数组**：
-
 ```vue
+<!-- checkbox 多选 → 数组 -->
 <input type="checkbox" value="apple" v-model="fruits" />
-<input type="checkbox" value="banana" v-model="fruits" />
-<!-- fruits = ['apple', 'banana'] -->
+<!-- fruits = ['apple', ...] -->
 ```
 
-**自定义 defineModel 修饰符（3.4+）**：
-
 ```ts
+// 自定义 defineModel 修饰符（3.4+）
 const [model, modifiers] = defineModel<string>({
-  set: (v) => modifiers.capitalize ? v.charAt(0).toUpperCase() + v.slice(1) : v,
+  set: (v) => modifiers.capitalize ? v[0].toUpperCase() + v.slice(1) : v,
 })
 ```
 
@@ -752,22 +680,13 @@ transition: slide-up
 ```vue
 <!-- 顶层 -->
 <script setup lang="ts">
-import { provide, ref, readonly } from 'vue'
-
 const theme = ref<'light' | 'dark'>('light')
-
 provide('theme', readonly(theme))   // 套 readonly 强制单向
 provide('toggleTheme', () => {
   theme.value = theme.value === 'light' ? 'dark' : 'light'
 })
-</script>
-```
 
-```vue
 <!-- 任意后代 -->
-<script setup lang="ts">
-import { inject } from 'vue'
-
 const theme = inject<Ref<'light' | 'dark'>>('theme')
 const toggle = inject<() => void>('toggleTheme')
 </script>
@@ -865,26 +784,14 @@ transition: slide-up
 
 ```vue
 <template>
-  <!-- 对象语法 -->
+  <!-- Class：对象 / 数组 / 与静态共存 -->
   <div :class="{ active: isActive, error: hasError }" />
-
-  <!-- 数组语法 -->
   <div :class="['base', cls, { active: isActive }]" />
-
-  <!-- 与静态 class 共存 -->
   <div class="static" :class="dynamic" />
-</template>
-```
 
-```vue
-<template>
-  <!-- Style：camelCase 或 kebab-case 都行 -->
+  <!-- Style：camelCase / CSS 变量 / 多对象 -->
   <p :style="{ color: 'red', fontSize: '16px' }">Hello</p>
-
-  <!-- CSS 变量 -->
   <div :style="{ '--primary': color }" />
-
-  <!-- 多对象合并 -->
   <p :style="[baseStyle, override]" />
 </template>
 ```
@@ -911,10 +818,7 @@ transition: slide-up
 
 ```vue
 <!-- CSS Modules：hash 处理避免冲突 -->
-<template>
-  <div :class="$style.card">Card</div>
-</template>
-
+<template><div :class="$style.card">Card</div></template>
 <style module>
 .card { padding: 16px; }
 </style>
@@ -924,24 +828,16 @@ transition: slide-up
 <!-- v-bind 在 CSS 中（3.2+）：响应式样式 -->
 <script setup>
 const color = ref('red')
-const fontSize = ref(16)
 </script>
-
-<template>
-  <p class="text">Hello</p>
-</template>
-
+<template><p class="text">Hello</p></template>
 <style scoped>
-.text {
-  color: v-bind(color);
-  font-size: v-bind('fontSize + "px"');
-}
+.text { color: v-bind(color); }
 </style>
 ```
 
 <v-click>
 
-`v-bind()` 在编译期生成 CSS 自定义属性，运行时通过 inline style 推到 DOM。**改 `color.value` 自动更新所有用到该 class 的 DOM**。
+`v-bind()` 编译期生成 CSS 自定义属性，运行时通过 inline style 推到 DOM。改 `color.value` 自动更新。
 
 </v-click>
 
@@ -958,28 +854,18 @@ transition: slide-up
 export function useCounter(initial = 0) {
   const count = ref(initial)
   const doubled = computed(() => count.value * 2)
-
   function increment() { count.value++ }
   function reset() { count.value = initial }
-
   return { count, doubled, increment, reset }
 }
-```
 
-```vue
-<script setup>
-import { useCounter } from '@/composables/useCounter'
-
+// 使用
 const { count, doubled, increment, reset } = useCounter(10)
-</script>
 ```
 
 <v-click>
 
-**约定**：
-- 函数名以 `use` 开头
-- 返回响应式 ref / reactive + 操作函数
-- 资源清理用 `onUnmounted` / `onWatcherCleanup`
+**约定**：函数名以 `use` 开头 / 返回响应式 ref + 操作函数 / 资源清理用 `onUnmounted` / `onWatcherCleanup`。
 
 </v-click>
 
@@ -990,8 +876,6 @@ transition: slide-up
 # Composable：异步 + 自动清理
 
 ```ts
-import { ref, watch, onWatcherCleanup } from 'vue'
-
 export function useFetchData<T>(url: () => string) {
   const data = ref<T | null>(null)
   const loading = ref(false)
@@ -1000,7 +884,6 @@ export function useFetchData<T>(url: () => string) {
   watch(url, async (currentUrl) => {
     const controller = new AbortController()
     onWatcherCleanup(() => controller.abort())
-
     loading.value = true
     try {
       const res = await fetch(currentUrl, { signal: controller.signal })
@@ -1060,9 +943,6 @@ transition: slide-up
 
 ```ts
 // stores/auth.ts —— Setup Store 风格（推荐）
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-
 export const useAuthStore = defineStore('auth', () => {
   // state
   const user = ref<User | null>(null)
@@ -1079,7 +959,6 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = data.token
     localStorage.setItem('token', data.token)
   }
-
   function logout() { user.value = null; token.value = null }
 
   return { user, token, isLoggedIn, userName, login, logout }
@@ -1132,15 +1011,10 @@ const counter = useCounterStore()
 
 // 批量修改（避免多次触发 watcher）
 counter.$patch({ count: 10, name: 'New' })
-counter.$patch((state) => {
-  state.count++
-  state.items.push({ id: Date.now() })
-})
+counter.$patch((state) => { state.count++; state.items.push({}) })
 
-// 替换整个 state
+// 替换 / 重置
 counter.$state = { count: 100, name: 'Reset' }
-
-// 重置（Option Store 自动；Setup Store 要自己实现）
 counter.$reset()
 ```
 
@@ -1150,7 +1024,6 @@ counter.$reset()
 
 ```ts
 cart.$onAction(({ name, args, after, onError }) => {
-  console.log(`Calling ${name} with`, args)
   after((result) => console.log(`${name} returned:`, result))
   onError((err) => console.error(`${name} failed:`, err))
 })
@@ -1238,26 +1111,18 @@ transition: slide-up
 
 ```ts
 const routes = [
-  // 单参数
-  { path: '/users/:id', component: UserView },
-
-  // 可选参数
-  { path: '/users/:id?', component: UsersView },
-
-  // 通配（catch-all）
-  { path: '/:pathMatch(.*)*', name: 'not-found', component: NotFoundView },
-
-  // 正则约束
-  { path: '/users/:id(\\d+)', component: UserView },
+  { path: '/users/:id', component: UserView },           // 单参数
+  { path: '/users/:id?', component: UsersView },          // 可选参数
+  { path: '/:pathMatch(.*)*', component: NotFoundView },  // 通配
+  { path: '/users/:id(\\d+)', component: UserView },      // 正则约束
 
   // 嵌套
   {
-    path: '/user/:id',
-    component: UserLayout,
+    path: '/user/:id', component: UserLayout,
     children: [
-      { path: 'profile', component: UserProfile },   // /user/:id/profile
+      { path: 'profile', component: UserProfile },        // /user/:id/profile
       { path: 'posts', component: UserPosts },
-      { path: '', component: UserHome },              // 默认子路由
+      { path: '', component: UserHome },                  // 默认子路由
     ],
   },
 ]
@@ -1276,22 +1141,17 @@ transition: slide-up
 # 路由守卫
 
 ```ts
-// 全局前置守卫
+// 全局前置（return: false 取消 / '/login' 重定向 / true 放行）
 router.beforeEach((to, from) => {
-  // return: undefined / true → 放行
-  //         false → 取消导航
-  //         '/login' / { name: 'login' } → 重定向
   if (to.meta.requiresAuth && !auth.isLoggedIn) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 })
 
-// 全局解析守卫（组件守卫之后）
+// 全局解析（组件守卫之后） / 全局后置（不影响导航）
 router.beforeResolve(async (to) => {
-  if (to.meta.requiresPermissions) await checkPermissions(to.meta.requiresPermissions)
+  if (to.meta.permissions) await checkPermissions(to.meta.permissions)
 })
-
-// 全局后置（不影响导航）
 router.afterEach((to, from, failure) => {
   if (!failure) sendAnalytics({ to: to.fullPath })
 })
@@ -1300,11 +1160,8 @@ router.afterEach((to, from, failure) => {
 ```vue
 <!-- 组件内守卫 -->
 <script setup>
-import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router'
-
-onBeforeRouteLeave((to) => {
-  if (hasUnsavedChanges.value) return confirm('Discard?')
-})
+import { onBeforeRouteLeave } from 'vue-router'
+onBeforeRouteLeave((to) => hasUnsavedChanges.value ? confirm('Discard?') : true)
 </script>
 ```
 
@@ -1321,7 +1178,6 @@ declare module 'vue-router' {
     requiresAuth?: boolean
     permissions?: string[]
     title?: string
-    keepAlive?: boolean
   }
 }
 
@@ -1331,16 +1187,9 @@ const routes = [
     component: () => import('@/views/AdminView.vue'),   // 懒加载
     meta: { requiresAuth: true, title: 'Admin Panel' },
   },
-  // 命名 chunk
-  {
-    path: '/dashboard',
-    component: () => import(/* webpackChunkName: "dashboard" */ '@/views/Dashboard.vue'),
-  },
 ]
 
-router.beforeEach((to) => {
-  document.title = to.meta.title ?? 'My App'
-})
+router.beforeEach((to) => { document.title = to.meta.title ?? 'App' })
 ```
 
 <v-click>
@@ -1389,12 +1238,7 @@ transition: slide-up
 
 # Transition：进出动画
 
-`<Transition>` 在元素进入 / 离开时自动加 6 个 class：
-
-```
-v-enter-from → v-enter-active → v-enter-to
-v-leave-from → v-leave-active → v-leave-to
-```
+`<Transition>` 在元素进入 / 离开时自动加 6 个 class（`v-enter-from/active/to`、`v-leave-from/active/to`）：
 
 ```vue
 <template>
@@ -1411,12 +1255,7 @@ v-leave-from → v-leave-active → v-leave-to
 
 <v-click>
 
-**关键 props**：
-
-- `name` → 类名前缀（默认 `v`）
-- `mode` → `'out-in'`（先出后进，推荐路由切换）/ `'in-out'`
-- `appear` → 首次挂载也触发
-- `:css="false"` → 跳过 CSS 类，纯 JS hooks
+**关键 props**：`name` 类名前缀 / `mode='out-in'` 路由切换推荐 / `appear` 首次也触发 / `:css="false"` 纯 JS hooks。
 
 </v-click>
 
@@ -1428,25 +1267,15 @@ transition: slide-up
 
 ```vue
 <template>
-  <Transition
-    @before-enter="onBeforeEnter"
-    @enter="onEnter"
-    @after-enter="onAfterEnter"
-    @leave="onLeave"
-    :css="false"
-  >
+  <Transition @enter="onEnter" @leave="onLeave" :css="false">
     <div v-if="show" ref="el">Hello</div>
   </Transition>
 </template>
 
 <script setup>
 function onEnter(el, done) {
-  gsap.from(el, {
-    opacity: 0, y: 20, duration: 0.3,
-    onComplete: done,    // 必须调 done
-  })
+  gsap.from(el, { opacity: 0, y: 20, duration: 0.3, onComplete: done })
 }
-
 function onLeave(el, done) {
   gsap.to(el, { opacity: 0, y: -20, duration: 0.3, onComplete: done })
 }
@@ -1455,7 +1284,7 @@ function onLeave(el, done) {
 
 <v-click>
 
-`:css="false"` 告诉 Vue 跳过 CSS 类检测，直接用 JS 动画库（GSAP / anime.js）。
+`:css="false"` 告诉 Vue 跳过 CSS 类检测，直接用 JS 动画库（GSAP / anime.js）。**必须调 `done`** 通知 Vue。
 
 </v-click>
 
@@ -1501,18 +1330,14 @@ transition: slide-up
 
 # Teleport：传送门
 
-把内部 DOM 「传送」到任意 DOM 节点（常用 `body`）：
+把内部 DOM「传送」到任意 DOM 节点（常用 `body`）：
 
 ```vue
 <template>
   <button @click="show = true">Open Modal</button>
-
   <Teleport to="body">
-    <div v-if="show" class="modal-overlay" @click="show = false">
-      <div class="modal" @click.stop>
-        <h2>Modal Title</h2>
-        <button @click="show = false">Close</button>
-      </div>
+    <div v-if="show" class="modal-overlay">
+      <div class="modal" @click.stop>...</div>
     </div>
   </Teleport>
 </template>
@@ -1520,19 +1345,12 @@ transition: slide-up
 
 <v-click>
 
-适合 **Modal / Toast / Tooltip / Dropdown**——避免父容器的 `overflow: hidden` / `z-index` / `transform` 创建新栈上下文影响层级。
-
-</v-click>
-
-<v-click>
+适合 **Modal / Toast / Tooltip / Dropdown**——避免父容器 `overflow:hidden` / `z-index` / `transform` 影响层级。
 
 ```vue
 <!-- 完整选项 -->
-<Teleport
-  to="#modal-root"
-  :disabled="isMobile"
-  :defer="true"           <!-- 3.5+ 推迟到当前渲染周期之后 -->
-/>
+<Teleport to="#modal-root" :disabled="isMobile" :defer="true" />
+<!-- :defer 3.5+ 推迟到当前渲染周期之后 -->
 ```
 
 </v-click>
@@ -1545,10 +1363,6 @@ transition: slide-up
 
 ```vue
 <template>
-  <KeepAlive>
-    <component :is="currentView" />
-  </KeepAlive>
-
   <!-- 与路由配合 -->
   <RouterView v-slot="{ Component }">
     <KeepAlive :include="['HomeView', 'ListView']" :max="10">
@@ -1560,27 +1374,20 @@ transition: slide-up
 
 <v-click>
 
-**生命周期变化**：
+**生命周期变化**（缓存切换不重新 mount）：
 
 ```
 首次：setup → mounted → activated
-缓存切走：deactivated
-缓存切回：activated
-真销毁（移出 KeepAlive 范围）：beforeUnmount → unmounted
+切走：deactivated；切回：activated
+真销毁：beforeUnmount → unmounted
 ```
 
 ```vue
 <script setup>
-import { onActivated, onDeactivated } from 'vue'
-
 onActivated(() => console.log('entered cache view'))
-onDeactivated(() => console.log('left view but still cached'))
+onDeactivated(() => console.log('left but cached'))
 </script>
 ```
-
-</v-click>
-
-<v-click>
 
 适合：**列表 + 详情**来回切换，列表页保留滚动 / 表单状态。
 
@@ -1634,18 +1441,11 @@ transition: slide-up
 ```vue
 <script setup lang="ts">
 import type { Directive } from 'vue'
-
 // 自动聚焦
-const vFocus: Directive<HTMLInputElement> = {
-  mounted(el) {
-    el.focus()
-  },
-}
+const vFocus: Directive<HTMLInputElement> = { mounted: el => el.focus() }
 </script>
 
-<template>
-  <input v-focus />
-</template>
+<template><input v-focus /></template>
 ```
 
 <v-click>
@@ -1656,10 +1456,8 @@ const vFocus: Directive<HTMLInputElement> = {
 const myDirective: Directive = {
   mounted(el, binding) {
     binding.value        // 表达式的值
-    binding.oldValue     // 更新时才有
     binding.arg          // v-my-directive:arg → 'arg'
     binding.modifiers    // .mod → { mod: true }
-    binding.instance     // 当前组件实例
   },
 }
 ```
@@ -1676,27 +1474,21 @@ transition: slide-up
 // directives/permission.ts
 export const vPermission: Directive<HTMLElement, string | string[]> = {
   mounted(el, binding) {
-    const auth = useAuthStore()
     const required = Array.isArray(binding.value) ? binding.value : [binding.value]
-    const ok = required.every(p => auth.permissions.includes(p))
+    const ok = required.every(p => useAuthStore().permissions.includes(p))
     if (!ok) el.parentNode?.removeChild(el)
   },
 }
-```
 
-```ts
 // directives/clickOutside.ts
 export const vClickOutside: Directive<HTMLElement, (e: MouseEvent) => void> = {
   mounted(el, binding) {
-    el._clickOutside = (e: MouseEvent) => {
+    el._handler = (e: MouseEvent) => {
       if (!el.contains(e.target as Node)) binding.value(e)
     }
-    document.addEventListener('click', el._clickOutside)
+    document.addEventListener('click', el._handler)
   },
-  unmounted(el) {
-    document.removeEventListener('click', el._clickOutside)
-    delete el._clickOutside
-  },
+  unmounted(el) { document.removeEventListener('click', el._handler) },
 }
 ```
 
@@ -1752,19 +1544,14 @@ transition: slide-up
 
 ```vue
 <script setup lang="ts">
-// 类型字面量
 interface Props {
   title: string
   count?: number
-  items: { id: number; name: string }[]
   status: 'idle' | 'loading' | 'done'
 }
-
 const props = defineProps<Props>()
-
 const emit = defineEmits<{
   submit: [data: FormData]
-  cancel: []
   'update:value': [value: string]
 }>()
 </script>
@@ -1776,12 +1563,8 @@ const emit = defineEmits<{
 
 ```vue
 <script setup lang="ts" generic="T extends { id: number }">
-defineProps<{
-  items: T[]
-  onSelect: (item: T) => void
-}>()
+defineProps<{ items: T[]; onSelect: (item: T) => void }>()
 </script>
-
 <template>
   <li v-for="item in items" :key="item.id" @click="onSelect(item)">
     <slot :item="item" />
@@ -1800,14 +1583,10 @@ transition: slide-up
 | 类型 | 用途 |
 |---|---|
 | `Ref<T>` / `ComputedRef<T>` | ref / computed 返回类型 |
-| `ShallowRef<T>` | shallowRef 类型 |
 | `MaybeRef<T>` | `T \| Ref<T>` |
 | `MaybeRefOrGetter<T>` | `T \| Ref<T> \| (() => T)` |
-| `UnwrapRef<T>` | 拆 ref 层 |
-| `PropType<T>` | Options API props 类型断言 |
-| `ExtractPropTypes<T>` | 从 props 配置反推类型 |
 | `InjectionKey<T>` | 类型化 inject key |
-| `Directive<Element, Value>` | 自定义指令类型 |
+| `Directive<El, Val>` | 自定义指令类型 |
 
 <v-click>
 
@@ -1815,13 +1594,6 @@ transition: slide-up
 // MaybeRef：函数同时接受值和 ref
 function useDouble(input: MaybeRef<number>) {
   return computed(() => unref(input) * 2)
-}
-
-// 类型扩展全局属性
-declare module 'vue' {
-  interface ComponentCustomProperties {
-    $apiBase: string
-  }
 }
 ```
 
@@ -1894,15 +1666,6 @@ function reactive(obj) {
     },
   })
 }
-
-function track(target, key) {
-  if (!activeEffect) return
-  let depsMap = targetMap.get(target)
-  if (!depsMap) targetMap.set(target, (depsMap = new Map()))
-  let dep = depsMap.get(key)
-  if (!dep) depsMap.set(key, (dep = new Set()))
-  dep.add(activeEffect)
-}
 ```
 
 ---
@@ -1911,31 +1674,24 @@ transition: slide-up
 
 # Vue 2 vs Vue 3 响应式
 
-| 维度 | Vue 2 (`Object.defineProperty`) | Vue 3 (`Proxy`) |
+| 维度 | Vue 2 `defineProperty` | Vue 3 `Proxy` |
 |---|---|---|
-| 新增字段 | 不响应（要 `Vue.set`） | 自动 |
-| 删除字段 | 不响应（要 `Vue.delete`） | 自动 |
-| 数组下标 | 不响应（要 `splice`） | 自动 |
-| `length` 修改 | 不响应 | 自动 |
-| Map / Set | 不支持 | 完整支持 |
-| 性能 | 初始化时递归 defineProperty | 惰性（访问时才代理嵌套） |
-| 浏览器支持 | IE9+ | 不支持 IE（Proxy 无 polyfill） |
+| 新增 / 删除字段 | 要 `Vue.set/delete` | 自动 |
+| 数组下标 / length | 不响应 | 自动 |
+| Map / Set | 不支持 | 支持 |
+| 性能 | 递归初始化 | 惰性代理 |
 
 <v-click>
 
-**@vue/reactivity 可独立使用**（任意 JS 项目）：
+**@vue/reactivity 可独立使用**（适合 Node CLI / Tauri / Electron / Worker）：
 
 ```ts
 import { ref, computed, effect } from '@vue/reactivity'
-
 const count = ref(0)
 const doubled = computed(() => count.value * 2)
 effect(() => console.log(doubled.value))
-
 count.value++   // 自动 log
 ```
-
-适合：node CLI / Tauri / Electron / Web Worker 里做响应式状态管理。
 
 </v-click>
 
@@ -1960,19 +1716,17 @@ transition: slide-up
 ```ts
 function render() {
   return createElementBlock('div', null, [
-    createElementVNode('span', null, '静态文本'),                          // 无 patchFlag
+    createElementVNode('span', null, '静态文本'),                       // 无 patchFlag
     createElementVNode('span', null, ctx.dynamicText, 1 /* TEXT */),
-    createElementVNode('button', {
-      class: normalizeClass(ctx.cls),
-      onClick: ctx.handler,
-    }, 'Click', 2 /* CLASS */),
+    createElementVNode('button', { class: normalizeClass(ctx.cls) },
+      'Click', 2 /* CLASS */),
   ])
 }
 ```
 
 <v-click>
 
-`1 /* TEXT */` / `2 /* CLASS */` 是 patchFlag——告诉运行时 **只需要 diff 这种属性**。这是 Vue 性能优于 React 的核心原因之一。
+patchFlag 告诉运行时 **只需要 diff 这种属性**。这是 Vue 性能优于 React 的核心原因之一。
 
 </v-click>
 
@@ -2007,9 +1761,7 @@ function render() {
 
 <v-click>
 
-**Block 优化**：外层 `<div>` 是 block，收集所有动态子节点到 `block.dynamicChildren`。运行时 patch **只跑这数组，跳过静态子树**。
-
-`v-if` / `v-for` / `<Suspense>` / `<Teleport>` 都创建新 block。
+**Block 优化**：外层 block 收集所有动态子节点到 `block.dynamicChildren`，运行时只跑这数组，跳过静态子树。`v-if` / `v-for` / `Suspense` / `Teleport` 都创建新 block。
 
 </v-click>
 
@@ -2150,39 +1902,28 @@ transition: slide-up
 
 # 3.5+ Lazy Hydration
 
-降低 JS 解析 + 执行成本，**首屏 SSR + 非关键组件延后激活**：
+**首屏 SSR + 非关键组件延后激活**：
 
 ```ts
 import {
   defineAsyncComponent,
-  hydrateOnVisible,
-  hydrateOnIdle,
-  hydrateOnInteraction,
-  hydrateOnMediaQuery,
+  hydrateOnVisible, hydrateOnIdle, hydrateOnInteraction,
 } from 'vue'
 
-// 视口可见时才 hydrate
+// 视口可见时
 const ChartAsync = defineAsyncComponent({
   loader: () => import('./Chart.vue'),
   hydrate: hydrateOnVisible(),
 })
 
-// 浏览器空闲时（最多等 2 秒）
-const SidebarAsync = defineAsyncComponent({
-  loader: () => import('./Sidebar.vue'),
-  hydrate: hydrateOnIdle(2000),
-})
-
-// 用户交互时（click / focus）
-const FormAsync = defineAsyncComponent({
-  loader: () => import('./Form.vue'),
-  hydrate: hydrateOnInteraction(['click', 'focus']),
-})
+// 浏览器空闲时 / 用户交互时
+defineAsyncComponent({ loader, hydrate: hydrateOnIdle(2000) })
+defineAsyncComponent({ loader, hydrate: hydrateOnInteraction(['click']) })
 ```
 
 <v-click>
 
-参考 React Server Components / Astro Islands 的思路，但 Vue 通过 `defineAsyncComponent` 集成，不需要新 API 学习成本。
+参考 React Server Components / Astro Islands 的思路，通过 `defineAsyncComponent` 集成。
 
 </v-click>
 
@@ -2230,20 +1971,14 @@ transition: slide-up
 
 # Hydration mismatch
 
-服务端 HTML 与客户端首次渲染不一致时，Vue 警告：
-
-```
-[Vue warn] Hydration text mismatch:
-- Server rendered: "Hello Alice"
-- Client rendered: "Hello Bob"
-```
+服务端 HTML 与客户端首次渲染不一致时 Vue 会警告：
 
 ```vue
 <!-- ❌ 常见原因 -->
-<span>{{ Date.now() }}</span>               <!-- 每次结果不同 -->
+<span>{{ Date.now() }}</span>             <!-- 每次结果不同 -->
 <span>{{ Math.random() }}</span>
-<span>{{ window.innerWidth }}</span>         <!-- 服务端报错 -->
-<span>{{ isLoggedIn ? 'Welcome' : 'Sign in' }}</span>   <!-- cookie 不同步 -->
+<span>{{ window.innerWidth }}</span>       <!-- 服务端报错 -->
+<span>{{ isLoggedIn ? 'Y' : 'N' }}</span>  <!-- cookie 不同步 -->
 ```
 
 <v-click>
@@ -2299,15 +2034,8 @@ transition: slide-up
 
 # 测试：Vitest + @vue/test-utils
 
-```bash
-pnpm add -D vitest @vue/test-utils happy-dom @vitejs/plugin-vue
-```
-
 ```ts
 // vitest.config.ts
-import { defineConfig } from 'vitest/config'
-import vue from '@vitejs/plugin-vue'
-
 export default defineConfig({
   plugins: [vue()],
   test: {
@@ -2315,14 +2043,8 @@ export default defineConfig({
     globals: true,
   },
 })
-```
 
-```ts
 // tests/Counter.spec.ts
-import { describe, it, expect } from 'vitest'
-import { mount } from '@vue/test-utils'
-import Counter from '@/components/Counter.vue'
-
 describe('Counter', () => {
   it('increments on click', async () => {
     const wrapper = mount(Counter)
@@ -2339,8 +2061,6 @@ transition: slide-up
 # 测试：mount vs shallowMount / mocks
 
 ```ts
-import { mount, shallowMount } from '@vue/test-utils'
-
 const fullTree = mount(Parent)        // 完整渲染所有子组件
 const isolated = shallowMount(Parent) // 子组件被 stub 成 <child-stub />
 
@@ -2348,10 +2068,7 @@ const isolated = shallowMount(Parent) // 子组件被 stub 成 <child-stub />
 const wrapper = mount(Component, {
   global: {
     stubs: { ChildComponent: true },
-    mocks: {
-      $route: { params: { id: 1 } },
-      $router: { push: vi.fn() },
-    },
+    mocks: { $route: { params: { id: 1 } }, $router: { push: vi.fn() } },
     provide: { apiClient: mockApiClient },
     plugins: [createPinia()],
   },
@@ -2363,8 +2080,6 @@ const wrapper = mount(Component, {
 **Composable 测试更简单**：
 
 ```ts
-import { useCounter } from '@/composables/useCounter'
-
 it('starts at initial value', () => {
   const { count } = useCounter(10)
   expect(count.value).toBe(10)
@@ -2381,12 +2096,8 @@ transition: slide-up
 
 ```ts
 // Pinia store
-import { setActivePinia, createPinia } from 'pinia'
-import { beforeEach, describe, it, expect } from 'vitest'
-
 describe('Counter Store', () => {
   beforeEach(() => setActivePinia(createPinia()))
-
   it('increments', () => {
     const store = useCounterStore()
     store.increment()
@@ -2395,13 +2106,10 @@ describe('Counter Store', () => {
 })
 
 // Vue Router
-import { createRouter, createMemoryHistory } from 'vue-router'
-
 const router = createRouter({
   history: createMemoryHistory(),    // 内存模式
   routes,
 })
-
 const wrapper = mount(App, { global: { plugins: [router] } })
 await router.push('/users/42')
 await router.isReady()
@@ -2414,18 +2122,11 @@ transition: slide-up
 # E2E：Cypress vs Playwright
 
 ```ts
-// Cypress
-describe('Home', () => {
-  it('navigates to about', () => {
-    cy.visit('/')
-    cy.contains('About').click()
-    cy.url().should('include', '/about')
-  })
-})
+// Cypress（链式 jQuery 风）
+cy.visit('/'); cy.contains('About').click()
+cy.url().should('include', '/about')
 
-// Playwright
-import { test, expect } from '@playwright/test'
-
+// Playwright（async / await）
 test('navigation', async ({ page }) => {
   await page.goto('http://localhost:5173')
   await page.click('text=About')
@@ -2437,11 +2138,9 @@ test('navigation', async ({ page }) => {
 
 | 维度 | Cypress | Playwright |
 |---|---|---|
-| 浏览器 | Chromium / Firefox / Edge | Chromium / Firefox / WebKit |
-| API 风格 | 链式（jQuery 风） | async / await |
+| 浏览器 | Chromium / Firefox | + WebKit |
 | Trace | 时间旅行 | Trace Viewer 强大 |
-| 自动等待 | 内置 | 内置 + 更严格 |
-| 适合 | 单一前端 SPA | 跨浏览器 / 多端 |
+| 适合 | 单一 SPA | 跨浏览器 / 多端 |
 
 </v-click>
 
@@ -2451,38 +2150,25 @@ transition: slide-up
 
 # VueUse：必装工具库
 
-```bash
-pnpm add @vueuse/core
-```
-
 ```ts
 import {
   useEventListener,        // 自动 onUnmounted 清理
   useStorage,              // localStorage 响应式
-  useFetch,                // 类型化 fetch
-  useDark,                 // 暗黑模式
-  useMouse,
-  useWindowSize,
-  useDebouncedRef,
-  useThrottleFn,
-  useEventBus,
-  useClipboard,
-  useIntersectionObserver, // 元素进入可视区
-  useColorMode,
-  useTitle,
+  useFetch, useDark, useMouse, useWindowSize,
+  useDebouncedRef, useThrottleFn, useEventBus,
+  useClipboard, useIntersectionObserver,
+  useColorMode, useTitle,
 } from '@vueuse/core'
 ```
 
 <v-click>
 
 ```ts
-// 例：自动清理的事件监听
+// 自动清理的事件监听
 useEventListener(window, 'resize', () => console.log('resized'))
 
-// 例：跨组件事件总线（适合 keep-alive 详情 → 列表刷新）
+// 跨组件事件总线（适合 keep-alive 详情 → 列表刷新）
 const bus = useEventBus<{ source: string }>('refresh-list')
-// detail.vue: bus.emit({ source: 'save' })
-// list.vue: bus.on(() => loadList())
 ```
 
 </v-click>
@@ -2493,25 +2179,18 @@ transition: slide-up
 
 # 组件库选型
 
-| 库 | 风格 | 适合 |
-|---|---|---|
-| **Element Plus** | 桌面后台 | 中国企业内部系统 |
-| **Naive UI** | 现代极简 | 创业团队 / 个人项目 |
-| **Vuetify** | Material Design | 跨设备 / Material 风格 |
-| **Ant Design Vue** | 国际企业风 | 大型管理系统 |
-| **Quasar** | 全能跨平台 | PWA / Hybrid / Electron |
-| **Vant** | 移动端 | H5 / 小程序前端 |
-| **Nuxt UI** | 现代 Tailwind | Nuxt 项目 |
-| **shadcn-vue** | 抄写式 + Tailwind | 完全定制 |
-| **Radix Vue / Reka UI** | Headless | 自定义样式 |
+| 库 | 适合 |
+|---|---|
+| **Element Plus** | 中国企业后台 |
+| **Naive UI** | 创业 / 个人项目 |
+| **Ant Design Vue** | 大型管理系统 |
+| **Vuetify** | Material 跨设备 |
+| **Vant / Quasar** | 移动端 / 跨平台 |
+| **shadcn-vue / Reka UI** | Tailwind 完全定制 |
 
 <v-click>
 
-**经验**：
-
-- 中国后台 → Element Plus（成熟度 / 文档 / 社区都最好）
-- Material 跨设备 → Vuetify
-- Tailwind 完全定制 → shadcn-vue + Reka UI
+**经验**：中国后台 → Element Plus；Tailwind 定制 → shadcn-vue + Reka UI。
 
 </v-click>
 
@@ -2523,24 +2202,17 @@ transition: slide-up
 
 | 维度 | Vue 2 | Vue 3 |
 |---|---|---|
-| 响应式 | `Object.defineProperty` | `Proxy` |
-| 入口 | `new Vue({ ... })` | `createApp(App)` |
-| 多根节点 | 必须单根 | 支持 fragments |
-| `v-model` | 单值 + `value`/`input` | 多值 + `modelValue`/`update:modelValue` |
+| 响应式 | `defineProperty` | `Proxy` |
+| 入口 | `new Vue(...)` | `createApp(...)` |
+| `v-model` | 单值 | 多值 + `modelValue` |
 | `v-if` + `v-for` | `v-for` 优先 | `v-if` 优先 |
-| `$on` / `$off` | 有 | 移除（用 mitt） |
-| Filter | 有 | 移除 |
-| Mixins | 主流 | 不推荐 → Composables |
+| Filter / `$on` | 有 | 移除（用 mitt） |
+| Mixins | 主流 | Composables |
 | Vuex | v3/v4 | Pinia |
 
 <v-click>
 
-**迁移路径**：
-
-1. **直接重写**：项目小、想顺便重构
-2. **Vue 2.7 → Vue 3**：先在 2.7 上把 Options 改 Composition，再换 3
-3. **`@vue/compat`**：跑在 Vue 3 引擎上、兼容 Vue 2 API，逐步迁移
-4. **`@vue/codemod`**：官方 codemod 自动改一部分
+**迁移路径**：直接重写 / Vue 2.7 → Vue 3 / `@vue/compat` 兼容层 / `@vue/codemod` 自动改写。
 
 </v-click>
 
@@ -2557,23 +2229,14 @@ transition: slide-up
 <script setup>
 defineProps<{ label: string }>()
 </script>
-
-<template>
-  <button>{{ label }}</button>
-</template>
-
-<style>
-button { background: #41b883; color: white; }
-</style>
+<template><button>{{ label }}</button></template>
 ```
 
 ```ts
 // main.ts
 import { defineCustomElement } from 'vue'
 import MyButton from './MyButton.ce.vue'
-
-const MyButtonCE = defineCustomElement(MyButton)
-customElements.define('my-button', MyButtonCE)
+customElements.define('my-button', defineCustomElement(MyButton))
 ```
 
 ```html
@@ -2582,7 +2245,7 @@ customElements.define('my-button', MyButtonCE)
 
 <v-click>
 
-适合：**微前端 / Embed Widget / Cross-framework Library**。局限：Shadow DOM 中 Tailwind / UnoCSS 等需要特殊配置。
+适合 **微前端 / Embed Widget / Cross-framework Library**。局限：Shadow DOM 中 Tailwind / UnoCSS 等需要特殊配置。
 
 </v-click>
 
@@ -2596,7 +2259,6 @@ transition: slide-up
 |---|---|---|
 | **qiankun** | iframe-less + JS sandbox | 需插件 |
 | **wujie** | iframe + Web Component | 原生 |
-| **single-spa** | 各自隔离 + 共享路由 | 是 |
 | **micro-app** | Web Components + 沙箱 | 是 |
 
 <v-click>
@@ -2604,22 +2266,10 @@ transition: slide-up
 ```ts
 // wujie 主应用（推荐 Vite 项目）
 import { startApp } from 'wujie'
-
-startApp({
-  name: 'vue-app',
-  url: 'http://localhost:5174',
-  el: '#sub',
-  sync: true,
-})
+startApp({ name: 'vue-app', url: 'http://localhost:5174', el: '#sub' })
 ```
 
-子应用几乎不用改 —— 直接跑独立的 Vue 项目即可。
-
-</v-click>
-
-<v-click>
-
-**经验**：新项目首选 wujie 或 micro-app（对 Vite 友好）；老项目延续 qiankun。
+**经验**：新项目首选 wujie / micro-app（对 Vite 友好）；老项目延续 qiankun。
 
 </v-click>
 
@@ -2631,16 +2281,13 @@ transition: slide-up
 
 | 维度 | Vue 3.5 | React 19 |
 |---|---|---|
-| 模板 | SFC 模板 + 编译优化 | JSX + 全运行时 |
-| 响应式 | Proxy 自动追踪 | useState + 手动依赖 |
-| 更新粒度 | patchFlag 标记的动态部分 | 整组件函数重跑 |
-| TypeScript | 编译宏自动推导 | hooks 手动类型 |
-| 状态管理 | Pinia（官方） | Zustand / Redux / Context |
-| 路由 | Vue Router 4 | React Router / TanStack Router |
-| 元框架 | Nuxt | Next.js / Remix |
+| 模板 | SFC + 编译优化 | JSX + 运行时 |
+| 响应式 | Proxy 自动追踪 | useState + 手动 |
+| 更新粒度 | patchFlag 动态部分 | 整组件重跑 |
+| 状态管理 | Pinia | Zustand / Redux |
+| 元框架 | Nuxt | Next / Remix |
 | RSC | 暂无 | 有（实验性） |
-| 学习曲线 | 平缓 | 中等 |
-| 招聘市场 | 国内多 / 国际少 | 国际多 |
+| 招聘 | 国内多 | 国际多 |
 
 <v-click>
 
@@ -2656,20 +2303,14 @@ transition: slide-up
 
 | 维度 | Vue 3 | Svelte 5 | Solid |
 |---|---|---|---|
-| 编译策略 | 模板 → vnode + patchFlag | 编译消失 + 直接 DOM | JSX → 细粒度信号 |
-| 响应式 | Proxy + 自动追踪 | runes（`$state`） | Signal + tracking |
-| 运行时 | 有（小核） | 极小（KB 级） | 中等 |
-| 心智模型 | 模板 + 函数式逻辑 | 编译时魔法 | 信号 + JSX |
-| 生态 | 大（Pinia / Nuxt / Vant 等） | 中（SvelteKit） | 小（SolidStart） |
-| 渐进式 | ✅ | ⚠️ | ⚠️ |
+| 编译策略 | vnode + patchFlag | 编译消失 + 直接 DOM | JSX 细粒度信号 |
+| 响应式 | Proxy 自动 | runes `$state` | Signal |
+| 运行时 | 小核 | 极小（KB 级） | 中等 |
+| 生态 | 大 | 中 (SvelteKit) | 小 (SolidStart) |
 
 <v-click>
 
-**怎么选**：
-
-- **Vue**：团队主流 / 生态成熟 / 国内多人才
-- **Svelte**：DX 极佳、bundle 小、SSR 通过 SvelteKit
-- **Solid**：响应式信号最纯粹、性能最强、生态偏小
+**怎么选**：Vue → 团队主流 / 国内多人才；Svelte → DX 极佳 / bundle 小；Solid → 信号最纯粹 / 性能最强。
 
 </v-click>
 
@@ -2681,27 +2322,17 @@ transition: slide-up
 
 | 维度 | Vue 3 | Angular 17+ |
 |---|---|---|
-| 范式 | 灵活（SFC + Composition） | 严格（依赖注入 + RxJS） |
-| 模板 | 简洁（v-* 指令） | 多变（结构指令 + 管道） |
-| 响应式 | Proxy + signal | RxJS + Signal API（17 新） |
+| 范式 | SFC + Composition | DI + RxJS |
+| 响应式 | Proxy + signal | RxJS + Signal |
 | TypeScript | 可选 | 强制 |
-| Bundle | 小 | 较大（Ivy + tree-shake 改善了） |
+| Bundle | 小 | 较大 |
 | 学习曲线 | 平缓 | 陡峭 |
-| 适合 | 中小项目 / 国内团队 | 大型企业 / 后端思维团队 |
+| 适合 | 中小 / 国内 | 大企业 / 后端思维 |
 
 <v-click>
 
-**选 Vue 的场景**：
-
-- 项目偏中小型 / 快速迭代
-- 团队偏前端思维（HTML / CSS 占比高）
-- 国内招聘 + 生态
-
-**选 Angular 的场景**：
-
-- 大型企业级应用（金融 / 电信 / 政府）
-- 后端 OOP 思维团队
-- 强约定 + 强类型 + DI 需求
+**选 Vue**：中小项目 / 前端思维团队 / 国内招聘。
+**选 Angular**：大型企业（金融 / 政府）/ OOP 团队 / 强 DI 需求。
 
 </v-click>
 
@@ -2768,7 +2399,6 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-import './assets/main.css'
 
 const app = createApp(App)
 
@@ -2781,21 +2411,15 @@ app.config.errorHandler = (err, instance, info) => {
 // 全局属性（Options API 用 this.$xxx）
 app.config.globalProperties.$apiBase = import.meta.env.VITE_API_BASE
 
-app
-  .use(createPinia())
-  .use(router)
-  .mount('#app')
+app.use(createPinia()).use(router).mount('#app')
 ```
 
 <v-click>
 
-**类型扩展全局属性**：
-
 ```ts
+// 类型扩展全局属性
 declare module 'vue' {
-  interface ComponentCustomProperties {
-    $apiBase: string
-  }
+  interface ComponentCustomProperties { $apiBase: string }
 }
 ```
 

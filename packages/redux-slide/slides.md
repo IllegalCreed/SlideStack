@@ -116,23 +116,20 @@ transition: fade-out
 
 <v-click>
 
-| 维度          | Redux Toolkit 2     | Zustand 5             | Jotai             | Pinia 3           | MobX 6            |
-| ------------- | ------------------- | --------------------- | ----------------- | ----------------- | ----------------- |
-| 框架绑定      | React (vanilla 可用) | React (vanilla 可用)  | React             | **Vue 3 官方**    | React / Vue       |
-| API 风格      | **Slice + Hook**    | hook + flux           | Atom 原子化       | Composition       | Reactive class    |
-| Provider      | **需要**            | 无需                  | 需要              | 需要              | 无需              |
-| 状态模型      | Slice / Immer       | 单 store / immutable  | 多 atom           | 多 store          | observable        |
-| 异步方案      | **RTK Query / Thunk** | 普通 async           | jotai-tanstack    | 普通 async        | flow / async      |
-| 数据获取层    | **RTK Query 内置**  | 需 TanStack Query 配合 | 同左            | 同左              | 同左              |
-| TS 支持       | **完整推导**        | curried 推导          | 优                | **原生推导**      | 装饰器            |
-| 包体积        | ~10 KB              | **~1 KB**             | ~3 KB             | ~1.5 KB           | ~16 KB            |
-| DevTools      | **Redux DevTools**  | Redux DevTools        | Jotai DevTools    | Vue DevTools      | MobX DevTools     |
+| 维度       | Redux Toolkit 2       | Zustand 5  | Jotai          | Pinia 3        |
+| ---------- | --------------------- | ---------- | -------------- | -------------- |
+| 框架绑定   | React                 | React      | React          | **Vue 3 官方** |
+| API 风格   | **Slice + Hook**      | hook+flux  | Atom 原子化    | Composition    |
+| 数据获取层 | **RTK Query 内置**    | 需 TanStack| 同左           | 同左           |
+| TS 支持    | **完整推导**          | curried    | 优             | **原生推导**   |
+| 包体积     | ~10 KB                | **~1 KB**  | ~3 KB          | ~1.5 KB        |
+| DevTools   | **Redux DevTools**    | Redux DT   | Jotai DT       | Vue DT         |
 
 </v-click>
 
 <div v-click text-xs text-right>
 
-_Read more about_ [_Redux Style Guide_](https://redux.js.org/style-guide/)
+_Read more_ [_Redux Style Guide_](https://redux.js.org/style-guide/)
 
 </div>
 
@@ -344,15 +341,13 @@ RTK 全家桶一行装齐
 
 ```bash
 pnpm add @reduxjs/toolkit react-redux
-# 或
-npm install @reduxjs/toolkit react-redux
 ```
 
-| 包                  | 版本     | 作用                       |
-| ------------------- | -------- | -------------------------- |
-| redux               | 5.x      | 核心 store + reducer       |
-| @reduxjs/toolkit    | 2.x      | 官方工具集（推荐入口）     |
-| react-redux         | 9.x      | React 绑定（Provider + hooks） |
+| 包               | 版本 | 作用              |
+| ---------------- | ---- | ----------------- |
+| redux            | 5.x  | 核心 store        |
+| @reduxjs/toolkit | 2.x  | 官方工具集        |
+| react-redux      | 9.x  | React 绑定 + hooks|
 
 </v-click>
 
@@ -363,7 +358,6 @@ npm install @reduxjs/toolkit react-redux
 **最小可运行示例**
 
 ```ts
-// store/index.ts
 import { configureStore, createSlice } from "@reduxjs/toolkit";
 
 const counterSlice = createSlice({
@@ -380,8 +374,7 @@ export const store = configureStore({
 });
 ```
 
-`@reduxjs/toolkit` 已经 re-export 了 redux，
-项目里只 import RTK 即可，不必单独装 redux。
+RTK 已 re-export redux，不必单独装。
 
 </v-click>
 
@@ -446,11 +439,7 @@ import { Provider } from "react-redux";
 import { store } from "./store";
 import App from "./App";
 
-createRoot(document.getElementById("root")!).render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-);
+createRoot(document.getElementById("root")!).render(<Provider store={store}><App /></Provider>);
 ```
 
 </v-click>
@@ -460,16 +449,15 @@ createRoot(document.getElementById("root")!).render(
 **Next.js App Router**
 
 ```tsx
-// app/StoreProvider.tsx
 "use client";
 import { useRef } from "react";
 import { Provider } from "react-redux";
 import { makeStore, type AppStore } from "@/lib/store";
 
 export default function StoreProvider({ children }: { children: React.ReactNode }) {
-  const storeRef = useRef<AppStore>(null);
-  if (!storeRef.current) storeRef.current = makeStore();
-  return <Provider store={storeRef.current}>{children}</Provider>;
+  const ref = useRef<AppStore>(null);
+  if (!ref.current) ref.current = makeStore();
+  return <Provider store={ref.current}>{children}</Provider>;
 }
 ```
 
@@ -523,18 +511,13 @@ react-redux 9.x 的现代姿势
 <v-click>
 
 ```tsx
-// CounterDisplay.tsx
 import { useSelector, useDispatch } from "react-redux";
 import { increment } from "./counterSlice";
 import type { RootState, AppDispatch } from "@/store";
 
 export function Counter() {
-  // useSelector：订阅 state 的某个字段
   const count = useSelector((s: RootState) => s.counter.value);
-
-  // useDispatch：拿到 dispatch 函数
   const dispatch = useDispatch<AppDispatch>();
-
   return (
     <div>
       <h1>{count}</h1>
@@ -548,11 +531,7 @@ export function Counter() {
 
 <v-click>
 
-| Hook                | 作用                                   |
-| ------------------- | -------------------------------------- |
-| `useSelector`       | 订阅 state 派生值，类似 Zustand selector |
-| `useDispatch`       | 拿到 dispatch 函数                     |
-| `useStore`          | 直接访问 store 实例（少用）            |
+`useSelector` 订阅派生值 / `useDispatch` 拿 dispatch / `useStore` 拿 store 实例（少用）
 
 </v-click>
 
@@ -610,14 +589,9 @@ state + reducer + actions 一站式
 <v-click>
 
 ```ts
-// store/counterSlice.ts
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-interface CounterState {
-  value: number;
-  status: "idle" | "loading" | "succeeded" | "failed";
-}
-
+interface CounterState { value: number; status: "idle" | "loading" | "succeeded" | "failed" }
 const initialState: CounterState = { value: 0, status: "idle" };
 
 const counterSlice = createSlice({
@@ -625,19 +599,14 @@ const counterSlice = createSlice({
   initialState,
   reducers: {
     increment: (state) => { state.value += 1 },           // 无 payload
-    decrement: (state) => { state.value -= 1 },
     incrementByAmount: (state, action: PayloadAction<number>) => {
       state.value += action.payload;                       // 有 payload
     },
-    setStatus: (state, action: PayloadAction<CounterState["status"]>) => {
-      state.status = action.payload;
-    },
+    setStatus: (s, a: PayloadAction<CounterState["status"]>) => { s.status = a.payload },
   },
 });
 
-// 自动生成的 action creators
-export const { increment, decrement, incrementByAmount, setStatus } = counterSlice.actions;
-// 自动生成的 reducer
+export const { increment, incrementByAmount, setStatus } = counterSlice.actions;
 export default counterSlice.reducer;
 ```
 
@@ -697,7 +666,6 @@ transition: fade-out
 <v-click>
 
 ```ts
-// store/index.ts
 import { configureStore } from "@reduxjs/toolkit";
 import counterReducer from "./counterSlice";
 import userReducer from "./userSlice";
@@ -710,13 +678,10 @@ export const store = configureStore({
     [apiSlice.reducerPath]: apiSlice.reducer,   // RTK Query slice
   },
   middleware: (getDefault) =>
-    getDefault({
-      serializableCheck: { ignoredActions: ["persist/REHYDRATE"] },
-    }).concat(apiSlice.middleware),
+    getDefault().concat(apiSlice.middleware),
   devTools: process.env.NODE_ENV !== "production",
 });
 
-// TypeScript 类型
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 ```
@@ -781,20 +746,14 @@ transition: fade-out
 <v-click>
 
 ```ts
-// store/userSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-// 定义 thunk：第一个泛型是 return 类型，第二个是 arg 类型
+// 泛型：<return 类型, arg 类型>
 export const fetchUser = createAsyncThunk<User, number>(
   "user/fetchUser",
   async (userId, { rejectWithValue }) => {
-    try {
-      const res = await fetch(`/api/users/${userId}`);
-      if (!res.ok) throw new Error("Network error");
-      return (await res.json()) as User;
-    } catch (e) {
-      return rejectWithValue((e as Error).message);
-    }
+    try { return (await (await fetch(`/api/users/${userId}`)).json()) as User }
+    catch (e) { return rejectWithValue((e as Error).message) }
   },
 );
 
@@ -867,7 +826,6 @@ dispatch 异步 action + 订阅 loading/error
 <v-click>
 
 ```tsx
-// UserProfile.tsx
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchUser } from "@/store/userSlice";
@@ -878,15 +836,13 @@ export function UserProfile({ id }: { id: number }) {
   const { data, loading, error } = useSelector((s: RootState) => s.user);
 
   useEffect(() => {
-    // dispatch thunk 返回一个 Promise（解析为最终 action）
     const promise = dispatch(fetchUser(id));
     return () => promise.abort();   // 卸载时取消请求
   }, [dispatch, id]);
 
   if (loading) return <p>加载中...</p>;
   if (error) return <p>错误：{error}</p>;
-  if (!data) return null;
-  return <h2>{data.name}</h2>;
+  return data ? <h2>{data.name}</h2> : null;
 }
 ```
 
@@ -957,19 +913,11 @@ createApi 一键生成 hooks + 缓存
 <v-click>
 
 ```ts
-// store/apiSlice.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const apiSlice = createApi({
   reducerPath: "api",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "/api",
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as RootState).auth.token;
-      if (token) headers.set("authorization", `Bearer ${token}`);
-      return headers;
-    },
-  }),
+  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
   tagTypes: ["Post", "User"],
   endpoints: (builder) => ({
     getPosts: builder.query<Post[], void>({
@@ -1041,13 +989,11 @@ transition: fade-out
 <v-click>
 
 ```tsx
-// PostList.tsx
 import { useGetPostsQuery, useAddPostMutation } from "@/store/apiSlice";
 
 export function PostList() {
   // 自动请求 + 缓存 + 重渲
   const { data: posts, isLoading, isError, refetch } = useGetPostsQuery();
-
   // mutation 返回元组：[trigger, result]
   const [addPost, { isLoading: isAdding }] = useAddPostMutation();
 
@@ -1057,13 +1003,7 @@ export function PostList() {
   return (
     <div>
       {posts?.map((p) => <h3 key={p.id}>{p.title}</h3>)}
-      <button
-        disabled={isAdding}
-        onClick={async () => {
-          await addPost({ title: "新帖子" }).unwrap();
-          // 不需要手动刷新，invalidatesTags 自动触发 getPosts 重新请求
-        }}
-      >
+      <button disabled={isAdding} onClick={() => addPost({ title: "新帖子" }).unwrap()}>
         {isAdding ? "提交中..." : "新增"}
       </button>
     </div>
@@ -1134,21 +1074,14 @@ transition: fade-out
 ```tsx
 // 轮询：每 5 秒重新请求
 const { data } = useGetPostsQuery(undefined, { pollingInterval: 5000 });
-
 // 条件查询：skip 控制是否触发
 const { data } = useGetUserQuery(userId, { skip: !userId });
-
 // 转换返回数据：selectFromResult
 const { ids } = useGetPostsQuery(undefined, {
   selectFromResult: ({ data }) => ({ ids: data?.map((p) => p.id) ?? [] }),
 });
 
-// refetchOnMountOrArgChange：参数变化时重新请求
-useGetPostQuery(id, { refetchOnMountOrArgChange: true });
-
-// 乐观更新（mutation）
-addPost({ title }).unwrap()
-// 或：updateQueryData 在 onQueryStarted 里手动更新
+// 乐观更新：onQueryStarted 里 dispatch updateQueryData
 endpoints: {
   updatePost: builder.mutation({
     query: ({ id, ...patch }) => ({ url: `/posts/${id}`, method: "PATCH", body: patch }),
@@ -1221,32 +1154,26 @@ transition: fade-out
 <v-click>
 
 ```ts
-// store/listenerMiddleware.ts
-import { createListenerMiddleware } from "@reduxjs/toolkit";
+import { createListenerMiddleware, isAnyOf } from "@reduxjs/toolkit";
 import { increment, decrement } from "./counterSlice";
-import { fetchUser } from "./userSlice";
 
 export const listenerMiddleware = createListenerMiddleware();
 
-// 监听特定 action，执行副作用
+// 监听特定 action，执行副作用（带防抖）
 listenerMiddleware.startListening({
   actionCreator: increment,
   effect: async (action, { dispatch, getState, cancelActiveListeners, delay }) => {
-    cancelActiveListeners();       // 取消同名监听器的旧实例（防抖）
-    await delay(500);              // 等 500ms
+    cancelActiveListeners();       // 取消旧实例
+    await delay(500);
     const state = getState() as RootState;
-    if (state.counter.value >= 10) {
-      dispatch(fetchUser(1));      // 派发其他 action
-    }
+    if (state.counter.value >= 10) dispatch(fetchUser(1));
   },
 });
 
 // 用 matcher 监听多个 action
 listenerMiddleware.startListening({
   matcher: isAnyOf(increment, decrement),
-  effect: (action, { dispatch }) => {
-    console.log("counter changed", action.type);
-  },
+  effect: (action) => console.log("counter changed", action.type),
 });
 ```
 
@@ -1316,8 +1243,7 @@ CRUD 列表数据的官方姿势
 <v-click>
 
 ```ts
-// store/postsSlice.ts
-import { createSlice, createEntityAdapter, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, createEntityAdapter } from "@reduxjs/toolkit";
 
 interface Post { id: number; title: string; createdAt: number }
 
@@ -1329,22 +1255,16 @@ const postsAdapter = createEntityAdapter<Post>({
 const postsSlice = createSlice({
   name: "posts",
   initialState: postsAdapter.getInitialState({ loading: false }),
-  // 注意 state 形状：{ ids: number[], entities: { [id]: Post }, loading: boolean }
+  // state: { ids: number[], entities: { [id]: Post }, loading }
   reducers: {
-    addPost: postsAdapter.addOne,                       // 自动生成
+    addPost: postsAdapter.addOne,
     updatePost: postsAdapter.updateOne,
     removePost: postsAdapter.removeOne,
-    upsertMany: postsAdapter.upsertMany,
-    setAll: postsAdapter.setAll,
   },
 });
 
-// 生成 selectors
-export const {
-  selectAll: selectAllPosts,
-  selectById: selectPostById,
-  selectIds: selectPostIds,
-} = postsAdapter.getSelectors((state: RootState) => state.posts);
+export const { selectAll: selectAllPosts, selectById: selectPostById }
+  = postsAdapter.getSelectors((s: RootState) => s.posts);
 ```
 
 </v-click>
@@ -1418,13 +1338,8 @@ transition: fade-out
 import { useDispatch, useSelector, useStore } from "react-redux";
 import type { RootState, AppDispatch, AppStore } from "./index";
 
-// 类型化的 useDispatch：自动推断 thunk 返回类型
 export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
-
-// 类型化的 useSelector：state 自动推断为 RootState
 export const useAppSelector = useSelector.withTypes<RootState>();
-
-// 类型化的 useStore（很少用）
 export const useAppStore = useStore.withTypes<AppStore>();
 ```
 
@@ -1439,12 +1354,11 @@ import { fetchUser } from "@/store/userSlice";
 
 function MyComponent() {
   const dispatch = useAppDispatch();
-  const user = useAppSelector((s) => s.user.data);   // s 自动是 RootState 类型
+  const user = useAppSelector((s) => s.user.data);
 
-  // dispatch thunk 返回 Promise，类型完整
   const handleClick = async () => {
     const result = await dispatch(fetchUser(1)).unwrap();
-    console.log(result.name);                         // result 类型自动推断
+    console.log(result.name);
   };
 }
 ```
@@ -1533,21 +1447,18 @@ export const store = configureStore({
 
 **DevTools 能做什么？**
 
-- **Action log**：所有 dispatch 时间线，含 action type + payload
+- **Action log**：所有 dispatch 时间线，含 type + payload
 - **State diff**：每个 action 前后 state 差异（绿/红高亮）
-- **时间旅行**：拖动 slider 让 state 回到任意时刻，UI 跟着回到那时
+- **时间旅行**：拖动 slider 让 state 回到任意时刻
 - **Skip action**：跳过某条 action 看「不发生会怎样」
 - **Dispatcher**：手动 dispatch 任意 action
-- **Export / Import**：导出当前 session JSON，发给同事复现 bug
-- **State tree**：树形可视化整个 state
+- **Export / Import**：导出 JSON，发给同事复现 bug
 
 </v-click>
 
 <v-click>
 
-**最佳实践**
-
-action type 用 `'slice/action'` 格式（createSlice 自动生成），DevTools 时间线一眼看出业务模块。
+action type 用 `'slice/action'`（createSlice 自动生成），时间线一眼看出业务模块。
 
 </v-click>
 
@@ -1607,7 +1518,6 @@ transition: fade-out
 <v-click>
 
 ```ts
-// store/index.ts
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
 import storage from "redux-persist/lib/storage";
@@ -1616,16 +1526,14 @@ const persistConfig = {
   key: "root",
   storage,
   whitelist: ["auth", "user"],   // 只持久化这些 slice
-  // 或 blacklist: ["ui"]          // 排除这些 slice
 };
 
-const rootReducer = combineReducers({ auth: authReducer, user: userReducer, ui: uiReducer });
+const rootReducer = combineReducers({ auth: authReducer, user: userReducer });
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefault) => getDefault({
-    // 必须忽略 persist 内部的非序列化 action
     serializableCheck: { ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER] },
   }),
 });
@@ -1699,7 +1607,6 @@ reducer 测试零设置
 <v-click>
 
 ```ts
-// counterSlice.test.ts
 import { describe, it, expect } from "vitest";
 import counterReducer, { increment, incrementByAmount } from "./counterSlice";
 
@@ -1711,13 +1618,11 @@ describe("counterSlice", () => {
   });
 
   it("should handle increment", () => {
-    const actual = counterReducer(initialState, increment());
-    expect(actual.value).toEqual(1);
+    expect(counterReducer(initialState, increment()).value).toEqual(1);
   });
 
   it("should handle incrementByAmount", () => {
-    const actual = counterReducer(initialState, incrementByAmount(5));
-    expect(actual.value).toEqual(5);
+    expect(counterReducer(initialState, incrementByAmount(5)).value).toEqual(5);
   });
 });
 ```
@@ -1804,27 +1709,16 @@ transition: fade-out
 
 ```tsx
 // test-utils.tsx
-import { render, type RenderOptions } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import rootReducer, { type RootState } from "@/store/rootReducer";
 
-interface ExtendedRenderOptions extends Omit<RenderOptions, "queries"> {
-  preloadedState?: Partial<RootState>;
-  store?: ReturnType<typeof setupStore>;
-}
-
 const setupStore = (preloadedState?: Partial<RootState>) =>
   configureStore({ reducer: rootReducer, preloadedState });
 
-export function renderWithProviders(
-  ui: React.ReactElement,
-  { preloadedState, store = setupStore(preloadedState), ...options }: ExtendedRenderOptions = {},
-) {
-  return {
-    store,
-    ...render(<Provider store={store}>{ui}</Provider>, options),
-  };
+export function renderWithProviders(ui, { preloadedState, store = setupStore(preloadedState), ...options } = {}) {
+  return { store, ...render(<Provider store={store}>{ui}</Provider>, options) };
 }
 
 // 测试用例
@@ -1898,23 +1792,13 @@ transition: fade-out
 **❌ 老 Redux：reducer 里直接修改 state**
 
 ```ts
-// 老 Redux：必须 immutable，不能 mutate
 function counterReducer(state, action) {
-  switch (action.type) {
-    case "INCREMENT":
-      state.value += 1;        // ❌ 严重错误：mutate state
-      return state;             // 引用没变，组件不会重渲
+  if (action.type === "INCREMENT") {
+    state.value += 1;        // ❌ mutate，引用没变，组件不重渲
+    return state;
   }
 }
-```
-
-</v-click>
-
-<v-click>
-
-**✅ 老 Redux：必须返回新对象**
-
-```ts
+// ✅ 老 Redux 必须返回新对象
 return { ...state, value: state.value + 1 };
 ```
 
@@ -1928,9 +1812,7 @@ return { ...state, value: state.value + 1 };
 const counterSlice = createSlice({
   name: "counter",
   initialState: { value: 0 },
-  reducers: {
-    increment: (state) => { state.value += 1 },  // ✅ Immer 自动转 immutable
-  },
+  reducers: { increment: (s) => { s.value += 1 } },  // ✅ Immer 自动转 immutable
 });
 ```
 
@@ -1938,7 +1820,7 @@ const counterSlice = createSlice({
 
 <v-click>
 
-注意：**只能在 createSlice 的 reducer 内部 mutate**，组件 / 外部代码绝对不能改 state！
+注意：**只能在 createSlice 的 reducer 内部 mutate**，组件/外部代码不能改 state！
 
 </v-click>
 
@@ -1995,21 +1877,17 @@ transition: fade-out
 
 <v-click>
 
-**❌ 错误：selector 返回新对象**
+**❌ 错误**：返回新对象，每次重渲都新引用
 
 ```tsx
-// 每次 useSelector 调用都生成新对象 → 总是重渲
-const { name, age } = useSelector((s: RootState) => ({
-  name: s.user.name,
-  age: s.user.age,
-}));
+const { name, age } = useSelector((s: RootState) => ({ name: s.user.name, age: s.user.age }));
 ```
 
 </v-click>
 
 <v-click>
 
-**✅ 方案 1：拆成多个 useSelector（最朴素）**
+**✅ 方案 1：拆成多个 useSelector**
 
 ```tsx
 const name = useSelector((s: RootState) => s.user.name);
@@ -2020,32 +1898,18 @@ const age = useSelector((s: RootState) => s.user.age);
 
 <v-click>
 
-**✅ 方案 2：配 shallowEqual**
+**✅ 方案 2：shallowEqual**
 
 ```tsx
 import { shallowEqual } from "react-redux";
-
-const { name, age } = useSelector(
-  (s: RootState) => ({ name: s.user.name, age: s.user.age }),
-  shallowEqual,
-);
+const { name, age } = useSelector((s: RootState) => ({ name: s.user.name, age: s.user.age }), shallowEqual);
 ```
 
 </v-click>
 
 <v-click>
 
-**✅ 方案 3：reselect 创建 memoized selector**
-
-```tsx
-import { createSelector } from "@reduxjs/toolkit";
-
-const selectUserSummary = createSelector(
-  [(s: RootState) => s.user.name, (s: RootState) => s.user.age],
-  (name, age) => ({ name, age }),
-);
-const summary = useSelector(selectUserSummary);
-```
+**✅ 方案 3：createSelector memoize（适合派生计算）** — `@reduxjs/toolkit` re-export 自 reselect，相同输入返回相同引用。
 
 </v-click>
 
@@ -2106,10 +1970,9 @@ SSR / 测试 / 多 store 场景
 
 <v-click>
 
-**❌ 错误：Provider 内层创建 store**
+**❌ Provider 内层创建 store（每次重渲都新建）**
 
 ```tsx
-// 每次 App 重渲都新建 store，state 会重置
 function App() {
   const store = configureStore({ reducer: rootReducer });
   return <Provider store={store}><Routes /></Provider>;
@@ -2120,32 +1983,20 @@ function App() {
 
 <v-click>
 
-**✅ 正确：store 在 Provider 外层创建一次**
+**✅ store 在 Provider 外层创建一次**
 
 ```tsx
 // store/index.ts
 export const store = configureStore({ reducer: rootReducer });
-
 // main.tsx
-createRoot(...).render(
-  <Provider store={store}><App /></Provider>,
-);
+createRoot(...).render(<Provider store={store}><App /></Provider>);
 ```
 
 </v-click>
 
 <v-click>
 
-**✅ Next.js SSR：useRef 保证 store 单例**
-
-```tsx
-"use client";
-export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const storeRef = useRef<AppStore>(null);
-  if (!storeRef.current) storeRef.current = makeStore();
-  return <Provider store={storeRef.current}>{children}</Provider>;
-}
-```
+**✅ Next.js SSR：工厂函数 + `useRef` 保证 store 单例**（每请求新建，跨用户隔离），写法见上一页 Provider 章节。
 
 </v-click>
 
@@ -2209,7 +2060,7 @@ dispatch().unwrap() 才能 catch
 
 <v-click>
 
-**❌ 错误：以为 dispatch 抛错就能 catch**
+**❌ 错误**：以为 dispatch 抛错就能 catch
 
 ```tsx
 async function handleSubmit() {
@@ -2217,8 +2068,7 @@ async function handleSubmit() {
     await dispatch(saveData(formValues));   // 不会 throw
     setSuccess(true);
   } catch (e) {
-    // 永远不会进来！rejected action 不 throw
-    setError(e.message);
+    setError(e.message);   // 永远不会进来！
   }
 }
 ```
@@ -2227,35 +2077,20 @@ async function handleSubmit() {
 
 <v-click>
 
-**✅ 正确：用 .unwrap() 解包 thunk action**
+**✅ 用 `.unwrap()` 解包 thunk action**
 
 ```tsx
-async function handleSubmit() {
-  try {
-    const result = await dispatch(saveData(formValues)).unwrap();
-    setSuccess(true);
-    console.log("saved:", result);
-  } catch (e) {
-    setError((e as Error).message);
-  }
-}
-```
-
-</v-click>
-
-<v-click>
-
-**或：检查 action.meta.requestStatus**
-
-```tsx
-const action = await dispatch(saveData(formValues));
-if (saveData.fulfilled.match(action)) {
+try {
+  await dispatch(saveData(formValues)).unwrap();
   setSuccess(true);
-  console.log(action.payload);
-} else {
-  setError(action.payload as string);
-}
+} catch (e) { setError((e as Error).message) }
 ```
+
+</v-click>
+
+<v-click>
+
+**或：`saveData.fulfilled.match(action)` 缩窄 action 类型后再读 payload**
 
 </v-click>
 
@@ -2315,24 +2150,19 @@ transition: fade-out
 
 <v-click>
 
-| 老 Redux 写法                              | RTK 写法                              |
-| ------------------------------------------ | ------------------------------------- |
-| `createStore(reducer)`                     | `configureStore({ reducer })`         |
-| `combineReducers({ ... })`                 | `configureStore({ reducer: { ... } })`|
-| 手写 action types + creators               | `createSlice` 自动生成                |
-| `switch(action.type)` reducer              | `createSlice` 的 reducers map         |
-| 手写 immutable spread                      | Immer 内置，直接 `state.x = y`        |
-| 手动 applyMiddleware(thunk, logger)        | `configureStore` 自动接 thunk         |
-| 手写异步 action（thunk 函数）              | `createAsyncThunk`                    |
-| 手写 normalized state CRUD                 | `createEntityAdapter`                 |
-| 手写 fetch + cache                         | `RTK Query` createApi                 |
-| `connect(mapState, mapDispatch)`           | `useSelector + useDispatch` hooks     |
+| 老 Redux 写法                       | RTK 写法                              |
+| ----------------------------------- | ------------------------------------- |
+| `createStore(reducer)`              | `configureStore({ reducer })`         |
+| 手写 action types + creators        | `createSlice` 自动生成                |
+| 手写 immutable spread               | Immer 内置，直接 `state.x = y`        |
+| 手写异步 action                     | `createAsyncThunk`                    |
+| `connect(mapState, mapDispatch)`    | `useSelector + useDispatch` hooks     |
 
 </v-click>
 
 <v-click>
 
-**迁移建议**：旧项目不要一次性重写，按 slice 渐进式迁移 —— 老 reducer 和新 slice.reducer 可以同时存在于 configureStore 里。
+**迁移建议**：旧项目不要一次性重写，按 slice 渐进式迁移 —— 老 reducer 和新 `slice.reducer` 可同时存在于 `configureStore`。
 
 </v-click>
 
@@ -2393,50 +2223,32 @@ transition: fade-out
 
 # 实战：完整 Cart Store（RTK 版）
 
-createSlice + createAsyncThunk + entity adapter
-
 <v-click>
 
 ```ts
-// store/cartSlice.ts
 import { createSlice, createAsyncThunk, createEntityAdapter, type PayloadAction } from "@reduxjs/toolkit";
-import type { RootState } from "@/store";
 
 interface CartItem { id: string; name: string; price: number; qty: number }
-interface CartState { loading: boolean; error: string | null }
-
 const cartAdapter = createEntityAdapter<CartItem>();
-
-export const syncCart = createAsyncThunk<CartItem[]>("cart/sync", async () => {
-  const res = await fetch("/api/cart");
-  return res.json();
-});
+export const syncCart = createAsyncThunk<CartItem[]>("cart/sync", async () =>
+  (await fetch("/api/cart")).json());
 
 const cartSlice = createSlice({
   name: "cart",
-  initialState: cartAdapter.getInitialState<CartState>({ loading: false, error: null }),
+  initialState: cartAdapter.getInitialState(),
   reducers: {
     addItem: (s, { payload }: PayloadAction<Omit<CartItem, "qty">>) => {
       const exist = s.entities[payload.id];
       if (exist) exist.qty += 1;
       else cartAdapter.addOne(s, { ...payload, qty: 1 });
     },
-    setQty: (s, { payload }: PayloadAction<{ id: string; qty: number }>) => {
-      cartAdapter.updateOne(s, { id: payload.id, changes: { qty: payload.qty } });
-    },
     removeItem: cartAdapter.removeOne,
-    clear: cartAdapter.removeAll,
   },
-  extraReducers: (b) => {
-    b.addCase(syncCart.pending, (s) => { s.loading = true })
-     .addCase(syncCart.fulfilled, (s, { payload }) => { s.loading = false; cartAdapter.setAll(s, payload) })
-     .addCase(syncCart.rejected, (s, { error }) => { s.loading = false; s.error = error.message ?? null });
-  },
+  extraReducers: (b) => b.addCase(syncCart.fulfilled, (s, { payload }) => { cartAdapter.setAll(s, payload) }),
 });
 
-export const { addItem, setQty, removeItem, clear } = cartSlice.actions;
-export const { selectAll: selectCartItems, selectIds } = cartAdapter.getSelectors((s: RootState) => s.cart);
-export default cartSlice.reducer;
+export const { addItem, removeItem } = cartSlice.actions;
+export const selectCartItems = cartAdapter.getSelectors((s: RootState) => s.cart).selectAll;
 ```
 
 </v-click>
@@ -2517,21 +2329,17 @@ src/
   store/
     index.ts                  # configureStore + 类型导出
     hooks.ts                  # useAppSelector / useAppDispatch
-    rootReducer.ts            # combineReducers（如需）
     listenerMiddleware.ts     # 自定义副作用
   features/
     auth/
       authSlice.ts            # createSlice
       authThunks.ts           # createAsyncThunk
-      authSelectors.ts        # createSelector（可选）
-      LoginForm.tsx           # 组件
-      auth.test.ts            # 测试
+      LoginForm.tsx
     cart/
       cartSlice.ts
       cartApi.ts              # RTK Query createApi
       CartView.tsx
-  api/
-    baseApi.ts                # 共享 createApi（reducerPath: 'api'）
+  api/baseApi.ts              # 共享 createApi
   test-utils.tsx              # renderWithProviders
 ```
 
@@ -2539,12 +2347,7 @@ src/
 
 <v-click>
 
-**命名约定**
-
-- Slice 文件：`featureNameSlice.ts`
-- Thunk 函数：动词起头（`fetchUser` / `saveCart`）
-- Action：自动生成（`auth/login` / `cart/addItem`）
-- Selector：`select` 前缀（`selectAuthToken` / `selectCartTotal`）
+**命名约定**：Slice 用 `xxxSlice.ts` / Thunk 动词起头 / Selector 用 `select` 前缀。
 
 </v-click>
 
@@ -2622,22 +2425,17 @@ transition: fade-out
 **1. selector 粒度细化**
 
 ```ts
-// ❌ 订阅整个 user 对象
-const user = useSelector((s: RootState) => s.user);
-// ✅ 只订阅需要的字段
-const name = useSelector((s: RootState) => s.user.name);
+const user = useSelector((s: RootState) => s.user);          // ❌ 订阅整个对象
+const name = useSelector((s: RootState) => s.user.name);     // ✅ 只订阅字段
 ```
 
 </v-click>
 
 <v-click>
 
-**2. memoize 派生计算**
+**2. memoize 派生计算（createSelector 缓存）**
 
 ```ts
-// ❌ 每次重渲都重新计算 filtered
-const filtered = useSelector((s) => s.posts.filter(p => p.public));
-// ✅ createSelector 缓存
 const selectPublicPosts = createSelector(
   [(s: RootState) => s.posts],
   (posts) => posts.filter(p => p.public),
@@ -2648,19 +2446,7 @@ const selectPublicPosts = createSelector(
 
 <v-click>
 
-**3. 用 entity adapter 而非数组**
-
-</v-click>
-
-<v-click>
-
-**4. 用 RTK Query 而非自己写 cache**
-
-</v-click>
-
-<v-click>
-
-**5. immutable check / serializable check 仅 dev 启用**
+**3. 列表用 entity adapter 而非数组** — **4. 缓存用 RTK Query** — **5. check middleware 仅 dev**
 
 </v-click>
 
@@ -2727,17 +2513,15 @@ transition: fade-out
 
 <v-click>
 
-| 场景                            | 推荐方案              | 原因                                |
-| ------------------------------- | --------------------- | ----------------------------------- |
-| React 中大型项目 / 多团队       | **Redux Toolkit**     | 规范化、招人简单、生态完整          |
-| 需要 API 缓存 + 状态管理一体    | **RTK Query**         | 一站式，省装 TanStack Query         |
-| React 小型项目 / 个人项目       | **Zustand**           | 极简、无 Provider、~1 KB            |
-| React + 大量独立小状态          | **Jotai**             | atom 颗粒度小，按需订阅             |
-| React + Vue 风格响应式偏好      | **Valtio / MobX**     | proxy mutable 写法                  |
-| Vue 3 项目                      | **Pinia**             | Vue 官方推荐                        |
-| 异步数据（搭配任何状态库）      | **TanStack Query**    | 框架无关，社区最大                  |
-| URL state（筛选 / 分页）        | URL params + nuqs     | 不要塞进 Redux                      |
-| 表单状态                        | React Hook Form       | 不要塞进 Redux                      |
+| 场景                          | 推荐方案           | 原因                          |
+| ----------------------------- | ------------------ | ----------------------------- |
+| React 中大型项目 / 多团队     | **Redux Toolkit**  | 规范化、生态完整              |
+| API 缓存 + 状态管理一体       | **RTK Query**      | 一站式，省装 TanStack Query   |
+| React 小型项目 / 个人项目     | **Zustand**        | 极简、~1 KB                   |
+| React + 大量独立小状态        | **Jotai**          | atom 颗粒度小                 |
+| Vue 3 项目                    | **Pinia**          | Vue 官方推荐                  |
+| 异步数据（任何框架）          | **TanStack Query** | 框架无关，社区最大            |
+| URL state / 表单状态          | nuqs / RHF         | 不要塞进 Redux                |
 
 </v-click>
 
@@ -2907,7 +2691,6 @@ transition: fade-out
 - [Redux 官方文档](https://redux.js.org/) — 必读，重点看 Tutorials / Style Guide
 - [Redux Toolkit 文档](https://redux-toolkit.js.org/) — 现代 Redux 全套
 - [Redux Essentials 教程](https://redux.js.org/tutorials/essentials/part-1-overview-concepts) — 6 part 完整实战
-- [Redux Fundamentals 教程](https://redux.js.org/tutorials/fundamentals/part-1-overview) — 原理 + 老 Redux 用法
 
 </v-click>
 
@@ -2917,19 +2700,13 @@ transition: fade-out
 
 - [redux-persist](https://github.com/rt2zz/redux-persist) — 状态持久化
 - [reselect](https://github.com/reduxjs/reselect) — memoized selectors（RTK 已包含）
-- [redux-logger](https://github.com/LogRocket/redux-logger) — console 日志 middleware
-- [redux-saga](https://github.com/redux-saga/redux-saga) — Generator 副作用方案（高级场景）
 - [redux-state-sync](https://github.com/aohua/redux-state-sync) — 跨 tab 同步
 
 </v-click>
 
 <v-click>
 
-**实战项目参考**
-
-- [RealWorld - React Redux](https://github.com/gothinkster/react-redux-realworld-example-app) — 完整 SPA 示例
-- [Redux GitHub Issues 应用](https://redux.js.org/tutorials/essentials/part-5-async-logic) — 官方教程项目
-- 《Learning Redux》 — Mark Erikson 著
+**实战项目**：[RealWorld - React Redux](https://github.com/gothinkster/react-redux-realworld-example-app) / 《Learning Redux》Mark Erikson
 
 </v-click>
 

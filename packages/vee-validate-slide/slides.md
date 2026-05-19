@@ -793,23 +793,19 @@ transition: slide-up
 | --- | --- |
 | 邮箱、用户名格式 | `validateOnBlur`（输入完才校验） |
 | 密码强度提示 | `validateOnInput`（实时反馈） |
-| 数字范围 | `validateOnChange` |
 | 异步唯一性 | `validateOnBlur` + debounce |
 | 跨字段依赖（二次密码） | 任一字段改变都校验，`validateOnInput` |
-| 整表大型校验 | 仅 submit 校验，`validateOnInput: false` |
 
 ```ts
 configure({
   validateOnInput: false,
   validateOnBlur: true,
-  validateOnChange: false,
-  validateOnModelUpdate: true,
 });
 ```
 
 <v-click>
 
-全局默认 + 字段级覆盖。**输入即时校验**虽然及时，但太多会打扰用户；多数场景 `validateOnBlur` 是平衡点。
+全局默认 + 字段级覆盖。多数场景 `validateOnBlur` 是平衡点——输入即时校验虽然及时，但太多会打扰用户。
 
 </v-click>
 

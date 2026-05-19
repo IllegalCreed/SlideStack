@@ -306,19 +306,12 @@ transition: slide-up
 
 <v-click>
 
-输出示例
-
 ```md
 # 评论系统设计
-## 需求范围
-- 支持嵌套？最大层级？审核？
-## Schema / API
-GET /api/comments?postId=...
-POST /api/comments
-## 实施步骤 ...
+## 需求范围 / Schema / API / 实施步骤 ...
 ```
 
-类似 superpowers 的 `brainstorming + writing-plans` 组合，但更工程化——直接落地为 ADR。
+类似 superpowers `brainstorming + writing-plans`，但更工程化——直接落地为 ADR。
 
 </v-click>
 
@@ -568,18 +561,15 @@ transition: slide-up
 
 # Hook 模板速查（15+ 类）
 
+**编辑触发类**
+
 | 模板 | 何时触发 | 做什么 |
 | --- | --- | --- |
-| `lint-on-edit` | Edit TS/JS/Vue 后 | 跑 ESLint / Prettier |
-| `typecheck-on-edit` | Edit TS 后 | 跑 `tsc --noEmit` |
-| `test-on-edit` | Edit src/ 后 | 跑相关 unit test |
-| `format-on-write` | Write 后 | 跑 prettier --write |
-| `audit-bash` | Bash 前 | 记日志 + 高危命令拦截 |
-| `commit-validation` / `push-protection` | git commit/push | commitlint / 阻止 main 直推 |
-| `mcp-call-log` / `cost-monitor` | MCP / tool 调用 | audit log / token 消耗告警 |
-| `security-scan-on-edit` | Edit 后 | 跑 AgentShield 快速扫描 |
-| `pii-scrubbing` | Write 前 | 清理 email / 手机号 |
-| `git-worktree-init` / `post-deployment-verify` | 工作流 | worktree 隔离 / smoke test |
+| `lint-on-edit` / `format-on-write` | Edit / Write 后 | ESLint / Prettier |
+| `typecheck-on-edit` / `test-on-edit` | Edit 后 | `tsc --noEmit` / unit test |
+| `security-scan-on-edit` / `pii-scrubbing` | Edit / Write | AgentShield / 清理敏感信息 |
+
+**工具 / 工作流类**：`audit-bash`（Bash 前记日志 + 拦截高危）、`commit-validation` / `push-protection`（commitlint / 阻止 main 直推）、`mcp-call-log` / `cost-monitor`（audit log / token 告警）、`git-worktree-init` / `post-deployment-verify`（worktree / smoke test）
 
 ---
 transition: slide-up
@@ -774,22 +764,16 @@ transition: slide-up
 | 维度 | superpowers | ECC |
 | --- | --- | --- |
 | 体量 | 15-25 skill | 230+ skill + 60 agent |
-| 哲学 | 流程严格（mandatory workflow） | 工程基础设施（functional） |
+| 哲学 | 流程严格 | 工程基础设施 |
 | 安全扫描 | 无 | AgentShield |
 | 多语言 rules | 无 | TS/Python/Go/Java/Rust/PHP/Kotlin |
-| 跨 harness | yes | yes |
-| 学习曲线 | 低 | 中 |
-| 系统提示开销 | 低 | 中-高 |
+| 学习曲线 / 系统提示开销 | 低 / 低 | 中 / 中-高 |
 
 <v-click>
 
-**单选建议**
+**单选建议**：全栈 + 多语言 → ECC core；单语言 + 重视流程 → superpowers；企业级 + 需要安全扫描 → ECC（AgentShield 不可替代）
 
-- **全栈 / 多人团队 + 多语言** → ECC core
-- **单语言（如 TS）+ 重视流程** → superpowers
-- **企业级 + 需要安全扫描** → ECC（AgentShield 不可替代）
-
-**不要两个都装**：skill 名冲突（`test-driven-development` 两边都有），Agent 选哪个不确定。
+**不要两个都装**：skill 名冲突（`test-driven-development` 两边都有）。
 
 </v-click>
 
@@ -808,13 +792,7 @@ transition: slide-up
 
 <v-click>
 
-ECC skill 例子
-
-- `ecc:test-driven-development`
-- `ecc:systematic-debugging`
-- `ecc:multi-language-rules`
-- `ecc:agentshield-scan-before-commit`
-- `ecc:planning-document-template`
+ECC skill 例子：`ecc:test-driven-development` / `ecc:systematic-debugging` / `ecc:multi-language-rules` / `ecc:agentshield-scan-before-commit` / `ecc:planning-document-template`
 
 </v-click>
 
@@ -828,11 +806,9 @@ transition: slide-up
 ecc install [--profile <name>] [--harness <name>] [--dry-run] [--force]
 ```
 
-| Flag | 说明 |
-| --- | --- |
-| `--profile` | `minimal` / `core` / `full`（默认 core） |
-| `--harness` | `claude-code` / `codex` / `cursor` / `opencode` / `all` |
-| `--dry-run` | 不实际装，只列出会做的事 |
+- `--profile`：`minimal` / `core` / `full`（默认 core）
+- `--harness`：`claude-code` / `codex` / `cursor` / `opencode` / `all`
+- `--dry-run`：不实际装，只列出会做的事
 
 <v-click>
 
@@ -840,12 +816,9 @@ ecc install [--profile <name>] [--harness <name>] [--dry-run] [--force]
 ecc shield scan [path] [flags]
 ```
 
-| Flag | 说明 |
-| --- | --- |
-| `--fail-on-medium` | medium 及以上 exit 1 |
-| `--include <glob>` / `--exclude <glob>` | 文件过滤 |
-| `--format json` | JSON 输出给 CI |
-| `--severity-min <level>` | 仅显示 ≥ 该 severity |
+- `--fail-on-medium`：medium 及以上 exit 1
+- `--include` / `--exclude <glob>`：文件过滤
+- `--format json`：JSON 输出给 CI；`--severity-min <level>`：仅显示 ≥ 该 severity
 
 </v-click>
 

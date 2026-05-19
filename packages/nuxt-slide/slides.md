@@ -241,9 +241,7 @@ const config = useRuntimeConfig();
 <v-click>
 
 **自动导入清单**：
-- `app/components/` 组件
-- `app/composables/` 函数（约定 `use*`）
-- `app/utils/` 纯函数
+- `app/components/` 组件、`app/composables/` 函数、`app/utils/` 纯函数
 - Vue API：`ref` / `computed` / `watch` / 生命周期
 - Nuxt API：`useFetch` / `useAsyncData` / `useState` 等
 
@@ -585,9 +583,7 @@ const { data, pending, error, refresh, status, execute, clear } = await useFetch
     // ─── 请求行为 ───
     method: "GET",
     query: { page: 1, size: 20 },
-    body: { /* POST 时 */ },
     headers: { "X-Token": token.value },
-    credentials: "include",
 
     // ─── 响应处理 ───
     transform: (res) => res.data.map((x) => ({ ...x, slug: slugify(x.title) })),
@@ -597,12 +593,10 @@ const { data, pending, error, refresh, status, execute, clear } = await useFetch
     // ─── 调度策略 ───
     lazy: false,                    // true：不阻塞导航
     immediate: true,                // false：手动 execute()
-    server: true,                   // false：跳过 SSR
     watch: [page, size],            // 依赖变更自动 refresh
 
     // ─── 缓存 ───
     key: "articles",                // 跨组件共享
-    getCachedData: (key, nuxt) => nuxt.payload.data[key],
   },
 );
 ```
@@ -759,26 +753,19 @@ transition: slide-up
 
 ```ts
 // app/app.config.ts → 构建期常量（前端可访问）
-export default defineAppConfig({
-  theme: { primary: "#00DC82" },
-  feature: { newCheckout: true },
-});
+export default defineAppConfig({ theme: { primary: "#00DC82" } });
 
 // nuxt.config.ts → 运行期环境变量
 export default defineNuxtConfig({
   runtimeConfig: {
-    apiSecret: "",                       // 仅服务端可见，从 NUXT_API_SECRET env
-    public: {
-      apiBase: "https://api.example.com", // 客户端可见，从 NUXT_PUBLIC_API_BASE
-    },
+    apiSecret: "",                       // 仅服务端，从 NUXT_API_SECRET
+    public: { apiBase: "" },             // 客户端，从 NUXT_PUBLIC_API_BASE
   },
 });
-```
 
-```ts
 // 使用
-const appConfig = useAppConfig();     // 全局共享，构建期
-const runtimeConfig = useRuntimeConfig(); // 运行期，可被 env 覆盖
+const appConfig = useAppConfig();         // 构建期
+const runtimeConfig = useRuntimeConfig(); // 运行期，env 可覆盖
 ```
 
 | 场景 | 选 |
@@ -1006,9 +993,7 @@ transition: slide-up
 image: {
   provider: "ipx",          // 内置；也可 cloudinary / vercel / netlify
   domains: ["cdn.example.com"],
-  presets: {
-    avatar: { modifiers: { format: "webp", width: 96, height: 96 } },
-  },
+  presets: { avatar: { modifiers: { format: "webp", width: 96, height: 96 } } },
 }
 ```
 

@@ -532,19 +532,9 @@ gitlab-runner register --token glrt-xxxxxxxxxxxxxxxxx \
 transition: slide-up
 ---
 
-# Runner Executor 对比
-
-| Executor | 隔离 | 资源 | 适合 |
-| --- | --- | --- | --- |
-| `shell` | 无（裸跑） | 低 | 简单脚本，需访问 host 工具 |
-| `docker` | 容器 | 中 | **首选**：每 job 独立容器 |
-| `docker+machine` | 动态 VM | 中 | 按需扩缩容（已被 Custom Executor 替代）|
-| `kubernetes` | Pod | 中 | K8s 集群中跑 runner |
-| `ssh` | 远端机器 | 中 | 老式部署 / 跨网 |
-| `custom` | 自定义 | 灵活 | 接 Lambda / FaaS / 其它 |
+# Runner config.toml
 
 ```toml
-# config.toml
 concurrent = 10    # runner 进程全局并发上限
 
 [[runners]]
@@ -559,6 +549,12 @@ concurrent = 10    # runner 进程全局并发上限
     privileged = false
     volumes = ["/cache"]
 ```
+
+<v-click>
+
+`concurrent` 是 runner 进程全局上限；`limit` 是单个 `[[runners]]` 块上限。pull_policy 设 `if-not-present` 避免每 job 拉镜像。
+
+</v-click>
 
 ---
 transition: slide-up
@@ -645,7 +641,6 @@ transition: slide-up
 include:
   - local: ".gitlab-ci/templates/node-build.yml"
   - template: "Security/SAST.gitlab-ci.yml"      # GitLab 内置
-  - remote: "https://example.com/ci-template.yml"
   - project: "templates/shared-ci"
     ref: main
     file: "deploy.yml"
@@ -679,14 +674,9 @@ test:unit:
   needs: [build:lib]             # build:lib 完就跑，不等 build:app
   script: pnpm test:unit
 
-test:e2e:
-  stage: test
-  needs: [build:app]
-  script: pnpm test:e2e
-
 deploy:
   stage: deploy
-  needs: [test:unit, test:e2e]
+  needs: [test:unit, build:app]
 ```
 
 <v-click>

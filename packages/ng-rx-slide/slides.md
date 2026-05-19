@@ -58,27 +58,17 @@ transition: fade-out
 
 # 什么是 NgRx？
 
-为 Angular 应用提供 Redux 模式状态管理 + RxJS 副作用编排的官方推荐方案
+Angular 官方推荐的 Redux + RxJS 状态管理方案
 
 <v-click>
 
-- **Redux 派 + RxJS**：Action / Reducer / Selector 经典三件套，副作用用 Observable 编排
-- **Angular 优先**：与 DI / Standalone / Signals / Router / SSR 深度集成
-- **模块矩阵**：store / effects / entity / router-store / component-store / signals
-- **@ngrx/signals 新引擎**：基于 Angular Signals 的 SignalStore，零 boilerplate
-- **完整生态**：DevTools / schematics / 时间旅行 / 测试工具一应俱全
-- **类型完整**：createAction / createReducer / createFeature 全链路类型推导
-- **企业级首选**：大型 Angular 项目（IBM / Adobe / Capital One）实战验证
+- **Redux 三件套**：Action / Reducer / Selector，副作用用 RxJS 编排
+- **Angular 优先**：DI / Standalone / Signals / Router 深度集成
+- **模块矩阵**：store / effects / entity / router-store / signals
+- **@ngrx/signals 新引擎**：基于 Signals 的零 boilerplate store
+- **企业级首选**：IBM / Adobe / Capital One 实战验证
 
 </v-click>
-
-<br>
-
-<div v-click text-xs>
-
-_Read more about_ [_NgRx Introduction_](https://ngrx.io/docs)
-
-</div>
 
 <style>
 h1 {
@@ -138,25 +128,16 @@ Angular 状态管理模块矩阵，按规模分层使用
 
 <v-click>
 
-| 维度          | @ngrx/store        | @ngrx/signals      | @ngrx/component-store | Angular Services |
-| ------------- | ------------------ | ------------------ | --------------------- | ---------------- |
-| 范围          | **全局 store**     | 全局 / 局部均可    | **组件级局部 store**  | 任意（无强约束） |
-| 模式          | Redux (Action/Reducer) | Signal-first   | Reactive (RxJS)       | DIY              |
-| 写法          | createAction + reducer | withState + withMethods | initialState + updater | 类 + Observable  |
-| 派生          | createSelector     | **withComputed**   | select(...)           | 手写 pipe        |
-| 副作用        | @ngrx/effects      | rxMethod / 自定义  | effect(...)           | service 内 RxJS  |
-| DevTools      | **Redux DevTools** | Redux DevTools     | Redux DevTools        | 无               |
-| 样板代码      | 较多               | **极少**           | 中等                  | 视实现           |
-| TypeScript    | 完整推导           | **优秀（Signal 推导）** | 完整推导          | 视实现           |
-| 适用场景      | **企业级 / 多人**  | 中小型 / 单页面    | 复杂组件局部状态      | 简单 service     |
+| 维度       | @ngrx/store        | @ngrx/signals       | component-store     |
+| ---------- | ------------------ | ------------------- | ------------------- |
+| 范围       | **全局 store**     | 全局 / 局部均可     | **组件级局部**      |
+| 模式       | Redux (Action)     | Signal-first        | Reactive (RxJS)     |
+| 派生       | createSelector     | **withComputed**    | select(...)         |
+| 副作用     | @ngrx/effects      | rxMethod            | effect(...)         |
+| 样板代码   | 较多               | **极少**            | 中等                |
+| 适用场景   | **企业级 / 多人**  | 中小型 / 单页面     | 复杂组件局部状态    |
 
 </v-click>
-
-<div v-click text-xs text-right>
-
-_Read more about_ [_NgRx Architecture_](https://ngrx.io/guide/store)
-
-</div>
 
 <style>
 h1 {
@@ -224,16 +205,14 @@ transition: fade-out
 
 <v-click>
 
-| 时期               | 代表 API                              | 痛点 / 亮点                           |
-| ------------------ | ------------------------------------- | ------------------------------------- |
-| **2016 元年**      | StoreModule.provideStore + reducer    | Redux 模式首次为 Angular 移植         |
-| **2018 v6 重写**   | createAction + createReducer          | TypeScript 友好，告别 enum action types |
-| **2019 v8 Entity** | createEntityAdapter                   | normalized state 标准化               |
-| **2020 v10 selector** | createFeatureSelector + createSelector | selector 类型推导完善              |
-| **2022 v14 standalone** | provideStore / provideEffects      | 配合 Angular Standalone API           |
-| **2023 v16 Signals** | @ngrx/signals 实验性发布            | 探索 Angular Signals 集成             |
-| **2024 v18 SignalStore GA** | withState / withMethods         | 新一代 store，零 boilerplate          |
-| **2026 v19 当前**  | Functional Effects + SignalStore 稳定 | Standalone-first 全面对齐 Angular 19  |
+| 时期                  | 代表 API                          | 亮点                          |
+| --------------------- | --------------------------------- | ----------------------------- |
+| **2016 元年**         | StoreModule.provideStore          | Redux 模式首次为 Angular 移植 |
+| **2018 v6**           | createAction + createReducer      | TS 友好，告别 enum            |
+| **2019 v8 Entity**    | createEntityAdapter               | normalized state 标准化       |
+| **2022 v14**          | provideStore / provideEffects     | Standalone API                |
+| **2024 v18**          | SignalStore GA                    | 零 boilerplate 新引擎         |
+| **2026 v19 当前**     | Functional Effects 稳定           | 全面对齐 Angular 19           |
 
 </v-click>
 
@@ -298,37 +277,22 @@ Redux 三大原则 + Angular 集成 + RxJS 副作用
 
 <v-click>
 
-**1. Single Source of Truth（单一数据源）**
+**1. Single Source of Truth** — 整个应用 state 在一棵 store 树
 
-整个应用 state 存在一棵 store 树，便于调试 / SSR hydration / 时间旅行。
+**2. State is Read-Only** — 只能通过 dispatch action 变更
 
-</v-click>
-
-<v-click>
-
-**2. State is Read-Only（State 只读）**
-
-不能直接修改 state，唯一变更方式是 dispatch action。
+**3. Pure Reducers** — reducer 是纯函数，无副作用
 
 </v-click>
 
 <v-click>
 
-**3. Changes via Pure Reducers（纯函数变更）**
+**NgRx 现代理念**
 
-reducer 接收旧 state 和 action，返回新 state（必须纯函数，无副作用）。
-
-</v-click>
-
-<v-click>
-
-**NgRx 在此之上叠加的现代理念**
-
-- Effects = 副作用专属层（基于 RxJS Observable）
-- Selectors = memoized 派生计算（自动缓存）
-- Entity Adapter = normalized state 标准化
-- SignalStore = 基于 Angular Signals 的零样板新引擎
-- DevTools = 时间旅行 + action 重放
+- Effects = 副作用层（RxJS Observable）
+- Selectors = memoized 派生计算
+- Entity Adapter = normalized state
+- SignalStore = Signals 零样板新引擎
 
 </v-click>
 
@@ -422,21 +386,14 @@ NgRx 全家桶，一行 ng add 装齐
 ng add @ngrx/store@latest
 ng add @ngrx/effects@latest
 ng add @ngrx/store-devtools@latest
-
-# 或手动安装
-pnpm add @ngrx/store @ngrx/effects \
-  @ngrx/store-devtools @ngrx/entity \
-  @ngrx/router-store @ngrx/signals
 ```
 
-| 包                     | 作用                          |
-| ---------------------- | ----------------------------- |
-| @ngrx/store            | 核心 store + reducer          |
-| @ngrx/effects          | 副作用（RxJS）                |
-| @ngrx/entity           | normalized state              |
-| @ngrx/router-store     | 路由 state 同步               |
-| @ngrx/signals          | SignalStore（新引擎）         |
-| @ngrx/store-devtools   | Redux DevTools 集成           |
+| 包                     | 作用                  |
+| ---------------------- | --------------------- |
+| @ngrx/store            | 核心 store + reducer  |
+| @ngrx/effects          | 副作用（RxJS）        |
+| @ngrx/entity           | normalized state      |
+| @ngrx/signals          | SignalStore           |
 
 </v-click>
 
@@ -448,14 +405,6 @@ pnpm add @ngrx/store @ngrx/effects \
 
 ```ts
 // app.config.ts
-import { ApplicationConfig, isDevMode } from "@angular/core";
-import { provideStore } from "@ngrx/store";
-import { provideEffects } from "@ngrx/effects";
-import { provideStoreDevtools } from "@ngrx/store-devtools";
-import { provideRouterStore } from "@ngrx/router-store";
-import { reducers } from "./reducers";
-import { CounterEffects } from "./counter.effects";
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideStore(reducers),
@@ -545,29 +494,19 @@ NgRx 经典 store 的核心三个原语
 import { createAction, props } from "@ngrx/store";
 
 export const increment = createAction("[Counter] Increment");
-export const decrement = createAction("[Counter] Decrement");
 export const set = createAction("[Counter] Set", props<{ value: number }>());
 
 // counter.reducer.ts
-import { createReducer, on } from "@ngrx/store";
-import * as CounterActions from "./counter.actions";
-
-export interface CounterState {
-  value: number;
-}
-
+export interface CounterState { value: number }
 const initialState: CounterState = { value: 0 };
 
 export const counterReducer = createReducer(
   initialState,
-  on(CounterActions.increment, (state) => ({ ...state, value: state.value + 1 })),
-  on(CounterActions.decrement, (state) => ({ ...state, value: state.value - 1 })),
-  on(CounterActions.set, (state, { value }) => ({ ...state, value })),
+  on(increment, (s) => ({ ...s, value: s.value + 1 })),
+  on(set, (s, { value }) => ({ ...s, value })),
 );
 
 // counter.selectors.ts
-import { createFeatureSelector, createSelector } from "@ngrx/store";
-
 export const selectCounterState = createFeatureSelector<CounterState>("counter");
 export const selectValue = createSelector(selectCounterState, (s) => s.value);
 ```
@@ -640,14 +579,7 @@ transition: fade-out
 
 ```ts
 // counter.feature.ts
-import { createFeature, createReducer, on } from "@ngrx/store";
-import * as CounterActions from "./counter.actions";
-
-export interface CounterState {
-  value: number;
-  loading: boolean;
-}
-
+export interface CounterState { value: number; loading: boolean }
 const initialState: CounterState = { value: 0, loading: false };
 
 export const counterFeature = createFeature({
@@ -655,24 +587,16 @@ export const counterFeature = createFeature({
   reducer: createReducer(
     initialState,
     on(CounterActions.increment, (s) => ({ ...s, value: s.value + 1 })),
-    on(CounterActions.loadStart, (s) => ({ ...s, loading: true })),
     on(CounterActions.loadSuccess, (s, { value }) => ({ ...s, value, loading: false })),
   ),
 });
 
-// 自动生成 selector：
-// counterFeature.selectCounterState
-// counterFeature.selectValue
-// counterFeature.selectLoading
+// 自动生成：counterFeature.selectValue / selectLoading
 
 // app.config.ts
-providers: [
-  provideStore(),
-  provideState(counterFeature),  // 注册 feature
-],
+providers: [provideStore(), provideState(counterFeature)];
 
-// 组件里使用
-constructor(private store: Store) {}
+// 组件
 value$ = this.store.select(counterFeature.selectValue);
 ```
 
@@ -739,38 +663,20 @@ inject() + select / dispatch 两步走
 <v-click>
 
 ```ts
-// counter.component.ts
-import { Component, inject } from "@angular/core";
-import { Store } from "@ngrx/store";
-import { CommonModule } from "@angular/common";
-import * as CounterActions from "./counter.actions";
-import { counterFeature } from "./counter.feature";
-
 @Component({
-  selector: "app-counter",
   standalone: true,
-  imports: [CommonModule],
   template: `
-    <div class="counter">
-      <h2>Count: {{ value$ | async }}</h2>
-      <button (click)="increment()">+</button>
-      <button (click)="decrement()">-</button>
-    </div>
+    <h2>Count: {{ value$ | async }}</h2>
+    <button (click)="increment()">+</button>
   `,
 })
 export class CounterComponent {
   private store = inject(Store);
 
-  // 订阅 selector：async pipe 自动 subscribe / unsubscribe
+  // async pipe 自动 subscribe / unsubscribe
   value$ = this.store.select(counterFeature.selectValue);
 
-  increment() {
-    this.store.dispatch(CounterActions.increment());
-  }
-
-  decrement() {
-    this.store.dispatch(CounterActions.decrement());
-  }
+  increment() { this.store.dispatch(CounterActions.increment()) }
 }
 ```
 
@@ -841,13 +747,6 @@ transition: fade-out
 <v-click>
 
 ```ts
-// counter.effects.ts
-import { inject, Injectable } from "@angular/core";
-import { Actions, createEffect, ofType } from "@ngrx/effects";
-import { HttpClient } from "@angular/common/http";
-import { map, mergeMap, catchError, of } from "rxjs";
-import * as CounterActions from "./counter.actions";
-
 @Injectable()
 export class CounterEffects {
   private actions$ = inject(Actions);
@@ -855,21 +754,16 @@ export class CounterEffects {
 
   loadCounter$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(CounterActions.loadStart),        // 只监听这个 action
+      ofType(CounterActions.loadStart),
       mergeMap(() =>
         this.http.get<{ value: number }>("/api/counter").pipe(
           map(({ value }) => CounterActions.loadSuccess({ value })),
-          catchError((error) => of(CounterActions.loadFailure({ error }))),
+          catchError((err) => of(CounterActions.loadFailure({ err }))),
         ),
       ),
     ),
   );
-
-  // 日志副作用（不 dispatch 新 action）
-  logActions$ = createEffect(
-    () => this.actions$.pipe(tap((a) => console.log(a))),
-    { dispatch: false },     // 关键：声明这个 effect 不产生新 action
-  );
+  // dispatch: false 用于日志 / 路由等不产生 action 的副作用
 }
 ```
 
@@ -959,13 +853,6 @@ transition: fade-out
 <v-click>
 
 ```ts
-// counter.effects.ts（函数式写法）
-import { inject } from "@angular/core";
-import { Actions, createEffect, ofType } from "@ngrx/effects";
-import { HttpClient } from "@angular/common/http";
-import { map, mergeMap, catchError, of } from "rxjs";
-import * as CounterActions from "./counter.actions";
-
 // 1. 每个 effect 是一个独立函数
 export const loadCounter = createEffect(
   (actions$ = inject(Actions), http = inject(HttpClient)) =>
@@ -974,7 +861,7 @@ export const loadCounter = createEffect(
       mergeMap(() =>
         http.get<{ value: number }>("/api/counter").pipe(
           map(({ value }) => CounterActions.loadSuccess({ value })),
-          catchError((error) => of(CounterActions.loadFailure({ error }))),
+          catchError((err) => of(CounterActions.loadFailure({ err }))),
         ),
       ),
     ),
@@ -982,11 +869,7 @@ export const loadCounter = createEffect(
 );
 
 // 2. 注册
-// app.config.ts
-providers: [
-  provideEffects({ loadCounter }),   // 传对象（函数式）
-  // 老写法仍支持：provideEffects([CounterEffects])  // 传类
-],
+providers: [provideEffects({ loadCounter })];
 ```
 
 </v-click>
@@ -1062,49 +945,25 @@ mergeMap / switchMap / concatMap / exhaustMap
 
 <v-click>
 
-| 操作符        | 行为                                | 典型场景                            |
-| ------------- | ----------------------------------- | ----------------------------------- |
-| `mergeMap`    | **并发执行**，所有 action 都处理    | 添加、删除、独立请求               |
-| `switchMap`   | **取消上一个**，用最新              | 搜索、自动补全、单选过滤           |
-| `concatMap`   | **串行排队**，按顺序执行            | 必须有序的操作（如撤销栈）         |
-| `exhaustMap`  | **忽略新的**，直到当前完成          | 防重复提交（登录、保存）           |
+| 操作符        | 行为              | 典型场景           |
+| ------------- | ----------------- | ------------------ |
+| `mergeMap`    | **并发执行**      | 添加、删除         |
+| `switchMap`   | **取消上一个**    | 搜索、自动补全     |
+| `concatMap`   | **串行排队**      | 有序操作           |
+| `exhaustMap`  | **忽略新的**      | 防重复提交         |
 
 </v-click>
 
 <v-click>
 
 ```ts
-// 经典模式：搜索（switchMap）
-search$ = createEffect(
-  (actions$ = inject(Actions), api = inject(SearchService)) =>
-    actions$.pipe(
-      ofType(searchQuery),
-      debounceTime(300),
-      distinctUntilChanged((a, b) => a.query === b.query),
-      switchMap(({ query }) =>
-        api.search(query).pipe(
-          map((results) => searchSuccess({ results })),
-          catchError((err) => of(searchFailure({ err }))),
-        ),
-      ),
-    ),
-  { functional: true },
-);
-
-// 经典模式：保存（exhaustMap）
-save$ = createEffect(
-  (actions$ = inject(Actions), api = inject(UserService)) =>
-    actions$.pipe(
-      ofType(saveProfile),
-      exhaustMap(({ data }) =>
-        api.save(data).pipe(
-          map(() => saveSuccess()),
-          catchError((err) => of(saveFailure({ err }))),
-        ),
-      ),
-    ),
-  { functional: true },
-);
+// 搜索 + switchMap（取消旧请求）
+search$ = createEffect((a$ = inject(Actions), api = inject(Search)) =>
+  a$.pipe(ofType(searchQuery), debounceTime(300),
+    switchMap(({ query }) => api.search(query).pipe(
+      map((r) => searchSuccess({ results: r })),
+      catchError((err) => of(searchFailure({ err }))),
+    ))), { functional: true });
 ```
 
 </v-click>
@@ -1186,14 +1045,10 @@ createSelector + memoization + 组合 selector
 <v-click>
 
 ```ts
-// user.selectors.ts
-import { createFeatureSelector, createSelector } from "@ngrx/store";
-import { UserState } from "./user.feature";
-
 // 1. 顶层 feature selector
 export const selectUserState = createFeatureSelector<UserState>("user");
 
-// 2. 简单派生：取字段
+// 2. 简单派生
 export const selectAllUsers = createSelector(selectUserState, (s) => s.users);
 export const selectFilter = createSelector(selectUserState, (s) => s.filter);
 
@@ -1208,11 +1063,6 @@ export const selectFilteredUsers = createSelector(
 // 4. 参数化 selector（factory 模式）
 export const selectUserById = (id: string) =>
   createSelector(selectAllUsers, (users) => users.find((u) => u.id === id));
-
-// 使用
-constructor(private store: Store) {}
-filteredUsers$ = this.store.select(selectFilteredUsers);
-user$ = this.store.select(selectUserById("123"));
 ```
 
 </v-click>
@@ -1291,24 +1141,11 @@ transition: fade-out
 <v-click>
 
 ```ts
-// user.feature.ts
-import { createEntityAdapter, EntityState } from "@ngrx/entity";
-import { createFeature, createReducer, on } from "@ngrx/store";
-import * as UserActions from "./user.actions";
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-}
-
 // EntityState<User> = { ids: string[], entities: { [id]: User } }
-export interface UserState extends EntityState<User> {
-  loading: boolean;
-}
+export interface UserState extends EntityState<User> { loading: boolean }
 
 export const adapter = createEntityAdapter<User>({
-  selectId: (u) => u.id,                   // 默认就用 id 字段
+  selectId: (u) => u.id,
   sortComparer: (a, b) => a.name.localeCompare(b.name),
 });
 
@@ -1316,15 +1153,13 @@ const initialState: UserState = adapter.getInitialState({ loading: false });
 
 export const userFeature = createFeature({
   name: "user",
-  reducer: createReducer(
-    initialState,
+  reducer: createReducer(initialState,
     on(UserActions.addOne, (s, { user }) => adapter.addOne(user, s)),
-    on(UserActions.upsertMany, (s, { users }) => adapter.upsertMany(users, s)),
     on(UserActions.removeOne, (s, { id }) => adapter.removeOne(id, s)),
     on(UserActions.updateOne, (s, { update }) => adapter.updateOne(update, s)),
   ),
   extraSelectors: ({ selectUserState }) => ({
-    ...adapter.getSelectors(selectUserState),  // 自动生成 selectAll/selectEntities/selectIds/selectTotal
+    ...adapter.getSelectors(selectUserState), // selectAll/selectEntities/selectIds/selectTotal
   }),
 });
 ```
@@ -1409,46 +1244,25 @@ transition: fade-out
 
 ```ts
 // app.config.ts
-import { provideRouterStore, routerReducer } from "@ngrx/router-store";
-
 providers: [
   provideRouter(routes),
   provideStore({ router: routerReducer }),
-  provideRouterStore(),     // 关键：注册同步
+  provideRouterStore(),
 ];
 
 // router.selectors.ts
-import { getRouterSelectors } from "@ngrx/router-store";
-
-export const {
-  selectCurrentRoute,
-  selectFragment,
-  selectQueryParams,
-  selectQueryParam,
-  selectRouteParams,
-  selectRouteParam,
-  selectRouteData,
-  selectUrl,
-  selectTitle,
-} = getRouterSelectors();
+export const { selectQueryParam, selectRouteParam, selectUrl } = getRouterSelectors();
 
 // 使用
-constructor(private store: Store) {}
 userId$ = this.store.select(selectRouteParam("id"));
-queryFilter$ = this.store.select(selectQueryParam("filter"));
 
 // 在 effect 里监听路由变化
-import { ROUTER_NAVIGATED } from "@ngrx/router-store";
-
-loadUserOnNavigate$ = createEffect(
-  (actions$ = inject(Actions)) =>
-    actions$.pipe(
-      ofType(ROUTER_NAVIGATED),
-      filter((action) => action.payload.event.url.startsWith("/user/")),
-      map(() => UserActions.loadCurrentUser()),
-    ),
-  { functional: true },
-);
+loadUserOnNavigate$ = createEffect((actions$ = inject(Actions)) =>
+  actions$.pipe(
+    ofType(ROUTER_NAVIGATED),
+    filter((a) => a.payload.event.url.startsWith("/user/")),
+    map(() => UserActions.loadCurrentUser()),
+  ), { functional: true });
 ```
 
 </v-click>
@@ -1530,47 +1344,27 @@ transition: fade-out
 <v-click>
 
 ```ts
-// user.store.ts
-import { signalStore, withState, withMethods, withComputed, withHooks, patchState } from "@ngrx/signals";
-import { computed, inject } from "@angular/core";
-import { UserService } from "./user.service";
-
-type User = { id: string; name: string; email: string };
-
 export const UserStore = signalStore(
-  { providedIn: "root" },        // 全局单例（也可以 providedIn: 'any' 用作组件级）
+  { providedIn: "root" },
 
   // 1. 状态
-  withState({
-    users: [] as User[],
-    filter: "",
-    loading: false,
-  }),
+  withState({ users: [] as User[], filter: "", loading: false }),
 
   // 2. 派生（computed signals）
   withComputed(({ users, filter }) => ({
-    filtered: computed(() =>
-      users().filter((u) =>
-        u.name.toLowerCase().includes(filter().toLowerCase()),
-      ),
-    ),
-    total: computed(() => users().length),
+    filtered: computed(() => users().filter((u) => u.name.includes(filter()))),
   })),
 
   // 3. 方法（直接调用，无 action / dispatch）
-  withMethods((store, userService = inject(UserService)) => ({
-    setFilter: (filter: string) => patchState(store, { filter }),
+  withMethods((store, api = inject(UserService)) => ({
     async load() {
       patchState(store, { loading: true });
-      const users = await userService.getAll();
-      patchState(store, { users, loading: false });
+      patchState(store, { users: await api.getAll(), loading: false });
     },
   })),
 
-  // 4. 生命周期 hooks
-  withHooks({
-    onInit(store) { store.load() },
-  }),
+  // 4. 生命周期
+  withHooks({ onInit(store) { store.load() } }),
 );
 ```
 
@@ -1661,12 +1455,6 @@ rxMethod 把 RxJS 流接入 SignalStore
 <v-click>
 
 ```ts
-// user.store.ts
-import { signalStore, withState, withMethods, patchState } from "@ngrx/signals";
-import { rxMethod } from "@ngrx/signals/rxjs-interop";
-import { pipe, switchMap, tap } from "rxjs";
-import { tapResponse } from "@ngrx/operators";
-
 export const UserStore = signalStore(
   { providedIn: "root" },
   withState({ users: [] as User[], loading: false, error: null as string | null }),
@@ -1689,16 +1477,6 @@ export const UserStore = signalStore(
     ),
   })),
 );
-
-// 使用
-@Component({...})
-export class UsersPage {
-  store = inject(UserStore);
-  ngOnInit() {
-    this.store.loadUsers();   // 触发流（无参数）
-  }
-  // 模板里：{{ store.users() }} {{ store.loading() }}
-}
 ```
 
 </v-click>
@@ -1798,55 +1576,28 @@ transition: fade-out
 <v-click>
 
 ```ts
-// movies.store.ts
-import { ComponentStore } from "@ngrx/component-store";
-import { Injectable } from "@angular/core";
-import { tap, switchMap, catchError, EMPTY } from "rxjs";
-
-interface MoviesState {
-  movies: Movie[];
-  loading: boolean;
-}
-
 @Injectable()
 export class MoviesStore extends ComponentStore<MoviesState> {
-  constructor(private api: MovieService) {
-    super({ movies: [], loading: false });
-  }
+  constructor(private api: MovieService) { super({ movies: [], loading: false }) }
 
   // 1. selectors（自动 memoize）
   readonly movies$ = this.select((s) => s.movies);
-  readonly loading$ = this.select((s) => s.loading);
 
   // 2. updaters（同步 state 更新）
-  readonly setLoading = this.updater((state, loading: boolean) => ({ ...state, loading }));
-  readonly addMovie = this.updater((state, movie: Movie) => ({
-    ...state, movies: [...state.movies, movie],
-  }));
+  readonly setLoading = this.updater((s, loading: boolean) => ({ ...s, loading }));
 
-  // 3. effects（RxJS 副作用，集成在 store 内部）
-  readonly loadMovies = this.effect<void>((trigger$) =>
-    trigger$.pipe(
-      tap(() => this.setLoading(true)),
-      switchMap(() =>
-        this.api.getAll().pipe(
-          tap({
-            next: (movies) => this.patchState({ movies, loading: false }),
-            error: () => this.setLoading(false),
-          }),
-          catchError(() => EMPTY),
-        ),
-      ),
-    ),
-  );
+  // 3. effects（RxJS 副作用）
+  readonly loadMovies = this.effect<void>((t$) => t$.pipe(
+    tap(() => this.setLoading(true)),
+    switchMap(() => this.api.getAll().pipe(
+      tap((movies) => this.patchState({ movies, loading: false })),
+    )),
+  ));
 }
 
-// 在组件里
-@Component({ providers: [MoviesStore] })  // 关键：组件级提供
-export class MoviesPage {
-  constructor(public store: MoviesStore) {}
-  ngOnInit() { this.store.loadMovies() }
-}
+// 组件级提供
+@Component({ providers: [MoviesStore] })
+export class MoviesPage { /* ... */ }
 ```
 
 </v-click>
@@ -1931,27 +1682,14 @@ transition: fade-out
 <v-click>
 
 ```ts
-// app.config.ts
-import { provideStoreDevtools } from "@ngrx/store-devtools";
-import { isDevMode } from "@angular/core";
-
 providers: [
   provideStore(reducers),
   provideStoreDevtools({
     maxAge: 25,                 // 保留最近 25 个 action
-    logOnly: !isDevMode(),      // 生产环境只读（不能 dispatch）
-    autoPause: true,            // window 未聚焦时暂停记录
-    trace: false,               // 性能：false（开启 true 会记录 stack trace）
-    traceLimit: 75,
-    connectInZone: true,        // Zone-less 项目设 false
-    actionsBlocklist: ["[Router] *"],  // 排除噪声 action
+    logOnly: !isDevMode(),      // 生产只读模式
+    autoPause: true,            // window 失焦时暂停记录
+    actionsBlocklist: ["[Router] *"],
     name: "My App Store",
-    features: {
-      pause: true, lock: true, persist: true,
-      export: true, import: "custom",
-      jump: true, skip: true,
-      reorder: true, dispatch: true, test: true,
-    },
   }),
 ];
 ```
@@ -1960,7 +1698,7 @@ providers: [
 
 <v-click>
 
-> 💡 **提示**：浏览器需装 [Redux DevTools 扩展](https://github.com/reduxjs/redux-devtools)（Chrome / Firefox / Edge 都有），开发期打开就能看时间旅行 / action 重放。
+> 💡 浏览器需装 [Redux DevTools 扩展](https://github.com/reduxjs/redux-devtools)，开发期打开就能看时间旅行 / action 重放。
 
 </v-click>
 
@@ -2053,22 +1791,14 @@ createAction 自动推导 + Store 类型
 
 ```ts
 // 1. createAction 自动推导 type 字符串和 payload
-import { createAction, props } from "@ngrx/store";
-
 export const setUser = createAction(
   "[User] Set",
   props<{ id: string; name: string }>(),
 );
-
-// 自动推导：setUser.type === "[User] Set"
-// 自动推导：setUser({ id: '1', name: 'A' }) 返回 { type: "[User] Set", id: '1', name: 'A' }
+// setUser.type === "[User] Set"
+// setUser({ id: '1', name: 'A' }) → { type: "[User] Set", id, name }
 
 // 2. createReducer 类型严格
-import { createReducer, on, ActionReducer } from "@ngrx/store";
-
-interface UserState { id: string; name: string }
-const initialState: UserState = { id: "", name: "" };
-
 const reducer: ActionReducer<UserState> = createReducer(
   initialState,
   on(setUser, (s, { id, name }) => ({ ...s, id, name })),
@@ -2076,15 +1806,8 @@ const reducer: ActionReducer<UserState> = createReducer(
 );
 
 // 3. Store 类型化
-import { Store } from "@ngrx/store";
-
-interface AppState {
-  user: UserState;
-  counter: CounterState;
-}
-
+interface AppState { user: UserState; counter: CounterState }
 constructor(private store: Store<AppState>) {}
-// store.select(s => s.user) 自动推导出 UserState
 ```
 
 </v-click>
@@ -2173,41 +1896,28 @@ Loading / Error / Success 状态机
 <v-click>
 
 ```ts
-// user.feature.ts
+// 状态机字段
 interface UserState {
   data: User | null;
   status: "idle" | "loading" | "success" | "error";
-  error: string | null;
 }
 
-const initialState: UserState = { data: null, status: "idle", error: null };
-
+// reducer
 export const userFeature = createFeature({
   name: "user",
-  reducer: createReducer(
-    initialState,
-    on(loadUser, (s) => ({ ...s, status: "loading", error: null })),
+  reducer: createReducer(initialState,
+    on(loadUser, (s) => ({ ...s, status: "loading" })),
     on(loadUserSuccess, (s, { user }) => ({ ...s, data: user, status: "success" })),
     on(loadUserFailure, (s, { error }) => ({ ...s, status: "error", error })),
   ),
 });
 
-// user.effects.ts
-export const loadUser = createEffect(
-  (actions$ = inject(Actions), api = inject(UserService)) =>
-    actions$.pipe(
-      ofType(UserActions.loadUser),
-      switchMap(({ id }) =>
-        api.getUser(id).pipe(
-          map((user) => UserActions.loadUserSuccess({ user })),
-          catchError((err: HttpErrorResponse) =>
-            of(UserActions.loadUserFailure({ error: err.message })),
-          ),
-        ),
-      ),
-    ),
-  { functional: true },
-);
+// effect: catchError 必须在内层
+export const loadUser$ = createEffect((a$ = inject(Actions), api = inject(Api)) =>
+  a$.pipe(ofType(loadUser), switchMap(({ id }) => api.getUser(id).pipe(
+    map((user) => loadUserSuccess({ user })),
+    catchError((err) => of(loadUserFailure({ error: err.message }))),
+  ))), { functional: true });
 ```
 
 </v-click>
@@ -2304,22 +2014,14 @@ transition: fade-out
 <v-click>
 
 ```ts
-// counter.component.spec.ts
-import { TestBed } from "@angular/core/testing";
-import { provideMockStore, MockStore } from "@ngrx/store/testing";
-import { CounterComponent } from "./counter.component";
-import { counterFeature } from "./counter.feature";
-import * as CounterActions from "./counter.actions";
-
 describe("CounterComponent", () => {
   let store: MockStore;
   let dispatchSpy: jasmine.Spy;
-  const initialState = { counter: { value: 0 } };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [CounterComponent],
-      providers: [provideMockStore({ initialState })],
+      providers: [provideMockStore({ initialState: { counter: { value: 0 } } })],
     });
     store = TestBed.inject(MockStore);
     dispatchSpy = spyOn(store, "dispatch");
@@ -2328,19 +2030,9 @@ describe("CounterComponent", () => {
   it("should select value", (done) => {
     store.overrideSelector(counterFeature.selectValue, 42);
     const fixture = TestBed.createComponent(CounterComponent);
-    fixture.detectChanges();
-
-    const componentInstance = fixture.componentInstance;
-    componentInstance.value$.subscribe((value) => {
-      expect(value).toBe(42);
-      done();
+    fixture.componentInstance.value$.subscribe((v) => {
+      expect(v).toBe(42); done();
     });
-  });
-
-  it("should dispatch increment", () => {
-    const fixture = TestBed.createComponent(CounterComponent);
-    fixture.componentInstance.increment();
-    expect(dispatchSpy).toHaveBeenCalledWith(CounterActions.increment());
   });
 });
 ```
@@ -2461,36 +2153,26 @@ createActionGroup 一组 action 一行声明
 <v-click>
 
 ```ts
-// counter.actions.ts
-import { createActionGroup, emptyProps, props } from "@ngrx/store";
-
 export const CounterActions = createActionGroup({
   source: "Counter",
   events: {
     "Increment": emptyProps(),
     "Decrement": emptyProps(),
     "Set Value": props<{ value: number }>(),
-    "Load Start": emptyProps(),
     "Load Success": props<{ value: number }>(),
     "Load Failure": props<{ error: string }>(),
   },
 });
 
-// 自动生成 action creators（camelCase）：
-// CounterActions.increment()                  // type: "[Counter] Increment"
-// CounterActions.decrement()                  // type: "[Counter] Decrement"
-// CounterActions.setValue({ value: 10 })      // type: "[Counter] Set Value"
-// CounterActions.loadStart()
-// CounterActions.loadSuccess({ value: 5 })
-// CounterActions.loadFailure({ error: "..." })
+// 自动生成（camelCase）：
+// CounterActions.increment()         → type: "[Counter] Increment"
+// CounterActions.setValue({ value }) → type: "[Counter] Set Value"
+// CounterActions.loadSuccess({ value })
 
 // 使用
 this.store.dispatch(CounterActions.increment());
-this.store.dispatch(CounterActions.setValue({ value: 100 }));
-
-// 在 reducer / effect 里
-on(CounterActions.loadStart, (s) => ({ ...s, loading: true })),
-ofType(CounterActions.loadSuccess),
+on(CounterActions.loadStart, (s) => ({ ...s, loading: true }));
+ofType(CounterActions.loadSuccess);
 ```
 
 </v-click>
@@ -2584,18 +2266,9 @@ transition: fade-out
 <v-click>
 
 ```ts
-// meta-reducers.ts
-import { ActionReducer, MetaReducer } from "@ngrx/store";
-
 // 1. 日志 meta-reducer
 export function logger(reducer: ActionReducer<any>): ActionReducer<any> {
-  return (state, action) => {
-    console.log("prev state", state);
-    console.log("action", action);
-    const next = reducer(state, action);
-    console.log("next state", next);
-    return next;
-  };
+  return (state, action) => { console.log(action); return reducer(state, action) };
 }
 
 // 2. localStorage 持久化
@@ -2612,16 +2285,8 @@ export function persist(reducer: ActionReducer<any>): ActionReducer<any> {
 }
 
 // 3. 注册
-import { isDevMode } from "@angular/core";
-
-export const metaReducers: MetaReducer[] = isDevMode()
-  ? [logger, persist]
-  : [persist];
-
-// app.config.ts
-providers: [
-  provideStore(reducers, { metaReducers }),
-];
+const metaReducers: MetaReducer[] = isDevMode() ? [logger, persist] : [persist];
+providers: [provideStore(reducers, { metaReducers })];
 ```
 
 </v-click>
@@ -2714,10 +2379,6 @@ transition: fade-out
 
 ```ts
 // app.routes.ts
-import { Routes } from "@angular/router";
-import { provideState } from "@ngrx/store";
-import { provideEffects } from "@ngrx/effects";
-
 export const routes: Routes = [
   {
     path: "users",
@@ -2729,26 +2390,8 @@ export const routes: Routes = [
   },
   {
     path: "products",
-    loadChildren: () => import("./products/products.routes").then((m) => m.productRoutes),
-  },
-];
-
-// products/products.routes.ts
-import { Routes } from "@angular/router";
-import { provideState } from "@ngrx/store";
-import { productFeature } from "./product.feature";
-
-export const productRoutes: Routes = [
-  {
-    path: "",
-    providers: [
-      provideState(productFeature),
-      provideEffects({ loadProducts }),
-    ],
-    children: [
-      { path: "", loadComponent: () => import("./list.page") },
-      { path: ":id", loadComponent: () => import("./detail.page") },
-    ],
+    loadChildren: () =>
+      import("./products/products.routes").then((m) => m.productRoutes),
   },
 ];
 ```
@@ -2842,56 +2485,31 @@ transition: fade-out
 
 # RxJS 实战：Effects 高级模式
 
-retry / debounce / cache / cancellation
+retry / cache / cancellation
 
 <v-click>
 
 ```ts
 // 1. 重试（指数退避）
-export const loadWithRetry = createEffect(
-  (actions$ = inject(Actions), api = inject(Api)) =>
-    actions$.pipe(
-      ofType(loadStart),
-      switchMap(() =>
-        api.get().pipe(
-          retry({
-            count: 3,
-            delay: (err, retryCount) => timer(1000 * Math.pow(2, retryCount)),
-          }),
-          map((data) => loadSuccess({ data })),
-          catchError((err) => of(loadFailure({ err }))),
-        ),
-      ),
-    ),
-  { functional: true },
-);
+export const loadWithRetry = createEffect((actions$ = inject(Actions), api = inject(Api)) =>
+  actions$.pipe(
+    ofType(loadStart),
+    switchMap(() => api.get().pipe(
+      retry({ count: 3, delay: (e, n) => timer(1000 * Math.pow(2, n)) }),
+      map((data) => loadSuccess({ data })),
+      catchError((err) => of(loadFailure({ err }))),
+    )),
+  ), { functional: true });
 
-// 2. 缓存（withLatestFrom 检查 cache）
-export const loadIfNeeded = createEffect(
-  (actions$ = inject(Actions), store = inject(Store)) =>
-    actions$.pipe(
-      ofType(loadIfNeeded),
-      withLatestFrom(store.select(featureFeature.selectData)),
-      filter(([_, data]) => !data || isStale(data)),
-      switchMap(() => api.get().pipe(map((d) => loadSuccess({ data: d })))),
-    ),
-  { functional: true },
-);
-
-// 3. 取消（takeUntil 监听 cancel action）
-export const cancellableLoad = createEffect(
-  (actions$ = inject(Actions)) =>
-    actions$.pipe(
-      ofType(loadStart),
-      switchMap(() =>
-        api.longRunning().pipe(
-          takeUntil(actions$.pipe(ofType(loadCancel))),
-          map((d) => loadSuccess({ data: d })),
-        ),
-      ),
-    ),
-  { functional: true },
-);
+// 2. 取消（takeUntil 监听 cancel action）
+export const cancellableLoad = createEffect((actions$ = inject(Actions)) =>
+  actions$.pipe(
+    ofType(loadStart),
+    switchMap(() => api.longRunning().pipe(
+      takeUntil(actions$.pipe(ofType(loadCancel))),
+      map((d) => loadSuccess({ data: d })),
+    )),
+  ), { functional: true });
 ```
 
 </v-click>
@@ -2995,29 +2613,17 @@ transition: fade-out
 <v-click>
 
 ```ts
-// entity-metadata.ts
-import { EntityMetadataMap } from "@ngrx/data";
-
+// 1. entity metadata
 export const entityMetadata: EntityMetadataMap = {
-  Hero: {},        // 用默认配置
-  Villain: {
-    selectId: (v: Villain) => v.id,
-    sortComparer: (a: Villain, b: Villain) => a.name.localeCompare(b.name),
-  },
+  Hero: {},
+  Villain: { sortComparer: (a, b) => a.name.localeCompare(b.name) },
 };
 
-// app.config.ts
-import { provideEntityData, withEffects } from "@ngrx/data";
+// 2. 注册
+providers: [provideStore(), provideEffects(),
+  provideEntityData({ entityMetadata }, withEffects())];
 
-providers: [
-  provideStore(),
-  provideEffects(),
-  provideEntityData({ entityMetadata }, withEffects()),
-];
-
-// hero.service.ts
-import { EntityCollectionServiceBase, EntityCollectionServiceElementsFactory } from "@ngrx/data";
-
+// 3. service 继承
 @Injectable({ providedIn: "root" })
 export class HeroService extends EntityCollectionServiceBase<Hero> {
   constructor(factory: EntityCollectionServiceElementsFactory) {
@@ -3025,13 +2631,9 @@ export class HeroService extends EntityCollectionServiceBase<Hero> {
   }
 }
 
-// 组件里直接用，无需 actions / reducer / effects
-constructor(public heroService: HeroService) {}
+// 4. 组件直接用，无需 actions / reducer / effects
 heroes$ = this.heroService.entities$;
-ngOnInit() { this.heroService.getAll() }
-add(hero: Hero) { this.heroService.add(hero) }
-update(hero: Hero) { this.heroService.update(hero) }
-remove(id: number) { this.heroService.delete(id) }
+add(h: Hero) { this.heroService.add(h) }
 ```
 
 </v-click>
@@ -3114,37 +2716,21 @@ transition: fade-out
 
 <v-click>
 
-**步骤 1：升级版本**
-
-```bash
-ng update @angular/core @angular/cli
-ng update @ngrx/store @ngrx/effects @ngrx/store-devtools
-# 自动跑 migrations，会改部分 import
-```
+**步骤 1**：`ng update @angular/core @ngrx/store ...`（跑迁移）
 
 </v-click>
 
 <v-click>
 
-**步骤 2：把 StoreModule.forRoot 改成 provideStore**
+**步骤 2：根 Module → app.config.ts**
 
 ```ts
-// 旧：app.module.ts
-@NgModule({
-  imports: [
-    StoreModule.forRoot(reducers),
-    EffectsModule.forRoot([AppEffects]),
-    StoreDevtoolsModule.instrument({ maxAge: 25 }),
-  ],
-})
+// 旧
+@NgModule({ imports: [StoreModule.forRoot(reducers), EffectsModule.forRoot([...])] })
 
-// 新：app.config.ts
+// 新
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideStore(reducers),
-    provideEffects([AppEffects]),
-    provideStoreDevtools({ maxAge: 25 }),
-  ],
+  providers: [provideStore(reducers), provideEffects([AppEffects])],
 };
 ```
 
@@ -3152,24 +2738,13 @@ export const appConfig: ApplicationConfig = {
 
 <v-click>
 
-**步骤 3：feature module 改成 standalone routes**
+**步骤 3：feature module → standalone routes**
 
 ```ts
-// 旧：users.module.ts
-@NgModule({
-  imports: [
-    StoreModule.forFeature('users', usersReducer),
-    EffectsModule.forFeature([UserEffects]),
-  ],
-})
-
-// 新：users.routes.ts
+// 新
 export const userRoutes: Routes = [{
   path: '',
-  providers: [
-    provideState('users', usersReducer),
-    provideEffects([UserEffects]),
-  ],
+  providers: [provideState('users', usersReducer), provideEffects([UserEffects])],
   loadComponent: () => import('./users.page'),
 }];
 ```
@@ -3276,18 +2851,15 @@ NgRx vs RTK vs Pinia vs Akita
 
 <v-click>
 
-| 维度          | NgRx 19            | RTK 2 / React        | Pinia 3 / Vue        | Akita 8 (停更)     |
-| ------------- | ------------------ | -------------------- | -------------------- | ------------------ |
-| 框架          | **Angular 唯一**   | React / vanilla      | Vue 3 唯一           | Angular 唯一       |
-| 哲学          | Redux + RxJS       | Redux + Hook         | Composition          | Reactive store     |
-| 副作用        | **@ngrx/effects**  | thunk / listener     | actions 内           | service / akita-ng-effects |
-| 数据层        | ngrx-data (社区)   | **RTK Query 官方**   | 无（配 TanStack）    | akita-ng-entity-service |
-| Signals       | **@ngrx/signals**  | -                    | 原生 reactive        | -                  |
-| DevTools      | Redux DevTools     | Redux DevTools       | Vue DevTools         | Redux DevTools     |
-| 体积          | ~30 KB (核心)      | ~10 KB               | ~1.5 KB              | ~15 KB             |
-| 学习曲线      | 陡（RxJS + Redux） | 中（Redux）          | 平（Composition）    | 中                 |
-| 维护          | **官方活跃**       | **官方活跃**         | **官方活跃**         | 已停更（推荐 NgRx） |
-| 招聘市场      | Angular 必备       | React 必备           | Vue 主流             | 已淘汰             |
+| 维度       | NgRx 19            | RTK 2 / React        | Pinia 3 / Vue       | Akita (停更)  |
+| ---------- | ------------------ | -------------------- | ------------------- | ------------- |
+| 框架       | **Angular 唯一**   | React                | Vue 3               | Angular       |
+| 副作用     | **@ngrx/effects**  | thunk / listener     | actions 内          | service       |
+| 数据层     | ngrx-data (社区)   | **RTK Query 官方**   | 配 TanStack         | -             |
+| Signals    | **@ngrx/signals**  | -                    | 原生 reactive       | -             |
+| 体积       | ~30 KB             | ~10 KB               | ~1.5 KB             | ~15 KB        |
+| 学习曲线   | 陡（RxJS+Redux）   | 中（Redux）          | 平                  | 中            |
+| 维护       | **官方活跃**       | **官方活跃**         | **官方活跃**        | 已停更        |
 
 </v-click>
 
@@ -3366,34 +2938,25 @@ transition: fade-out
 <v-click>
 
 ```
-src/
-  app/
-    state/                 # 全局 / 跨 feature 状态
-      index.ts             # 集中导出
-      app.reducers.ts      # 根 reducer 组合
-    features/
-      users/
-        users.actions.ts   # createActionGroup
-        users.feature.ts   # createFeature
-        users.effects.ts   # functional effects
-        users.service.ts   # API 包装
-        users.facade.ts    # 可选：facade 模式
-        users.routes.ts    # 路由 + provideState
-        users.page.ts      # 组件
-        index.ts           # 统一 re-export
-      products/
-        ...
-    shared/
-      ui/, utils/, ...
+src/app/
+  state/              # 全局 / 跨 feature 状态
+  features/
+    users/
+      users.actions.ts   # createActionGroup
+      users.feature.ts   # createFeature
+      users.effects.ts   # functional effects
+      users.service.ts   # API 包装
+      users.routes.ts    # 路由 + provideState
+      index.ts           # 统一 re-export
+  shared/
 ```
 
 ```ts
 // users/index.ts
 export * from "./users.actions";
 export * from "./users.feature";
-export * from "./users.service";
 
-// 在其他 feature 里跨用
+// 跨用
 import { UserActions, userFeature } from "@/features/users";
 ```
 
@@ -3490,42 +3053,25 @@ transition: fade-out
 <v-click>
 
 ```ts
-// users/users.facade.ts
-import { Injectable, inject } from "@angular/core";
-import { Store } from "@ngrx/store";
-import { userFeature } from "./users.feature";
-import { UserActions } from "./users.actions";
-
 @Injectable({ providedIn: "root" })
 export class UsersFacade {
   private store = inject(Store);
 
-  // 暴露 selectors（Observable 或 Signal）
+  // 暴露 selectors
   users$ = this.store.select(userFeature.selectAllUsers);
   loading$ = this.store.select(userFeature.selectLoading);
-  error$ = this.store.select(userFeature.selectError);
 
-  // 暴露 actions（方法）
-  loadUsers() {
-    this.store.dispatch(UserActions.loadUsers());
-  }
-  addUser(user: User) {
-    this.store.dispatch(UserActions.addUser({ user }));
-  }
-  deleteUser(id: string) {
-    this.store.dispatch(UserActions.deleteUser({ id }));
-  }
+  // 暴露 actions
+  loadUsers() { this.store.dispatch(UserActions.loadUsers()) }
+  addUser(user: User) { this.store.dispatch(UserActions.addUser({ user })) }
+  deleteUser(id: string) { this.store.dispatch(UserActions.deleteUser({ id })) }
 }
 
-// 组件里不再直接 inject Store
-@Component({...})
+// 组件不再直接 inject Store
 export class UsersPage {
   private facade = inject(UsersFacade);
   users$ = this.facade.users$;
-  loading$ = this.facade.loading$;
-
   ngOnInit() { this.facade.loadUsers() }
-  add(u: User) { this.facade.addUser(u) }
 }
 ```
 
@@ -3621,41 +3167,13 @@ transition: fade-out
 
 <v-click>
 
-```ts
-// main.server.ts
-import { bootstrapApplication } from "@angular/platform-browser";
-import { provideServerRendering } from "@angular/platform-server";
-import { provideStore } from "@ngrx/store";
-
-const bootstrap = () =>
-  bootstrapApplication(AppComponent, {
-    providers: [
-      provideServerRendering(),
-      provideStore(reducers, {
-        // 每次请求创建新 store（默认就是）
-        runtimeChecks: { strictStateImmutability: true },
-      }),
-      // ...
-    ],
-  });
-
-export default bootstrap;
-```
-
-</v-click>
-
-<v-click>
-
 **Transfer State（避免客户端重复请求）**
 
 ```ts
-// 在 effect 里检查是否 SSR 已经加载过
+// 在 effect 里检查是否 SSR 已加载过
 export const loadUser = createEffect(
-  (
-    actions$ = inject(Actions),
-    api = inject(UserService),
-    transfer = inject(TransferState),
-  ) =>
+  (actions$ = inject(Actions), api = inject(UserService),
+   transfer = inject(TransferState)) =>
     actions$.pipe(
       ofType(UserActions.loadUser),
       mergeMap(() => {
@@ -3666,13 +3184,11 @@ export const loadUser = createEffect(
           return of(UserActions.loadUserSuccess({ user: data }));
         }
         return api.getUser().pipe(
-          tap((user) => isPlatformServer(platformId) && transfer.set(key, user)),
+          tap((u) => isPlatformServer(platformId) && transfer.set(key, u)),
           map((user) => UserActions.loadUserSuccess({ user })),
         );
       }),
-    ),
-  { functional: true },
-);
+    ), { functional: true });
 ```
 
 </v-click>
@@ -3766,30 +3282,11 @@ OnPush + selector + entity + lazy
 
 <v-click>
 
-**1. OnPush 变更检测**
+**1. OnPush 变更检测** — `changeDetection: ChangeDetectionStrategy.OnPush`
 
-```ts
-@Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `...`,
-})
-```
+**2. selector 精细化** — 用 createSelector 派生最小所需字段
 
-</v-click>
-
-<v-click>
-
-**2. selector 精细化**
-
-避免组件订阅整个 state；用 createSelector 派生最小所需字段。
-
-</v-click>
-
-<v-click>
-
-**3. Entity normalized state**
-
-列表项 > 100 时用 @ngrx/entity 标准化，避免 O(n) 查找。
+**3. Entity normalized state** — 列表项 > 100 时用 @ngrx/entity
 
 </v-click>
 
@@ -3798,9 +3295,7 @@ OnPush + selector + entity + lazy
 **4. async pipe + trackBy**
 
 ```ts
-template: `
-  <user-card *ngFor="let u of users$ | async; trackBy: trackById" [user]="u" />
-`
+template: `<user-card *ngFor="let u of users$ | async; trackBy: trackById" [user]="u" />`
 trackById = (i: number, u: User) => u.id;
 ```
 
@@ -3808,20 +3303,9 @@ trackById = (i: number, u: User) => u.id;
 
 <v-click>
 
-**5. lazy load + standalone**
+**5. lazy load + standalone** — 按路由懒加载 feature reducer
 
-按路由懒加载 feature reducer，减少初始 bundle。
-
-</v-click>
-
-<v-click>
-
-**6. Bundle 验证**
-
-```bash
-ng build --stats-json
-npx webpack-bundle-analyzer dist/stats.json
-```
+**6. Bundle 验证** — `ng build --stats-json` + bundle-analyzer
 
 </v-click>
 
@@ -3929,18 +3413,7 @@ transition: fade-out
 
 <v-click>
 
-**1. DevTools 安全：logOnly 模式**
-
-```ts
-provideStoreDevtools({
-  maxAge: 25,
-  logOnly: !isDevMode(),    // 生产强制 true
-});
-```
-
-</v-click>
-
-<v-click>
+**1. DevTools 安全** — `logOnly: !isDevMode()` 生产只读
 
 **2. runtimeChecks 仅 dev**
 
@@ -3950,8 +3423,6 @@ provideStore(reducers, {
     strictStateImmutability: isDevMode(),
     strictActionImmutability: isDevMode(),
     strictStateSerializability: isDevMode(),
-    strictActionSerializability: isDevMode(),
-    strictActionWithinNgZone: isDevMode(),
   },
 });
 ```
@@ -3960,37 +3431,11 @@ provideStore(reducers, {
 
 <v-click>
 
-**3. 敏感数据不入 store**
+**3. 敏感数据不入 store** — token / 密码 → httpOnly cookie
 
-- token / 密码 / 信用卡号 → httpOnly cookie 或加密存储
-- store 内容会进 DevTools / TransferState
+**4. 持久化版本管理** — `v2:app-state` 前缀 + migration
 
-</v-click>
-
-<v-click>
-
-**4. 持久化版本管理**
-
-```ts
-const SCHEMA_VERSION = 2;
-// 升级前清理 v1 数据，或写 migration 转换
-```
-
-</v-click>
-
-<v-click>
-
-**5. 监控集成**
-
-```ts
-import * as Sentry from "@sentry/angular-ivy";
-import { createReduxEnhancer } from "@sentry/redux";
-
-// 把关键 action 自动上报到 Sentry
-provideStore(reducers, {
-  metaReducers: [Sentry.createReduxEnhancer()],
-});
-```
+**5. 监控集成** — Sentry / Datadog Redux enhancer
 
 </v-click>
 
@@ -4111,79 +3556,33 @@ NgRx 老手都踩过的坑
 
 <v-click>
 
-**1. Reducer 直接 mutate state**
+**1. Reducer 直接 mutate state** — ❌ `s.items.push(item)` → ✅ `({ ...s, items: [...s.items, item] })`
+
+</v-click>
+
+<v-click>
+
+**2. Effect 外层 catchError**（第一次失败后 stream 死掉）
 
 ```ts
-// ❌ 错：runtimeChecks 会报错
-on(addItem, (s, { item }) => {
-  s.items.push(item);
-  return s;
-})
+// ❌ catchError 在外层
+ofType(load), switchMap(() => api.get()), catchError(...)
 
-// ✅ 对：返回新对象
-on(addItem, (s, { item }) => ({ ...s, items: [...s.items, item] }))
+// ✅ catchError 在 inner observable
+ofType(load), switchMap(() => api.get().pipe(catchError(...)))
 ```
 
 </v-click>
 
 <v-click>
 
-**2. Effect 外层 catchError**
-
-```ts
-// ❌ 错：第一次失败后 effect stream 死掉
-loadEffect$ = createEffect(() =>
-  this.actions$.pipe(
-    ofType(load),
-    switchMap(() => this.api.get()),
-    catchError((err) => of(loadFailure({ err }))),  // 在外层
-  ),
-);
-
-// ✅ 对：catchError 在 inner observable
-loadEffect$ = createEffect(() =>
-  this.actions$.pipe(
-    ofType(load),
-    switchMap(() =>
-      this.api.get().pipe(catchError((err) => of(loadFailure({ err })))),
-    ),
-  ),
-);
-```
+**3. Selector 返回新引用** — ❌ `(users) => [...users]` → ✅ `(users) => users`
 
 </v-click>
 
 <v-click>
 
-**3. Selector 返回新对象 / 数组**
-
-```ts
-// ❌ 错：每次返回新引用，下游组件无效更新
-export const selectUsers = createSelector(selectAll, (users) => [...users]);
-
-// ✅ 对：让 createSelector 控制引用
-export const selectUsers = createSelector(selectAll, (users) => users);
-```
-
-</v-click>
-
-<v-click>
-
-**4. async pipe 多次订阅**
-
-```ts
-// ❌ 错：每次 | async 都新订阅
-template: `
-  <div *ngIf="user$ | async as user">{{ user.name }}</div>
-  <div *ngIf="user$ | async as user">{{ user.email }}</div>
-`
-// ✅ 对：用 *ngIf 解构一次
-template: `
-  <div *ngIf="user$ | async as user">
-    {{ user.name }} - {{ user.email }}
-  </div>
-`
-```
+**4. async pipe 多次订阅** — 用 `*ngIf="user$ | async as user"` 解构一次
 
 </v-click>
 
@@ -4303,9 +3702,8 @@ transition: fade-out
 
 **官方资源**
 
-- [NgRx 官方文档](https://ngrx.io/) — 必读，模块矩阵全覆盖
-- [NgRx GitHub](https://github.com/ngrx/platform) — 8K+ star，活跃维护
-- [NgRx Walkthrough](https://ngrx.io/guide/store/walkthrough) — 经典 Counter 项目实战
+- [NgRx 官方文档](https://ngrx.io/) — 模块矩阵全覆盖
+- [NgRx Walkthrough](https://ngrx.io/guide/store/walkthrough) — 经典 Counter 项目
 - [NgRx Example App](https://github.com/ngrx/platform/tree/main/projects/example-app) — 官方完整示例
 
 </v-click>
@@ -4315,8 +3713,7 @@ transition: fade-out
 **Signals 时代**
 
 - [@ngrx/signals 文档](https://ngrx.io/guide/signals) — SignalStore 完整指南
-- [Angular Signals 指南](https://angular.dev/guide/signals) — 配合官方 Signals 教程
-- [ngrx-toolkit](https://github.com/angular-architects/ngrx-toolkit) — withDataService / withStorageSync 等扩展
+- [ngrx-toolkit](https://github.com/angular-architects/ngrx-toolkit) — withDataService / withStorageSync
 
 </v-click>
 
@@ -4326,8 +3723,6 @@ transition: fade-out
 
 - [NgRx Style Guide](https://ngrx.io/guide/store/style-guide) — 团队规范必读
 - [Mike Ryan 演讲合集](https://www.youtube.com/@MikeRyanDev) — NgRx 核心贡献者
-- [Tomas Trajan 博客](https://medium.com/@tomastrajan) — NgRx 模式 / 最佳实践
-- [Brandon Roberts 教程](https://www.youtube.com/@brandonroberts) — RxJS + NgRx 配套
 
 </v-click>
 

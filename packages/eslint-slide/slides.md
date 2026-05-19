@@ -186,7 +186,7 @@ pnpm create @eslint/config@latest
 pnpm add -D eslint @eslint/js
 ```
 
-`@eslint/js` 必装：v9 起 `"eslint:recommended"` 字符串已废弃。
+`@eslint/js` 必装（v9 起 `"eslint:recommended"` 已废弃）
 
 </v-click>
 
@@ -197,14 +197,9 @@ pnpm add -D eslint @eslint/js
 **运行**
 
 ```bash
-# 检查所有文件
-pnpm exec eslint .
-
-# 自动修复
-pnpm exec eslint . --fix
-
-# CI 严格模式
-pnpm exec eslint . --max-warnings=0
+pnpm exec eslint .                  # 检查所有文件
+pnpm exec eslint . --fix            # 自动修复
+pnpm exec eslint . --max-warnings=0 # CI 严格模式
 ```
 
 **退出码**
@@ -258,8 +253,7 @@ transition: fade-out
 
 ```js
 rules: {
-  "no-console": "warn",
-  "eqeqeq": ["error", "always"],     // 带选项时用数组
+  "eqeqeq": ["error", "always"],  // 带选项用数组
 }
 ```
 

@@ -89,20 +89,17 @@ level: 2
 <v-clicks>
 
 **优点**
-- 基于 Web Standards，组件 = 浏览器原生 custom element
-- **唯一**适合做跨框架设计系统的方案
+- **唯一**适合做跨框架设计系统的方案（组件 = 浏览器原生 custom element）
 - Bundle 极小（5-7 KB），适合嵌入式 SDK / 微前端
-- 样式 Shadow DOM 默认隔离，彻底解决 CSS 命名冲突
-- Google / Adobe / IBM / Salesforce / SAP / Microsoft 多家在用
-- TypeScript 一流，装饰器 + HTMLElementTagNameMap 类型推导
-- Reactive Controllers 替代 Mixin，组合复用清晰
+- Shadow DOM 默认隔离，彻底解决 CSS 命名冲突
+- 大厂背书：Google / Adobe / IBM / Salesforce / SAP / Microsoft
+- TypeScript 一流 + Reactive Controllers 替代 Mixin
 
 **缺点**
 - 不是 SPA 框架——无内置路由 / 状态管理 / 数据获取
 - Shadow DOM 限制 → 全局样式（Tailwind utility）穿不进
 - SSR 仍在 Labs，相对 Next.js 不够成熟
-- 生态规模小，UI 组件库数量级远小于 React 生态
-- 招聘市场小，候选人少一个数量级
+- 生态规模小，招聘市场远小于 React 生态
 - React 集成需要 @lit/react wrapper
 
 </v-clicks>
@@ -115,9 +112,7 @@ transition: slide-up
 
 | 版本 | 时间 | 关键事件 |
 |---|---|---|
-| **Polymer 0.5** | 2014 | Google 推出，最早的 Web Components 框架 |
-| **Polymer 1.0** | 2015 | data-binding 表达式 + behaviors（mixin） |
-| **Polymer 2.0** | 2017 | 拥抱 ES Class + Custom Elements v1 |
+| **Polymer 1.0** | 2015 | Google 推出，data-binding + behaviors（mixin） |
 | **Polymer 3.0** | 2018 | 转 npm + ES Modules（最后一个 Polymer） |
 | **LitElement 2.x** | 2019 | 抽离模板引擎 lit-html + LitElement 基类 |
 | **Lit 2** | 2021 | 单包 lit + Reactive Controllers |
@@ -141,22 +136,10 @@ transition: slide-up
 ```ts
 @customElement('my-button')
 export class MyButton extends LitElement {
-  // ↑ 这就是浏览器原生 HTMLElement 的子类
-  // ↓ 注册之后 <my-button> 在任何 HTML 中都能用
+  // 浏览器原生 HTMLElement 的子类
+  // 继承链：HTMLElement → ReactiveElement → LitElement
 }
 ```
-
-<v-click>
-
-继承链：
-
-```
-HTMLElement
-  └── ReactiveElement     // Lit 的响应式基类（无模板能力）
-        └── LitElement    // 加上 html 模板能力
-```
-
-</v-click>
 
 <v-click>
 
@@ -164,7 +147,7 @@ HTMLElement
 
 | 维度 | Lit | React | Vue |
 |---|---|---|---|
-| 组件本质 | **浏览器原生 custom element** | JS 函数（VDOM 节点） | 编译产物 |
+| 组件本质 | **原生 custom element** | JS 函数（VDOM） | 编译产物 |
 | 跨框架可用 | **是** | 否 | 否 |
 | 样式作用域 | **Shadow DOM** | CSS Modules | scoped CSS |
 | Bundle 核心 | **5-7 KB** | ~45 KB | ~25 KB |
@@ -178,40 +161,33 @@ transition: slide-up
 # 快速开始
 
 ```bash
-# 官方 Starter Kit（TypeScript，含测试 + 演示）
+# 官方 Starter Kit（TypeScript）
 git clone https://github.com/lit/lit-element-starter-ts.git my-element
-cd my-element
-npm install
-npm run dev
+cd my-element && npm install && npm run dev
 
 # Vite 模板（更现代）
 pnpm create vite@latest my-lit -- --template lit-ts
-cd my-lit && pnpm install && pnpm dev
 
 # 裸装到现有项目
-pnpm add lit
-pnpm add @lit/context @lit/task @lit/react @lit/localize
+pnpm add lit @lit/context @lit/task @lit/react @lit/localize
 ```
 
 <v-click>
 
 ```
-my-element/                       # 标准结构
+my-element/
 ├── src/
 │   ├── my-element.ts            # 组件定义
-│   ├── my-element.test.ts       # 测试
 │   └── index.ts                 # 公共导出
-├── docs/                        # 文档站
 ├── custom-elements.json         # CEM（IDE 类型提示）
-├── package.json
-└── tsconfig.json
+└── package.json
 ```
 
 </v-click>
 
 <v-click>
 
-要求：Node 18+ / Chrome 88+ / Edge 88+ / Firefox 90+ / Safari 14+。**IE11 不再支持**。
+要求：Node 18+ / Chrome 88+ / Firefox 90+ / Safari 14+。**IE11 不再支持**。
 
 </v-click>
 
@@ -228,26 +204,21 @@ import { customElement, property, state } from 'lit/decorators.js'
 @customElement('my-counter')
 export class MyCounter extends LitElement {
   static styles = css`
-    :host { display: inline-block; font-family: system-ui; }
+    :host { display: inline-block; }
     button { padding: 6px 12px; cursor: pointer; }
-    .count { font-weight: bold; margin: 0 8px; }
   `
 
-  @property({ type: String })  label = 'Click me'
-  @property({ type: Number })  step = 1
+  @property() label = 'Click me'
+  @property({ type: Number }) step = 1
   @state() private _count = 0
 
   render() {
-    return html`
-      <button @click=${() => this._count += this.step}>${this.label}</button>
-      <span class="count">${this._count}</span>
-    `
+    return html`<button @click=${() => this._count += this.step}>${this.label}</button>
+      <span>${this._count}</span>`
   }
 }
 
-declare global {
-  interface HTMLElementTagNameMap { 'my-counter': MyCounter }
-}
+declare global { interface HTMLElementTagNameMap { 'my-counter': MyCounter } }
 ```
 
 ---
@@ -295,12 +266,8 @@ transition: slide-up
 # 装饰器全表
 
 ```ts
-import {
-  customElement, property, state,
-  query, queryAll, queryAsync,
-  queryAssignedElements, queryAssignedNodes,
-  eventOptions,
-} from 'lit/decorators.js'
+import { customElement, property, state, query, queryAll,
+  queryAssignedElements, eventOptions } from 'lit/decorators.js'
 ```
 
 | 装饰器 | 作用 |
@@ -308,12 +275,9 @@ import {
 | `@customElement('x')` | 注册 custom element |
 | `@property(opts?)` | 公共响应式属性（带 attribute 映射） |
 | `@state()` | 内部响应式状态（无 attribute） |
-| `@query(sel, cache?)` | 单元素 querySelector |
-| `@queryAll(sel)` | querySelectorAll（NodeList） |
-| `@queryAsync(sel)` | 异步 query（等下次更新） |
+| `@query(sel)` / `@queryAll(sel)` | querySelector / All |
 | `@queryAssignedElements(opts?)` | 获取 slot 分配的元素 |
-| `@queryAssignedNodes(opts?)` | 获取 slot 分配的节点（含文本） |
-| `@eventOptions(opts)` | 给方法附加 addEventListener 选项 |
+| `@eventOptions(opts)` | addEventListener 选项 |
 
 ---
 transition: slide-up
@@ -324,30 +288,18 @@ transition: slide-up
 ```ts
 @property({
   type: Number,                   // 反序列化类型
-  attribute: 'data-id',           // attribute 名（默认属性名 kebab-case）
+  attribute: 'data-id',           // attribute 名（默认 kebab-case）
   reflect: true,                  // 属性 → attribute 反射
-  noAccessor: false,              // 不要自动生成 getter/setter
-  state: false,                   // 等价 @state()
   hasChanged: (n, o) => n !== o,  // 自定义变化判断
-  converter: {                    // 自定义 attribute ↔ property 转换
-    fromAttribute: (v) => Number(v),
-    toAttribute: (v) => String(v),
-  },
-  useDefault: true,               // Lit 3.x 新增：初始值不反射 + 移除时重置
+  converter: { fromAttribute: (v) => Number(v) },
+  useDefault: true,               // Lit 3.x 新增：初始值不反射
 })
 count = 0
 ```
 
 <v-click>
 
-**默认 converter 行为**：
-
-| `type` | attribute → property | property → attribute |
-|---|---|---|
-| `String` | 直接字符串 | 字符串 |
-| `Number` | `Number(attr)` | `String(value)` |
-| `Boolean` | attribute 存在 = true | true 加 attribute / false 移除 |
-| `Array` / `Object` | `JSON.parse(attr)` | `JSON.stringify(value)` |
+**默认 converter**：`String` 直传 / `Number` 用 `Number(attr)` / `Boolean` attribute 存在即 true / `Array`/`Object` 走 `JSON.parse`
 
 </v-click>
 
@@ -360,13 +312,8 @@ transition: slide-up
 ```ts
 @customElement('open-menu')
 export class OpenMenu extends LitElement {
-  // 公共 API：HTML <open-menu open> 可控
-  @property({ type: Boolean })
-  open = false
-
-  // 内部状态：键盘高亮项（不暴露为 attribute）
-  @state()
-  private _highlightedIndex = 0
+  @property({ type: Boolean }) open = false   // 公共 API
+  @state() private _highlightedIndex = 0      // 内部状态
 }
 ```
 
@@ -376,8 +323,7 @@ export class OpenMenu extends LitElement {
 |---|---|---|
 | 是否映射 attribute | **是**（默认） | 否 |
 | 暴露给外部消费者 | **公共 API** | 内部细节 |
-| TypeScript 修饰 | 通常 public | 通常 private |
-| 命名约定 | 普通名 | `_` 前缀 |
+| 命名约定 | public 普通名 | private `_` 前缀 |
 
 </v-click>
 
@@ -396,14 +342,10 @@ transition: slide-up
 ```ts
 @customElement('text-input')
 export class TextInput extends LitElement {
-  @query('input')
-  private _input!: HTMLInputElement   // lazy getter
+  @query('input') private _input!: HTMLInputElement   // lazy getter
+  @query('input', true) private _cached!: HTMLInputElement  // 缓存 querySelector
 
-  @query('input', true)
-  private _inputCached!: HTMLInputElement  // cache=true 只 querySelector 一次
-
-  @queryAll('li')
-  private _items!: NodeListOf<HTMLLIElement>
+  @queryAll('li') private _items!: NodeListOf<HTMLLIElement>
 
   @queryAssignedElements({ slot: 'icon', selector: 'svg' })
   private _icons!: SVGElement[]
@@ -411,13 +353,8 @@ export class TextInput extends LitElement {
   @queryAssignedNodes({ slot: '' })
   private _defaultNodes!: Node[]
 
-  focus() {
-    this._input.focus()
-  }
-
-  render() {
-    return html`<input>`
-  }
+  focus() { this._input.focus() }
+  render() { return html`<input>` }
 }
 ```
 
@@ -461,17 +398,13 @@ transition: slide-up
 
 | 钩子 | 触发时机 | 典型用途 |
 |---|---|---|
-| `constructor()` | 元素创建 | 默认值（很少用） |
 | `connectedCallback()` | 加入 DOM | 注册外部事件 / 启动控制器 |
 | `disconnectedCallback()` | 离开 DOM | 清理订阅 |
-| `attributeChangedCallback()` | observed attribute 变化 | Lit 自动处理 |
-| `shouldUpdate(changed)` | 更新前 | 返回 false 跳过更新 |
-| `willUpdate(changed)` | render 前 | **计算依赖其他属性的派生值** |
-| `update(changed)` | render 前 | 罕见重写 |
+| `willUpdate(changed)` | render 前 | **计算派生值** |
 | `render()` | update 中 | **返回 TemplateResult** |
-| `firstUpdated(changed)` | 首次 DOM 更新后 | 一次性 DOM 初始化（focus / Observer） |
-| `updated(changed)` | 每次 DOM 更新后 | 读 DOM / 派发事件 / 动画 |
-| `updateComplete` | DOM 更新完成 Promise | `await` 等更新（测试常用） |
+| `firstUpdated(changed)` | 首次 DOM 更新后 | 一次性初始化 |
+| `updated(changed)` | 每次 DOM 更新后 | 读 DOM / 派发事件 |
+| `updateComplete` | Promise | `await` 等更新（测试） |
 
 ---
 transition: slide-up
@@ -519,23 +452,18 @@ export class MouseController implements ReactiveController {
   host: ReactiveControllerHost
   pos = { x: 0, y: 0 }
 
-  private _onMove = (e: MouseEvent) => {
-    this.pos = { x: e.clientX, y: e.clientY }
-    this.host.requestUpdate()
-  }
-
   constructor(host: ReactiveControllerHost) {
     this.host = host
     host.addController(this)
   }
 
-  hostConnected() {
-    window.addEventListener('mousemove', this._onMove)
+  private _onMove = (e: MouseEvent) => {
+    this.pos = { x: e.clientX, y: e.clientY }
+    this.host.requestUpdate()
   }
 
-  hostDisconnected() {
-    window.removeEventListener('mousemove', this._onMove)
-  }
+  hostConnected() { window.addEventListener('mousemove', this._onMove) }
+  hostDisconnected() { window.removeEventListener('mousemove', this._onMove) }
 }
 ```
 
@@ -549,30 +477,20 @@ transition: slide-up
 @customElement('mouse-tracker')
 export class MouseTracker extends LitElement {
   private mouse = new MouseController(this)
-
-  render() {
-    return html`<p>x=${this.mouse.pos.x} y=${this.mouse.pos.y}</p>`
-  }
+  render() { return html`<p>x=${this.mouse.pos.x} y=${this.mouse.pos.y}</p>` }
 }
 ```
 
 <v-click>
 
-**4 个生命周期钩子**：
-
-| 钩子 | 触发时机 |
-|---|---|
-| `hostConnected()` | host 加入 DOM 后 |
-| `hostDisconnected()` | host 离开 DOM 后 |
-| `hostUpdate()` | host update 前（DOM 未变） |
-| `hostUpdated()` | host updated 后（DOM 已变） |
+**4 个生命周期钩子**：`hostConnected` / `hostDisconnected` / `hostUpdate`（DOM 未变前） / `hostUpdated`（DOM 已变后）
 
 </v-click>
 
 <v-click>
 
 ::: tip 替代 Mixin
-Reactive Controller 是 Lit 对 Mixin 的**官方替代**——有独立 this，支持多实例，类型友好，无命名冲突。
+Reactive Controller 是 Lit 对 Mixin 的**官方替代**——独立 this，支持多实例，类型友好，无命名冲突。
 :::
 
 </v-click>
@@ -583,14 +501,12 @@ transition: slide-up
 
 # Controller vs Mixin
 
-| 维度 | Reactive Controller | Mixin（旧路线） |
+| 维度 | Reactive Controller | Mixin（旧） |
 |---|---|---|
-| 接入方式 | `new C(this)` + `addController` | `class X extends Mixin(LitElement)` |
-| 标识 | 独立对象（this.mouse） | 混入到 host 原型 |
-| 多实例 | **可**（同 host 两个 ClockController） | 不可 |
-| 类型 | 标准 TS class | TS Mixin 类型推导复杂 |
-| 命名冲突 | 无（隔离在 controller） | 高（同名方法覆盖） |
-| 测试 | 独立测试 | 必须配合 host |
+| 接入 | `new C(this)` + `addController` | `extends Mixin(LitElement)` |
+| 多实例 | **可** | 不可 |
+| 类型 | 标准 TS class | TS Mixin 推导复杂 |
+| 命名冲突 | 无（隔离） | 高（同名覆盖） |
 | 推荐度 | **强推荐** | 仅遗留场景 |
 
 <v-click>
@@ -612,28 +528,20 @@ transition: slide-up
 # 内置指令速查（一）
 
 ```ts
-import { classMap }    from 'lit/directives/class-map.js'
-import { styleMap }    from 'lit/directives/style-map.js'
-import { repeat }      from 'lit/directives/repeat.js'
-import { when }        from 'lit/directives/when.js'
-import { ifDefined }   from 'lit/directives/if-defined.js'
-import { ref, createRef } from 'lit/directives/ref.js'
+import { classMap } from 'lit/directives/class-map.js'
+import { styleMap } from 'lit/directives/style-map.js'
+import { repeat }   from 'lit/directives/repeat.js'
+import { when }     from 'lit/directives/when.js'
+import { ifDefined } from 'lit/directives/if-defined.js'
 ```
 
 ```ts
 render() {
   return html`
-    <div
-      class=${classMap({ card: true, active: this.active })}
-      style=${styleMap({ color: this.color, '--var': '#fff' })}
-    >
-      ${when(this.loading,
-        () => html`<spinner></spinner>`,
-        () => html`<content></content>`,
-      )}
-
+    <div class=${classMap({ card: true, active: this.active })}
+         style=${styleMap({ color: this.color })}>
+      ${when(this.loading, () => html`<spinner></spinner>`, () => html`<content></content>`)}
       <ul>${repeat(this.items, i => i.id, i => html`<li>${i.name}</li>`)}</ul>
-
       <a href=${ifDefined(this.url)}>${this.text}</a>
     </div>
   `
@@ -646,22 +554,15 @@ transition: slide-up
 
 # 内置指令速查（二）
 
-| 指令 | 用途 | 性能场景 |
-|---|---|---|
-| `classMap(obj)` | 类名切换 | - |
-| `styleMap(obj)` | 样式切换 | - |
-| `when(cond, T, F?)` | 条件渲染 | 替代三元 |
-| `choose(key, cases, fb?)` | switch/case | - |
-| `map(items, fn)` | iterable 映射 | 短列表 |
-| `repeat(items, keyFn, tpl)` | 带 key 列表 | 长列表 / 重排 |
-| `ifDefined(v)` | undefined 移除 attribute | - |
-| `live(v)` | 与 DOM 实际值比较 | **受控 input 必备** |
-| `ref(refOrCb)` | DOM 引用 | - |
-| `cache(tpl)` | 切换保留 DOM | Tab / 路由切换 |
-| `guard(deps, fn)` | 依赖不变跳过 | 贵子模板 |
-| `keyed(key, tpl)` | key 变化强制重建 | 切 user 重置状态 |
-| `unsafeHTML(str)` | 字符串解析 HTML | XSS 注意 |
-| `until(...vals)` | Promise / 同步混合 | - |
+| 指令 | 用途 |
+|---|---|
+| `classMap` / `styleMap` | 类名 / 样式切换 |
+| `when` / `choose` | 条件 / switch |
+| `map` / `repeat` | 短列表 / 带 key 长列表 |
+| `ifDefined(v)` | undefined 移除 attribute |
+| `live(v)` | 与 DOM 实际值比较（**受控 input 必备**） |
+| `ref` / `cache` | DOM 引用 / Tab 切换保留 |
+| `unsafeHTML` / `until` | 解析 HTML / Promise 混合 |
 
 ---
 transition: slide-up
@@ -747,10 +648,7 @@ class StreamDirective extends AsyncDirective {
   private _stream?: AsyncIterable<string>
 
   render(stream: AsyncIterable<string>) {
-    if (this._stream !== stream) {
-      this._stream = stream
-      this._consume()
-    }
+    if (this._stream !== stream) { this._stream = stream; this._consume() }
     return ''
   }
 
@@ -770,7 +668,7 @@ export const stream = directive(StreamDirective)
 
 <v-click>
 
-`setValue(v)` 在异步操作完成时主动推送——不依赖响应式更新流程。
+`setValue(v)` 异步推送——不依赖响应式更新流程。
 
 </v-click>
 
@@ -784,16 +682,9 @@ transition: slide-up
 @customElement('my-card')
 export class MyCard extends LitElement {
   static styles = css`
-    :host {
-      display: block;
-      padding: 16px;
-      border: 1px solid var(--card-border, #ddd);
-      border-radius: 8px;
-    }
-    :host([variant="primary"]) {
-      background: #007aff;
-      color: white;
-    }
+    :host { display: block; padding: 16px; border-radius: 8px;
+            border: 1px solid var(--card-border, #ddd); }
+    :host([variant="primary"]) { background: #007aff; color: white; }
     .title { font-size: 18px; font-weight: bold; }
     ::slotted(p) { margin: 8px 0; }
   `
@@ -977,27 +868,20 @@ export class LightDomEl extends LitElement {
   protected createRenderRoot() {
     return this   // 渲染到自己，无 Shadow DOM
   }
-
   // 注意：static styles 在 light DOM 模式下不生效
 }
 ```
 
 <v-click>
 
-**代价**：
-
-- 失去样式作用域（外部样式会污染内部）
-- 失去 slot 抽象（外部 light DOM 元素直接是 children）
-- 失去 `::slotted` 选择器
+**代价**：失去样式作用域 / 失去 slot 抽象 / 失去 `::slotted`
 
 </v-click>
 
 <v-click>
 
 ::: tip 何时用 Light DOM
-- 与 Tailwind / 全局 CSS 框架集成
-- SEO 重度依赖（搜索引擎对 Shadow DOM 支持差）
-- SSR 时无 DSD polyfill 的旧浏览器
+与 Tailwind / 全局 CSS 框架集成 / SEO 重度依赖 / 旧浏览器无 DSD polyfill。
 
 否则**始终保持 Shadow DOM 默认开启**——这是 Lit 最大的卖点之一。
 :::
@@ -1021,21 +905,16 @@ export class ThemeProvider extends LitElement {
   @provide({ context: themeContext })
   theme: Theme = {
     mode: 'light',
-    toggle: () => {
-      this.theme = { ...this.theme, mode: this.theme.mode === 'light' ? 'dark' : 'light' }
-    },
+    toggle: () => { this.theme = { ...this.theme,
+      mode: this.theme.mode === 'light' ? 'dark' : 'light' } },
   }
   render() { return html`<slot></slot>` }
 }
 
 @customElement('theme-toggle')
 export class ThemeToggle extends LitElement {
-  @consume({ context: themeContext, subscribe: true })
-  theme?: Theme
-
-  render() {
-    return html`<button @click=${this.theme?.toggle}>${this.theme?.mode}</button>`
-  }
+  @consume({ context: themeContext, subscribe: true }) theme?: Theme
+  render() { return html`<button @click=${this.theme?.toggle}>${this.theme?.mode}</button>` }
 }
 ```
 
@@ -1090,7 +969,6 @@ export class UserCard extends LitElement {
 
   private _task = new Task(this, {
     task: async ([userId], { signal }) => {
-      if (!userId) return null
       const res = await fetch(`/api/users/${userId}`, { signal })
       return res.json()
     },
@@ -1099,7 +977,6 @@ export class UserCard extends LitElement {
 
   render() {
     return this._task.render({
-      initial: () => html`<p>请选择用户</p>`,
       pending: () => html`<spinner></spinner>`,
       complete: (user) => html`<p>${user?.name}</p>`,
       error: (err) => html`<p>Error: ${(err as Error).message}</p>`,
@@ -1225,17 +1102,13 @@ export class MyButton extends LitElement {
 }
 
 declare global {
-  interface HTMLElementTagNameMap {
-    'my-button': MyButton
-  }
+  interface HTMLElementTagNameMap { 'my-button': MyButton }
 }
 
 // 之后：
 const btn = document.createElement('my-button')  // 类型 MyButton
 btn.label = 'OK'                                 // 有类型检查
-
-document.querySelector<MyButton>('my-button')
-const found = document.querySelector('my-button')  // 自动推为 MyButton | null
+document.querySelector('my-button')              // 自动推为 MyButton | null
 ```
 
 <v-click>
@@ -1258,19 +1131,12 @@ transition: slide-up
 # tsconfig 陷阱：useDefineForClassFields
 
 ```json
-{
-  "experimentalDecorators": true,
-  "useDefineForClassFields": true    // 错误！
-}
+{ "experimentalDecorators": true, "useDefineForClassFields": true }  // 错误！
 ```
 
 <v-click>
 
-**为什么错**：
-
-- TS 5 之前的实验装饰器把 `@property` 装为 setter/getter
-- `useDefineForClassFields: true` 让字段初始化走 `[[DefineOwnProperty]]`，**覆盖 Lit 的 setter**
-- 结果：属性更新不再触发渲染——**静默失败，最难排查**
+**为什么错**：实验装饰器把 `@property` 装为 setter/getter，`useDefineForClassFields: true` 让字段初始化走 `[[DefineOwnProperty]]` 覆盖 Lit setter——属性更新不再触发渲染，**静默失败，最难排查**。
 
 </v-click>
 
@@ -1280,16 +1146,10 @@ transition: slide-up
 
 ```jsonc
 // 路线 A：实验装饰器 + 关闭 defineForClassFields
-{
-  "experimentalDecorators": true,
-  "useDefineForClassFields": false
-}
+{ "experimentalDecorators": true, "useDefineForClassFields": false }
 
 // 路线 B：TC39 标准装饰器（TS 5.0+）
-{
-  "experimentalDecorators": false,
-  "useDefineForClassFields": true
-}
+{ "experimentalDecorators": false, "useDefineForClassFields": true }
 ```
 
 </v-click>
@@ -1449,11 +1309,7 @@ import { msg, str, updateWhenLocaleChanges } from '@lit/localize'
 
 @customElement('greeting')
 export class Greeting extends LitElement {
-  constructor() {
-    super()
-    updateWhenLocaleChanges(this)
-  }
-
+  constructor() { super(); updateWhenLocaleChanges(this) }
   @property() name = 'World'
 
   render() {
@@ -1471,8 +1327,7 @@ export class Greeting extends LitElement {
 **工作流**：
 
 ```bash
-npx lit-localize extract   # 提取 → XLIFF 文件
-# 翻译团队填 XLIFF
+npx lit-localize extract   # 提取 → XLIFF（翻译团队填写）
 npx lit-localize build     # 生成 locale chunks
 ```
 
@@ -1583,20 +1438,14 @@ transition: slide-up
 |---|---|---|
 | 编译策略 | 运行时 | **编译时** |
 | 模板语法 | `html` tagged template | JSX |
-| Shadow DOM | 默认开（手动覆写走 light） | **默认 / 关闭可选** |
-| 多输出 | 单源码 | **编译 React / Vue / Angular wrapper** |
+| 多输出 wrapper | 单源码 | **编译 React/Vue/Angular** |
 | SSR | `@lit-labs/ssr`（Labs） | 内置 prerender |
-| 包体积 | 5-7 KB | ~10 KB（运行时） |
-| 响应式 API | `@property` setter | `@Prop` / `@State` / `@Watch` |
+| 包体积 | 5-7 KB | ~10 KB |
 | 企业用户 | Adobe / IBM / SAP / Salesforce | Ionic / 多家 |
 
 <v-click>
 
-**怎么选**：
-
-- **想要更接近 HTML 原生 + 更小体积** → Lit
-- **已有 React 经验 + 想 React-first 但跨框架** → Stencil
-- **要一键生成多框架 wrapper** → Stencil
+**怎么选**：更接近 HTML 原生 + 更小体积 → **Lit**；已有 React 经验或要一键生成多框架 wrapper → **Stencil**。
 
 </v-click>
 
@@ -1608,20 +1457,16 @@ transition: slide-up
 
 | 维度 | Lit 3 | Microsoft FAST | Hybrids | 原生 WC |
 |---|---|---|---|---|
-| 维护方 | Google | Microsoft | 个人 / 社区 | W3C |
-| 模板语法 | `html` tagged template | `html` tagged template | 函数式 + descriptor | 手写 DOM |
+| 维护方 | Google | Microsoft | 社区 | W3C |
 | 类风格 | OOP（class + 装饰器） | OOP | **函数式** | OOP |
 | 设计 Tokens | CSS Custom Property | **完整 Token 系统** | CSS Custom Property | 无 |
 | 体积 | 5-7 KB | ~30 KB | ~3 KB | **0** |
-| 企业使用 | Adobe Spectrum / IBM Carbon | Microsoft Fluent UI | 小众 | - |
+| 企业使用 | Adobe / IBM Carbon | Microsoft Fluent UI | 小众 | - |
 
 <v-click>
 
 ::: tip 怎么选
-- **企业组件库 / 跨框架设计系统** → **Lit**（最广采用 + 最稳生态）
-- **Microsoft 生态** → FAST（Fluent UI 一脉相承）
-- **函数式偏好** → Hybrids
-- **学习 / demo** → 原生 Web Components
+**Lit**：跨框架设计系统 / 企业组件库 / **FAST**：Microsoft 生态 / **Hybrids**：函数式偏好 / **原生 WC**：学习
 :::
 
 </v-click>
@@ -1634,14 +1479,12 @@ transition: slide-up
 
 | 维度 | Lit 3 | React 19 | Vue 3.5 | Angular 18 |
 |---|---|---|---|---|
-| 自我定位 | Web Components 框架 | UI 库 | 完整框架 | 完整框架 |
+| 自我定位 | WC 框架 | UI 库 | 完整框架 | 完整框架 |
 | 跨框架可用 | **是** | 否 | 否 | 否 |
-| 模板 | `html` tagged template | JSX | SFC 模板 | HTML 模板 |
-| Virtual DOM | **无**（局部 dirty-check） | 有 | 有 | 无（增量 DOM） |
-| 样式 | **Shadow DOM** | CSS Modules | scoped CSS | Shadow DOM / Emulated |
-| 路由 | **无内置** | 无内置 | vue-router | @angular/router |
-| 状态管理 | **无内置** | 无内置 | 无内置 | Signal Store |
-| SSR | Labs | Next.js（生产） | Nuxt（生产） | Angular Universal |
+| Virtual DOM | **无** | 有 | 有 | 无（增量 DOM） |
+| 样式作用域 | **Shadow DOM** | CSS Modules | scoped CSS | Emulated |
+| 路由 / 状态 | **无内置** | 无 | vue-router | router/SignalStore |
+| SSR | Labs | Next.js | Nuxt | Angular Universal |
 | Bundle 核心 | **5-7 KB** | ~45 KB | ~25 KB | ~50 KB |
 
 <v-click>
@@ -1656,19 +1499,14 @@ transition: slide-up
 
 # 实战：跨框架设计系统
 
-完整流程：
-
 ```
 @my-org/ui/
 ├── src/
 │   ├── button/my-button.ts      # Lit 组件
-│   ├── card/my-card.ts
-│   ├── styles/tokens.ts          # CSS Custom Properties
+│   ├── styles/tokens.ts         # CSS Custom Properties
 │   └── index.ts
-├── react-wrapper/                # @my-org/ui-react
-│   └── src/index.ts              # @lit/react createComponent
-├── vue-wrapper/                  # @my-org/ui-vue (可选)
-├── custom-elements.json          # CEM (IDE 类型提示)
+├── react-wrapper/               # @my-org/ui-react (@lit/react)
+├── custom-elements.json         # CEM (IDE 类型提示)
 └── package.json
 ```
 
@@ -1679,14 +1517,10 @@ transition: slide-up
 export const tokens = css`
   :host {
     --color-primary: #007aff;
-    --space-1: 4px;
     --space-2: 8px;
     --font-base: system-ui, sans-serif;
   }
-  :host([theme="dark"]) {
-    --color-text: white;
-    --color-bg: #1a1a1a;
-  }
+  :host([theme="dark"]) { --color-text: white; --color-bg: #1a1a1a; }
 `
 ```
 
@@ -1704,11 +1538,8 @@ export class MyButton extends LitElement {
   static styles = [tokens, css`
     :host { display: inline-block; }
     button {
-      font: var(--font-base);
       padding: var(--space-2) var(--space-4);
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
+      border-radius: 6px; border: none; cursor: pointer;
     }
     .variant-primary { background: var(--color-primary); color: white; }
     .variant-danger { background: var(--color-danger); color: white; }
@@ -1719,15 +1550,9 @@ export class MyButton extends LitElement {
   @property({ type: Boolean }) disabled = false
 
   render() {
-    return html`
-      <button
-        class=${classMap({ [`variant-${this.variant}`]: true })}
-        ?disabled=${this.disabled}
-        @click=${this._onClick}
-      ><slot></slot></button>
-    `
+    return html`<button class=${classMap({ [`variant-${this.variant}`]: true })}
+        ?disabled=${this.disabled} @click=${this._onClick}><slot></slot></button>`
   }
-
   private _onClick() {
     this.dispatchEvent(new CustomEvent('press', { bubbles: true, composed: true }))
   }
@@ -1747,23 +1572,16 @@ import * as React from 'react'
 import { MyButton } from '@my-org/ui'
 
 export const Button = createComponent({
-  tagName: 'my-button',
-  elementClass: MyButton,
-  react: React,
+  tagName: 'my-button', elementClass: MyButton, react: React,
   events: { onPress: 'press' },
 })
 ```
 
 ```tsx
-// App.tsx（React 应用）
+// App.tsx
 import { Button } from '@my-org/ui-react'
-
 function App() {
-  return (
-    <Button variant="primary" onPress={() => alert('clicked')}>
-      点击
-    </Button>
-  )
+  return <Button variant="primary" onPress={() => alert('clicked')}>点击</Button>
 }
 ```
 

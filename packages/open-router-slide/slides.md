@@ -223,23 +223,15 @@ transition: slide-up
 
 # 模型 ID 命名规则
 
-```
-<vendor>/<model-name>[:variant]
-```
+格式：`<vendor>/<model-name>[:variant]`
 
 | OpenRouter ID | 对应模型 |
 | --- | --- |
 | `anthropic/claude-opus-4.7` | Claude Opus 4.7 |
 | `anthropic/claude-sonnet-4.6` | Claude Sonnet 4.6 |
-| `anthropic/claude-haiku-4.5` | Claude Haiku 4.5 |
-| `openai/gpt-5` | GPT-5 |
-| `openai/gpt-5-mini` | GPT-5-mini |
-| `openai/o3` | o3 推理模型 |
+| `openai/gpt-5` / `openai/gpt-5-mini` | GPT-5 系列 |
 | `google/gemini-2.5-pro` | Gemini 2.5 Pro |
-| `google/gemini-2.5-flash` | Gemini 2.5 Flash |
 | `deepseek/deepseek-r1` | DeepSeek R1 |
-| `qwen/qwen-2.5-72b-instruct` | Qwen 2.5 72B |
-| `xai/grok-4` | xAI Grok 4 |
 | `meta-llama/llama-3.3-70b-instruct` | Llama 3.3 70B |
 
 ---
@@ -256,22 +248,14 @@ transition: slide-up
 | `:online` | 自动接 web search |
 
 ```python
-# 让 OR 自动选最优模型
-model="openrouter/auto"
-
-# 免费 Llama
-model="meta-llama/llama-3.3-70b-instruct:free"
-
-# 1M context Claude
-model="anthropic/claude-opus-4.7:1m"
+model="openrouter/auto"                                # OR 自动选最优
+model="meta-llama/llama-3.3-70b-instruct:free"         # 免费 Llama
+model="anthropic/claude-opus-4.7:1m"                   # 1M context Claude
 ```
 
 <v-click>
 
-> 💡 **找模型 ID**
->
->
-> [openrouter.ai/models](https://openrouter.ai/models) 搜模型 → 点详情页有调用示例 + ID 复制按钮。
+> 💡 **找模型 ID**：[openrouter.ai/models](https://openrouter.ai/models) 搜模型 → 详情页有调用示例 + ID 复制按钮。
 
 </v-click>
 
@@ -430,21 +414,14 @@ transition: slide-up
 ```python
 # Claude 风格：显式 cache_control
 messages = [
-    {
-        "role": "system",
-        "content": [
-            {
-                "type": "text",
-                "text": LONG_CONTEXT,
-                "cache_control": {"type": "ephemeral"},
-            },
-        ],
-    },
+    {"role": "system", "content": [
+        {"type": "text", "text": LONG_CONTEXT,
+         "cache_control": {"type": "ephemeral"}},
+    ]},
     {"role": "user", "content": "..."},
 ]
 
-# GPT 风格：自动 cache（无需配置，第二次相同前缀自动命中）
-# Gemini 风格：implicit cache（无需配置，重复前缀自动 cache）
+# GPT / Gemini：自动 cache（相同前缀自动命中，无需配置）
 ```
 
 <v-click>
@@ -537,10 +514,7 @@ content = [
 # PDF（type: file）
 content = [
     {"type": "text", "text": "总结"},
-    {"type": "file", "file": {
-        "file_data": "data:application/pdf;base64,...",
-        "filename": "doc.pdf",
-    }},
+    {"type": "file", "file": {"file_data": "data:application/pdf;base64,...", "filename": "doc.pdf"}},
 ]
 ```
 
@@ -551,8 +525,6 @@ content = [
 | GPT-4o / GPT-5 系 | ✓ | ✗（需先 vision 抽页） |
 | Claude 3+ 系 | ✓ | ✓（OR 转 document block） |
 | Gemini 2+ 系 | ✓ | ✓（原生） |
-
-OR 自动把 OpenAI 风格 `image_url` 转成 Claude `image` / Gemini `inlineData`。
 
 </v-click>
 
@@ -834,7 +806,6 @@ extra_body={"provider": {"sort": "latency", "order": ["openai", "anthropic"]}}
 | GPT-5-mini | ~600ms（最快） |
 | Gemini 2.5 Flash | ~700ms |
 | Claude Sonnet 4.6 | ~1.2s（UI 慎用） |
-| Claude Opus 4.7 | ~2s |
 
 </v-click>
 
@@ -861,14 +832,12 @@ OpenRouter 加 **10-30%** 中间费：
 | Claude Sonnet 4.6 输入 | $3/M | $3.30/M | +10% |
 | Claude Opus 4.7 输入 | $15/M | $16.50/M | +10% |
 | GPT-5 输入 | $5/M | $5.50/M | +10% |
-| GPT-5-mini 输入 | $0.50/M | $0.55/M | +10% |
 | Gemini 2.5 Flash 输入 | $0.30/M | $0.36/M | +20% |
 | DeepSeek R1 输入 | $0.27/M | $0.30/M | +11% |
 
 <v-click>
 
-- 大厂模型（Claude / GPT）：加价稳定 10-15%
-- 小厂 / 开源模型：加价波动 11-30%
+- 大厂模型（Claude / GPT）：加价稳定 10-15%；小厂 / 开源模型：加价波动 11-30%
 - 实时价格：[openrouter.ai/models](https://openrouter.ai/models) 每模型详情页
 
 </v-click>
@@ -937,16 +906,12 @@ transition: slide-up
 
 | HTTP | 类型 | 含义 |
 | --- | --- | --- |
-| 400 | bad_request | 参数错 |
-| 401 | unauthorized | API key 错 |
+| 400 / 401 | bad_request / unauthorized | 参数错 / API key 错 |
 | 402 | payment_required | credit 不足 |
-| 403 | forbidden | model 无权限 |
-| 404 | not_found | model ID 不存在 |
-| 408 | timeout | provider 超时 |
-| 429 | rate_limit | 超 RPM / RPD |
+| 403 / 404 | forbidden / not_found | model 无权限 / model ID 不存在 |
+| 408 / 429 | timeout / rate_limit | provider 超时 / 超 RPM 或 RPD |
 | 500 | internal_error | OR 内部错 |
-| 502 | bad_gateway | provider 返错 |
-| 503 | service_unavailable | 所有 provider 不可用 |
+| 502 / 503 | bad_gateway / service_unavailable | provider 返错 / 所有 provider 不可用 |
 
 ---
 transition: slide-up
@@ -997,7 +962,6 @@ transition: slide-up
 | Tool 调用结果格式错 | 测每家实际输出，需 normalize |
 | `response_format: json_schema` 失败 | 设 `require_parameters: True` 过滤 |
 | 模型 ID 不存在 | 查 `/api/v1/models` 看是否 retire |
-| Stream 一直不返回 | 网络问题（境内境外抖动） |
 | credit 用完 | Settings → Add Credit / 自动 top-up |
 
 ---
@@ -1118,10 +1082,8 @@ transition: slide-up
 | 价格 | +10-30% 中间费 | 原价 |
 | 大陆访问 | Worker / 直连 / 反代 | 普遍困难 |
 | 独有特性 | 部分不支持 | 全支持 |
-| 多模型对比 | 一份代码切 | 重写代码 |
-| Fallback / 高可用 | 内置 | 自建 |
+| 多模型 / Fallback | 一份代码切 + 内置 | 重写代码 + 自建 |
 | 合规 / SLA | 中等 | 企业级 |
-| 监控 | Activity 面板 | 各家面板 |
 | 支付 | 信用卡 / Crypto | 国内卡难 |
 
 ---

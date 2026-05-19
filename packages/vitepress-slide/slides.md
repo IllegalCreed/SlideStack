@@ -285,10 +285,6 @@ transition: fade-out
 小提示
 :::
 
-::: warning
-警告
-:::
-
 ::: details 点开看代码
 内容
 :::
@@ -307,7 +303,7 @@ const a = 1; const b = 2; const c = 3; const d = 4
 ```
 ````
 
-代码块语法：花括号写行号、`:line-numbers` 启用行号。还有 `// [!code focus]` / `// [!code ++]` / `// [!code --]` 等内联标记。
+花括号写行号、`:line-numbers` 启用行号；还有 `// [!code focus]` / `// [!code ++]` / `// [!code --]` 等内联标记。
 
 </div>
 

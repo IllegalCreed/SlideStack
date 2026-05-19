@@ -133,21 +133,20 @@ transition: slide-up
 
 **Svelte 组件 + 文件路由 + 服务端 load + Form Actions + Adapter 部署**
 
-```mermaid {scale: 0.7}
+```mermaid {scale: 0.5}
 graph TD
   A[请求到来] --> B{路由匹配 src/routes}
-  B --> C[+page.server.ts load 跑服务端]
-  C --> D[查数据库 / 用 cookies / 读私有 env]
-  D --> E[+page.ts universal load 跑两端]
+  B --> C[+page.server.ts 服务端 load]
+  C --> E[+page.ts universal load]
   E --> F[+page.svelte 渲染]
-  F --> G[adapter 输出对应平台 artifact]
-  C -.actions.-> H[Form POST + redirect/fail]
-  E -.fetch.-> I[流式 promise streaming]
+  F --> G[adapter 输出平台 artifact]
 ```
 
-<v-click>
+---
+transition: slide-up
+---
 
-对比 Next.js / Nuxt：
+# 对比 Next.js / Nuxt
 
 | 维度 | SvelteKit 2 | Next.js 16 | Nuxt 4 |
 |---|---|---|---|
@@ -155,8 +154,6 @@ graph TD
 | 数据获取 | `load()` + `fetch` | `await fetch` + RSC | `useFetch` |
 | 部署 | Adapter（自选） | Vercel-first | Nitro preset |
 | 自动导入 | 显式 import | 显式 | 全自动 |
-
-</v-click>
 
 ---
 transition: slide-up
@@ -229,8 +226,6 @@ src/routes/blog/[slug]/
 ├── +page.ts               ← Universal load（两端都跑）
 ├── +page.server.ts        ← Server-only load + actions
 ├── +layout.svelte         ← 该目录及子目录共享布局
-├── +layout.ts             ← Layout universal load
-├── +layout.server.ts      ← Layout server load
 ├── +error.svelte          ← 错误兜底（最近一层）
 └── +server.ts             ← API endpoint（GET / POST / ...）
 ```
@@ -242,9 +237,7 @@ src/routes/blog/[slug]/
 | `+page.svelte` | 客户端 + SSR | 渲染 UI |
 | `+page.ts` | 服务端 + 客户端导航 | 通用数据加载 |
 | `+page.server.ts` | 仅服务端 | DB / 私有 env / cookies / **actions** |
-| `+layout.svelte` | 客户端 + SSR | 共享外壳（导航栏 / footer）|
-| `+server.ts` | 仅服务端 | RESTful endpoint，导出 HTTP 方法 |
-| `+error.svelte` | 客户端 + SSR | 错误页（向上冒泡找最近的）|
+| `+server.ts` | 仅服务端 | RESTful endpoint |
 
 </v-clicks>
 
@@ -274,17 +267,10 @@ export const load: PageServerLoad = async ({ params }) => {
   let { data }: PageProps = $props()   // Svelte 5 runes：$props 解构
 </script>
 
-<article>
-  <h1>{data.post.title}</h1>
-  <p>{data.post.content}</p>
-</article>
+<article><h1>{data.post.title}</h1><p>{data.post.content}</p></article>
 ```
 
-<v-click>
-
 `./$types` 是 SvelteKit 根据文件名 + 路由参数自动生成的类型，永远不要手写 `params` 类型。
-
-</v-click>
 
 ---
 transition: slide-up
@@ -341,16 +327,6 @@ transition: slide-up
 <footer>...</footer>
 ```
 
-```svelte
-<!-- src/routes/dashboard/+layout.svelte —— 嵌套 layout -->
-<script lang="ts">
-  let { children, data } = $props()
-</script>
-
-<aside>Sidebar</aside>
-<main>{@render children()}</main>
-```
-
 <v-click>
 
 **关键点**：
@@ -371,28 +347,20 @@ transition: slide-up
 | 维度 | `+page.ts` (Universal) | `+page.server.ts` (Server) |
 |---|---|---|
 | 运行位置 | SSR + 客户端导航 | 仅服务端 |
-| 能访问 DB / 私有 env / `cookies` | ❌ | ✅ |
-| 返回值序列化 | 不限（含 class / function）| 必须 devalue 可序列化 |
+| 能访问 DB / 私有 env | ❌ | ✅ |
+| 返回值序列化 | 不限（含 class）| 必须 devalue 可序列化 |
 | 客户端导航代价 | 直接跑 | 一次 fetch 拉 JSON |
-| 典型用途 | 公共 API + 自定义类 | DB / Auth / Secret |
 
 ```ts
 // 同时存在时：server 先跑，结果作为 universal 的 data 参数
-// +page.server.ts
-export const load = async () => ({ secret: process.env.SECRET })
-
-// +page.ts
-export const load = async ({ data, fetch }) => {
+export const load = async () => ({ secret: process.env.SECRET })   // +page.server.ts
+export const load = async ({ data, fetch }) => {                    // +page.ts
   const res = await fetch('/api/public')
   return { ...data, public: await res.json() }
 }
 ```
 
-<v-click>
-
 **经验**：能用 server load 就用 server load，少一次客户端数据序列化往返。
-
-</v-click>
 
 ---
 transition: slide-up
@@ -407,7 +375,6 @@ export const load: PageServerLoad = async (event) => {
   const {
     params,        // { slug: 'hello' }
     url,           // URL 实例，url.searchParams.get('q')
-    route,         // { id: '/blog/[slug]' }
     fetch,         // 增强 fetch：相对路径 + 自动传 cookies
     setHeaders,    // SSR 设置 response 头
     parent,        // await parent() 拿父 layout load 数据
@@ -415,18 +382,12 @@ export const load: PageServerLoad = async (event) => {
     cookies,       // (server only) cookies.get('token')
     locals,        // (server only) handle 钩子塞的 per-request 状态
     request,       // (server only) Web 标准 Request
-    platform,      // (server only) adapter 平台对象（Cloudflare 等）
+    platform,      // (server only) adapter 平台对象
   } = event
 }
 ```
 
-<v-clicks>
-
-- `parent()` 用来组合父 layout 的数据（注意：会触发父 load 重跑链路）
-- `depends('key')` + `invalidate('key')` 实现手动失效
-- `setHeaders({ 'cache-control': 'max-age=60' })` 仅 SSR 生效
-
-</v-clicks>
+- `parent()` 组合父 layout 数据；`depends('key')` + `invalidate('key')` 手动失效；`setHeaders` 仅 SSR 生效
 
 ---
 transition: slide-up
@@ -438,38 +399,28 @@ transition: slide-up
 // src/routes/+page.server.ts
 export const load = async () => {
   return {
-    // 立即 await，关键数据
-    post: await loadPost(),
-    // 不 await，promise 流式传到客户端
-    comments: loadComments(),
+    post: await loadPost(),        // 立即 await，关键数据
+    comments: loadComments(),      // 不 await，promise 流式传到客户端
   }
 }
 ```
 
 ```svelte
 <!-- src/routes/+page.svelte -->
-<script>
-  let { data } = $props()
-</script>
+<script>let { data } = $props()</script>
 
 <h1>{data.post.title}</h1>
 
 {#await data.comments}
   <p>评论加载中...</p>
 {:then comments}
-  {#each comments as comment}
-    <p>{comment.body}</p>
-  {/each}
+  {#each comments as comment}<p>{comment.body}</p>{/each}
 {:catch err}
   <p>加载失败：{err.message}</p>
 {/await}
 ```
 
-<v-click>
-
 类似 Next.js 的 Suspense + Streaming：先回 HTML 让用户看到框架，慢请求 resolve 后流式补 DOM。
-
-</v-click>
 
 ---
 transition: slide-up
@@ -486,29 +437,22 @@ export const actions: Actions = {
   default: async ({ request, cookies }) => {
     const data = await request.formData()
     const email = data.get('email') as string
-    const password = data.get('password') as string
-
-    const user = await authenticate(email, password)
-    if (!user) {
-      return fail(400, { email, error: '账号或密码错误' })
-    }
-
+    const user = await authenticate(email, data.get('password') as string)
+    if (!user) return fail(400, { email, error: '账号或密码错误' })
     cookies.set('session', user.token, { path: '/' })   // 2.0 起 path 必填
-    redirect(303, '/dashboard')   // 2.0 起不用 throw
+    redirect(303, '/dashboard')                          // 2.0 起不用 throw
   },
 }
 ```
 
 ```svelte
 <!-- src/routes/login/+page.svelte -->
-<script>
-  let { form } = $props()
-</script>
+<script>let { form } = $props()</script>
 
 <form method="POST">
   <input name="email" value={form?.email ?? ''} />
   <input name="password" type="password" />
-  {#if form?.error}<p class="error">{form.error}</p>{/if}
+  {#if form?.error}<p>{form.error}</p>{/if}
   <button>登录</button>
 </form>
 ```
@@ -526,34 +470,21 @@ transition: slide-up
   let pending = $state(false)
 </script>
 
-<form
-  method="POST"
-  use:enhance={() => {
+<form method="POST" use:enhance={() => {
     pending = true
-    return async ({ result, update }) => {
-      pending = false
-      await update()   // 默认行为：刷新 form prop + 失效 load 数据
-    }
-  }}
->
-  <input name="email" />
-  <input name="password" type="password" />
-  <button disabled={pending}>
-    {pending ? '登录中...' : '登录'}
-  </button>
+    return async ({ update }) => { pending = false; await update() }
+  }}>
+  <input name="email" /><input name="password" type="password" />
+  <button disabled={pending}>{pending ? '登录中...' : '登录'}</button>
 </form>
 ```
-
-<v-click>
 
 **关键点**：
 
 - 无 JS 时 → 普通 HTML 表单 POST（progressive enhancement）
 - 有 JS 时 → 拦截 submit 走 fetch，避免整页刷新
-- `use:enhance` 不传参 → 模拟浏览器原生行为；传函数 → 自定义结果处理
+- `use:enhance` 不传参 → 原生行为；传函数 → 自定义结果处理
 - 文件上传必须 `enctype="multipart/form-data"`（2.0 起强制）
-
-</v-click>
 
 ---
 transition: slide-up
@@ -572,29 +503,18 @@ export const actions: Actions = {
     return { success: true, action: 'create' }
   },
   delete: async ({ url }) => {
-    const id = url.searchParams.get('id')!
-    await db.posts.delete(id)
+    await db.posts.delete(url.searchParams.get('id')!)
     return { success: true, action: 'delete' }
   },
 }
 ```
 
 ```svelte
-<form method="POST" action="?/create">
-  <input name="title" />
-  <button>新建</button>
-</form>
-
-<form method="POST" action="?/delete&id={post.id}">
-  <button>删除</button>
-</form>
+<form method="POST" action="?/create"><input name="title" /><button>新建</button></form>
+<form method="POST" action="?/delete&id={post.id}"><button>删除</button></form>
 ```
 
-<v-click>
-
 action="?/name" 用 URL 查询定位调哪个；不能同时有 `default` 和 named action。
-
-</v-click>
 
 ---
 transition: slide-up
@@ -607,12 +527,9 @@ transition: slide-up
 export const prerender = true       // 构建时生成静态 HTML
 export const ssr = true             // 是否服务端渲染（默认 true）
 export const csr = true             // 是否客户端 hydrate（默认 true）
-export const trailingSlash = 'never'  // 'never' | 'always' | 'ignore'
 ```
 
 <v-clicks>
-
-**三种典型组合**：
 
 | 场景 | prerender | ssr | csr | 等价 |
 |---|---|---|---|---|
@@ -631,29 +548,17 @@ transition: slide-up
 
 # 渲染策略决策树
 
-```mermaid {scale: 0.7}
+```mermaid {scale: 0.55}
 graph TD
-  A[这个路由的数据特点?] --> B{数据是否每个用户不同?}
-  B -->|否，所有人一样| C{数据多久变一次?}
-  B -->|是，依赖 cookies/session| D[SSR / Dynamic]
+  A[路由数据特点?] --> B{每用户不同?}
+  B -->|否| C{多久变一次?}
+  B -->|是 cookies/session| D[SSR Dynamic]
   C -->|从不变| E[prerender = true]
-  C -->|定时变| F[ISR via adapter / cron]
+  C -->|定时变| F[ISR / cron]
   C -->|外部触发| G[on-demand revalidate]
-  D --> H{是否含通用静态部分?}
-  H -->|是| I[局部 prerender + 子页 SSR]
-  H -->|否| J[整页 SSR]
 ```
 
-<v-click>
-
-**实战速记**：
-
-- 内容站首页 / 文档 → `prerender = true`
-- 博客 / 产品列表 → 多数 prerender + 个别 SSR（按需）
-- 仪表盘 / 个人页 → SSR（默认）
-- 离线小工具 → `ssr = false`（SPA）
-
-</v-click>
+**实战速记**：内容站 / 文档 → `prerender = true`；博客 / 产品列表 → 多数 prerender + 个别 SSR；仪表盘 → SSR；离线工具 → `ssr = false`
 
 ---
 transition: slide-up
@@ -664,26 +569,20 @@ transition: slide-up
 ```js
 // svelte.config.js
 import adapter from '@sveltejs/adapter-auto'   // 自动识别 Vercel / Netlify / CF
-
-export default {
-  kit: {
-    adapter: adapter(),
-  },
-}
+export default { kit: { adapter: adapter() } }
 ```
 
 <v-clicks>
 
 | Adapter | 平台 | 特性 |
 |---|---|---|
-| **adapter-auto** | 自动（Vercel/Netlify/CF/Azure）| 零配置，看 env 推断 |
-| **adapter-node** | 自有 Node 服务 / Docker / K8s | 完整 SSR，`build/index.js` 启动 |
+| **adapter-auto** | 自动 | 零配置，看 env 推断 |
+| **adapter-node** | Node / Docker / K8s | 完整 SSR |
 | **adapter-vercel** | Vercel | ISR / Edge / Image 优化 |
-| **adapter-cloudflare** | CF Workers / Pages | 全球边缘 + KV / R2 / D1 |
-| **adapter-netlify** | Netlify Functions / Edge | Forms / Identity 集成 |
-| **adapter-static** | 静态 CDN（GitHub Pages 等）| 纯 SSG，不支持运行时 |
+| **adapter-cloudflare** | CF Workers / Pages | 边缘 + KV / R2 / D1 |
+| **adapter-static** | 静态 CDN | 纯 SSG |
 
-**生产建议**：自己部署用具体 adapter（明确依赖），别用 auto；CI 镜像里能省一次 adapter 探测。
+**生产建议**：用具体 adapter，别用 auto。
 
 </v-clicks>
 
@@ -696,20 +595,13 @@ transition: slide-up
 ```js
 // svelte.config.js
 import adapter from '@sveltejs/adapter-node'
-
 export default {
-  kit: {
-    adapter: adapter({
-      out: 'build',           // 输出目录
-      precompress: true,      // 预生成 br / gzip
-      envPrefix: 'PUBLIC_',
-    }),
-  },
+  kit: { adapter: adapter({ out: 'build', precompress: true, envPrefix: 'PUBLIC_' }) },
 }
 ```
 
 ```dockerfile
-# Dockerfile
+# Dockerfile —— 多阶段构建
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY . .
@@ -724,11 +616,7 @@ EXPOSE 3000
 CMD ["node", "build"]
 ```
 
-<v-click>
-
 启动后默认监听 `PORT=3000`，可用 `BODY_SIZE_LIMIT` / `ORIGIN` / `PROTOCOL_HEADER` 等环境变量调参。
-
-</v-click>
 
 ---
 transition: slide-up
@@ -739,17 +627,12 @@ transition: slide-up
 ```js
 // svelte.config.js
 import adapter from '@sveltejs/adapter-static'
-
 export default {
-  kit: {
-    adapter: adapter({
-      pages: 'build',
-      assets: 'build',
-      fallback: '200.html',   // SPA fallback（找不到的路由走客户端路由）
-      precompress: false,
-      strict: true,            // 找不到可 prerender 的路由直接报错
-    }),
-  },
+  kit: { adapter: adapter({
+    pages: 'build', assets: 'build',
+    fallback: '200.html',   // SPA fallback（找不到的路由走客户端路由）
+    strict: true,           // 找不到可 prerender 的路由直接报错
+  }) },
 }
 ```
 
@@ -781,15 +664,12 @@ import { json } from '@sveltejs/kit'
 import type { RequestHandler } from './$types'
 
 export const GET: RequestHandler = async ({ url }) => {
-  const posts = await db.posts.findMany({
-    take: Number(url.searchParams.get('limit') ?? 10),
-  })
+  const posts = await db.posts.findMany({ take: Number(url.searchParams.get('limit') ?? 10) })
   return json(posts)
 }
 
 export const POST: RequestHandler = async ({ request }) => {
-  const body = await request.json()
-  const post = await db.posts.create({ data: body })
+  const post = await db.posts.create({ data: await request.json() })
   return json(post, { status: 201 })
 }
 ```
@@ -802,11 +682,7 @@ export const DELETE: RequestHandler = async ({ params }) => {
 }
 ```
 
-<v-click>
-
-支持的方法：`GET` / `POST` / `PUT` / `PATCH` / `DELETE` / `OPTIONS` / `HEAD`。基于 Web 标准 Request/Response，没有自创类型。
-
-</v-click>
+支持的方法：`GET` / `POST` / `PUT` / `PATCH` / `DELETE` / `OPTIONS` / `HEAD`。基于 Web 标准 Request/Response。
 
 ---
 transition: slide-up
@@ -834,17 +710,12 @@ const securityHeaders: Handle = async ({ event, resolve }) => {
 export const handle = sequence(auth, securityHeaders)
 
 export const handleError = async ({ error, event }) => {
-  console.error('[server]', error)
-  // 上报 Sentry / Datadog
+  console.error('[server]', error)        // 上报 Sentry / Datadog
   return { message: '服务器开了点小差', code: 'INTERNAL' }
 }
 ```
 
-<v-click>
-
-`event.locals` 是 per-request 容器，类型在 `src/app.d.ts` 的 `App.Locals` 接口定义；下游 load 直接 `locals.user` 取用。
-
-</v-click>
+`event.locals` 是 per-request 容器，类型在 `App.Locals` 定义；下游 load 直接 `locals.user` 取用。
 
 ---
 transition: slide-up
@@ -858,10 +729,7 @@ import type { Reroute, Transport } from '@sveltejs/kit'
 
 // 国际化 URL → 内部路由
 export const reroute: Reroute = ({ url }) => {
-  const map: Record<string, string> = {
-    '/de/ueber-uns': '/about',
-    '/fr/a-propos': '/about',
-  }
+  const map: Record<string, string> = { '/de/ueber-uns': '/about', '/fr/a-propos': '/about' }
   return map[url.pathname]
 }
 
@@ -876,11 +744,7 @@ export const transport: Transport = {
 }
 ```
 
-<v-click>
-
-`reroute` 不改 URL，只改路由匹配；用户看到的还是原 URL。`transport` 解决「server load 返回 Date / Set / 自定义类时浏览器拿不到原型」的问题。
-
-</v-click>
+`reroute` 不改 URL，只改路由匹配。`transport` 解决「server load 返回 Date / Set / 自定义类时浏览器拿不到原型」的问题。
 
 ---
 transition: slide-up
@@ -894,19 +758,10 @@ transition: slide-up
   import { page } from '$app/state'      // 2.12+ 推荐
   import type { PageProps } from './$types'
 
-  // $props：解构 load 返回值
-  let { data, form }: PageProps = $props()
-
-  // $derived：自动派生
-  const wordCount = $derived(data.post.content.split(' ').length)
-
-  // $state：本地交互状态
-  let liked = $state(false)
-
-  // $effect：副作用（导航完成后）
-  $effect(() => {
-    document.title = data.post.title
-  })
+  let { data, form }: PageProps = $props()                          // 解构 load 返回值
+  const wordCount = $derived(data.post.content.split(' ').length)   // 自动派生
+  let liked = $state(false)                                          // 本地交互状态
+  $effect(() => { document.title = data.post.title })                // 副作用
 </script>
 
 <h1>{data.post.title}（{wordCount} 词）</h1>
@@ -915,11 +770,7 @@ transition: slide-up
 </button>
 ```
 
-<v-click>
-
-`page` / `navigating` / `updated` 来自 `$app/state`（runes 化）；老项目里的 `$app/stores` 已 deprecated 但仍可用。
-
-</v-click>
+`page` / `navigating` / `updated` 来自 `$app/state`（runes 化）；老项目 `$app/stores` 已 deprecated 但仍可用。
 
 ---
 transition: slide-up
@@ -929,15 +780,11 @@ transition: slide-up
 
 ```svelte
 <!-- ❌ 老写法（Svelte 4 / store API） -->
-<script>
-  import { page } from '$app/stores'
-</script>
+<script>import { page } from '$app/stores'</script>
 <p>{$page.url.pathname}</p>
 
 <!-- ✅ 新写法（Svelte 5 + SvelteKit 2.12+） -->
-<script>
-  import { page } from '$app/state'
-</script>
+<script>import { page } from '$app/state'</script>
 <p>{page.url.pathname}</p>
 ```
 
@@ -945,10 +792,10 @@ transition: slide-up
 
 | 维度 | `$app/stores` | `$app/state` |
 |---|---|---|
-| 反应式 | Svelte stores（`$` 前缀订阅）| Runes（`$state`/`$derived` 友好）|
+| 反应式 | Svelte stores（`$` 订阅）| Runes 友好 |
 | 引入 | SvelteKit 1.0 | SvelteKit 2.12 |
 | 状态 | Deprecated（仍可用）| 推荐 |
-| 类型 | `Readable<Page>` | `Page`（直接是对象）|
+| 类型 | `Readable<Page>` | `Page`（直接对象）|
 
 **迁移**：把 `$page.url` 改成 `page.url`，去掉 `$`。`navigating` / `updated` 同理。
 
@@ -961,24 +808,13 @@ transition: slide-up
 # 环境变量四象限
 
 ```ts
-// 1. $env/static/public —— 构建期注入客户端，必须 PUBLIC_ 前缀
-import { PUBLIC_API_URL } from '$env/static/public'
-
-// 2. $env/static/private —— 构建期注入服务端
-import { DATABASE_URL } from '$env/static/private'
-
-// 3. $env/dynamic/public —— 运行时读，客户端可见
-import { env } from '$env/dynamic/public'
-console.log(env.PUBLIC_API_URL)
-
-// 4. $env/dynamic/private —— 运行时读，仅服务端
-import { env } from '$env/dynamic/private'
-console.log(env.DATABASE_URL)
+import { PUBLIC_API_URL } from '$env/static/public'   // 构建期，客户端，PUBLIC_ 前缀
+import { DATABASE_URL } from '$env/static/private'    // 构建期，服务端
+import { env } from '$env/dynamic/public'              // 运行时，客户端可见
+import { env } from '$env/dynamic/private'             // 运行时，仅服务端
 ```
 
 <v-clicks>
-
-**选择矩阵**：
 
 | 维度 | static | dynamic |
 |---|---|---|
@@ -987,7 +823,7 @@ console.log(env.DATABASE_URL)
 | 容器化部署 | 重新构建 | 改 env 重启即可 |
 | prerender | ✅ 可用 | ❌ 报错 |
 
-**经验**：能 static 就 static（Docker 多环境共用镜像才用 dynamic/private）。
+**经验**：能 static 就 static（Docker 多环境共用镜像才用 dynamic）。
 
 </v-clicks>
 
@@ -1001,11 +837,7 @@ transition: slide-up
 // src/app.d.ts —— 自定义错误形状
 declare global {
   namespace App {
-    interface Error {
-      message: string
-      code?: string
-      id?: string         // 用于客服追踪
-    }
+    interface Error { message: string; code?: string; id?: string }
   }
 }
 export {}
@@ -1024,15 +856,11 @@ export const load = async ({ params }) => {
 
 ```svelte
 <!-- src/routes/+error.svelte —— 兜底错误页 -->
-<script>
-  import { page } from '$app/state'
-</script>
+<script>import { page } from '$app/state'</script>
 
 <h1>{page.status}</h1>
 <p>{page.error?.message}</p>
-{#if page.error?.id}
-  <small>错误 ID：{page.error.id}</small>
-{/if}
+{#if page.error?.id}<small>错误 ID：{page.error.id}</small>{/if}
 ```
 
 ---
@@ -1054,24 +882,15 @@ transition: slide-up
 </script>
 
 {#each photos as photo}
-  <button onclick={() => open(photo)}>
-    <img src={photo.thumb} alt="" />
-  </button>
+  <button onclick={() => open(photo)}><img src={photo.thumb} alt="" /></button>
 {/each}
 
 {#if page.state.selected}
-  <Modal
-    photo={page.state.selected}
-    close={() => history.back()}
-  />
+  <Modal photo={page.state.selected} close={() => history.back()} />
 {/if}
 ```
 
-<v-click>
-
-`pushState` / `replaceState` 来自 `$app/navigation`。在 `src/app.d.ts` 声明 `App.PageState` 拿到完整类型。**踩坑**：刷新页面 state 丢失，业务上要兜底（比如从 URL search param 恢复）。
-
-</v-click>
+`pushState` / `replaceState` 来自 `$app/navigation`。在 `App.PageState` 声明类型。**踩坑**：刷新 state 丢失，要从 URL 兜底恢复。
 
 ---
 transition: slide-up
@@ -1104,10 +923,9 @@ transition: slide-up
 | 基础 | Svelte 5 | React 19 | Vue 3 | 多框架混搭 |
 | 路由 | `src/routes/` | `app/` | `pages/` | `pages/` |
 | 默认 | SSR + hydrate | RSC | SSR Vue | Islands |
-| 数据 | `load()` + `fetch` | `await fetch` + RSC | `useFetch` | `getStaticPaths` |
-| 部署 | Adapter 多平台 | Vercel-first | Nitro 30+ preset | 静态 + Adapter |
+| 数据 | `load()` | RSC + fetch | `useFetch` | `getStaticPaths` |
+| 部署 | Adapter 多平台 | Vercel-first | Nitro preset | 静态 + Adapter |
 | 包体积 | **极小** | 大 | 中 | 小 |
-| 学习曲线 | 中 | 高（RSC/Cache）| 中 | 低 |
 | 招聘市场 | 小 | **最大** | 中 | 小 |
 
 ---
@@ -1123,17 +941,10 @@ transition: slide-up
 | **团队熟 Svelte / 看重包体积 / DX** | **SvelteKit 2** |
 | **博客 / 营销站 / 多框架混搭** | Astro 5 |
 | **小型项目快上线 / 单人** | SvelteKit 或 Astro |
-| **复杂数据图层（GraphQL / RPC）** | SvelteKit + tRPC / Houdini |
+| **复杂数据图层（GraphQL / RPC）** | SvelteKit + tRPC |
 | **跨端（Web + Mobile）** | SvelteKit + Capacitor / Tauri |
 
-<v-click>
-
-> 💡 **关键判断**
->
-> 团队主语言决定 80% 的选型。Svelte 圈选 SvelteKit 没有竞品（svelte-spa-router 只适合纯 SPA）。
-> 要做静态站 / 内容站可以再看一眼 Astro，否则 SvelteKit 全场景覆盖。
-
-</v-click>
+> 💡 团队主语言决定 80% 的选型。Svelte 圈选 SvelteKit 没有竞品；静态 / 内容站可看 Astro，否则 SvelteKit 全场景覆盖。
 
 ---
 transition: slide-up
@@ -1141,9 +952,7 @@ transition: slide-up
 
 # 常见踩坑（一）：SSR 状态共享
 
-> 💡 **核心原则**
->
-> 服务端 module-level 变量 **会跨用户共享**，绝对不能存用户数据。
+> 💡 服务端 module-level 变量 **会跨用户共享**，绝对不能存用户数据。
 
 ```ts
 // ❌ 危险：所有用户共享同一个 user
@@ -1160,7 +969,6 @@ export const actions = {
 
 ```ts
 // ✅ 正确：用 cookies + locals 隔离 per-request
-// hooks.server.ts
 export const handle = async ({ event, resolve }) => {
   const token = event.cookies.get('session')
   event.locals.user = token ? await getUser(token) : null
@@ -1250,10 +1058,9 @@ transition: slide-up
 - **`setHeaders({ 'cache-control': ... })`**：SSR 响应也能上 CDN
 - **`adapter-vercel` ISR / `adapter-cloudflare` cache API**：CDN 层缓存
 - **Svelte 5 编译器自动 memo**：runes 模型下手写 memo 多此一举
-- **`<svelte:options runes={true}>`**：组件强制 runes 模式
-- **图片优化**：用 `@sveltejs/enhanced-img` 或 unpic-img（Sharp 自动压缩 + AVIF / WebP）
+- **图片优化**：`@sveltejs/enhanced-img`（Sharp 自动压缩 + AVIF / WebP）
 - **bundle 分析**：`vite build` 自带 stats，或 `rollup-plugin-visualizer`
-- **service worker**：`src/service-worker.ts` 自动注册，配合 `$service-worker` 模块拿到资源清单
+- **service worker**：`src/service-worker.ts` 自动注册，配合 `$service-worker` 模块
 
 </v-clicks>
 
@@ -1263,12 +1070,8 @@ transition: slide-up
 
 # 测试
 
-```bash
-npx sv add vitest playwright
-```
-
 ```ts
-// vitest.config.ts —— sv add 自动生成
+// vitest.config.ts —— npx sv add vitest playwright 自动生成
 import { defineConfig } from 'vitest/config'
 import { sveltekit } from '@sveltejs/kit/vite'
 
@@ -1283,16 +1086,12 @@ export default defineConfig({
 })
 ```
 
-<v-clicks>
-
 **层次划分**：
 
 - **单元**：Vitest + `@testing-library/svelte`（组件 / hooks / 纯函数）
 - **load / actions**：直接当 async 函数测，mock `event` 即可
 - **E2E**：Playwright（官方首选，sv add 一键装）
 - **组件库**：Storybook（sv add 也能装）
-
-</v-clicks>
 
 ---
 transition: slide-up
@@ -1304,34 +1103,24 @@ transition: slide-up
 // src/lib/server/auth.ts —— Better Auth 示例
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { db } from './db'
 
 export const auth = betterAuth({
   database: drizzleAdapter(db),
   emailAndPassword: { enabled: true },
   socialProviders: { github: { clientId: '...', clientSecret: '...' } },
 })
-```
 
-```ts
 // src/hooks.server.ts
 import { svelteKitHandler } from 'better-auth/svelte-kit'
-import { auth } from '$lib/server/auth'
-
-export const handle = ({ event, resolve }) =>
-  svelteKitHandler({ event, resolve, auth })
+export const handle = ({ event, resolve }) => svelteKitHandler({ event, resolve, auth })
 ```
-
-<v-click>
 
 **主流选择**：
 
-- **Better Auth**：sv add 一键装，类型安全，社区新秀（2025 起势头最猛）
+- **Better Auth**：sv add 一键装，类型安全，2025 势头最猛
 - **Lucia**：轻量，需自己实现 session 存储
-- **Auth.js**：来自 NextAuth，多 provider 多
-- **自己撸**：cookies + bcrypt + JWT，最灵活
-
-</v-click>
+- **Auth.js**：来自 NextAuth，provider 多
+- **自己撸**：cookies + bcrypt + JWT
 
 ---
 transition: slide-up
@@ -1344,33 +1133,21 @@ transition: slide-up
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import { DATABASE_URL } from '$env/static/private'
+export const db = drizzle(postgres(DATABASE_URL))
 
-const client = postgres(DATABASE_URL)
-export const db = drizzle(client)
-```
-
-```ts
 // +page.server.ts
-import { db } from '$lib/server/db'
 import { posts } from '$lib/server/schema'
 import { eq } from 'drizzle-orm'
-
 export const load = async ({ params }) => {
-  const [post] = await db.select().from(posts).where(eq(posts.slug, params.slug))
-  return { post }
+  return { post: (await db.select().from(posts).where(eq(posts.slug, params.slug)))[0] }
 }
 ```
 
-<v-clicks>
-
-| 工具 | 风格 | 适合 |
-|---|---|---|
-| **Drizzle** | SQL builder + 类型推断 | SvelteKit 官方推荐，sv add 一键 |
-| **Prisma** | ORM + schema-first | 复杂关系 + migration 强 |
-| **Kysely** | 类型化 SQL builder | 极致 TS 体验 |
-| **Lucia / Pothos** | RPC / GraphQL | 复杂数据图 |
-
-</v-clicks>
+| 工具 | 适合 |
+|---|---|
+| **Drizzle** | SvelteKit 官方推荐，sv add 一键 |
+| **Prisma** | 复杂关系 + migration 强 |
+| **Kysely** | 极致 TS 体验 |
 
 ---
 transition: slide-up
@@ -1400,16 +1177,14 @@ transition: slide-up
 
 <v-clicks>
 
-- **能 prerender 就 prerender**——静态资产 CDN 秒回，SEO + 性能双赢
+- **能 prerender 就 prerender**——CDN 秒回，SEO + 性能双赢
 - **server load 优于 universal load**——少一次序列化往返
 - **Form Actions 优于自建 API**——progressive enhancement 免费送
-- **`use:enhance` 默认行为基本够用**——别一上来就自定义 callback
-- **`event.locals` 存请求级状态**——绝对不要 module-level 变量存用户数据
-- **`$lib/server/` 放敏感代码**——SvelteKit 自动阻止被 client import
-- **`+error.svelte` + `App.Error` 类型化**——错误信息有 ID 便于客服追溯
-- **Adapter 选具体的**——`adapter-auto` 只适合 prototype，生产明确指定
-- **环境变量优先 static**——构建期 tree-shake，部署期不可改才用 dynamic
-- **Sentry / OpenTelemetry 第一天装**——SSR 错误栈不友好，必须监控
+- **`event.locals` 存请求级状态**——module-level 变量会跨用户污染
+- **`$lib/server/` 放敏感代码**——自动阻止 client import
+- **`+error.svelte` + `App.Error` 类型化**——错误 ID 便于客服追溯
+- **Adapter 选具体的**——`adapter-auto` 只适合 prototype
+- **环境变量优先 static**——tree-shake 友好
 
 </v-clicks>
 
@@ -1422,23 +1197,16 @@ transition: slide-up
 <v-clicks>
 
 **第 1 周：基础**
-- Svelte 5 runes（`$state` / `$derived` / `$effect` / `$props`）→ snippet 语法
-- 跟着 [Svelte 官方 tutorial](https://svelte.dev/tutorial) 走一遍
+- Svelte 5 runes（`$state` / `$derived` / `$effect` / `$props`）+ 官方 tutorial
 
 **第 2 周：SvelteKit 核心**
-- 文件约定（`+page` / `+layout` / `+server` / `+error`）→ load function
-- Form Actions → `use:enhance` → progressive enhancement
-- Hooks（handle / handleError / reroute）
+- 文件约定 → load function → Form Actions / `use:enhance` → Hooks
 
 **第 3 周：渲染 + 部署**
-- prerender / ssr / csr 三选 → adapter 选型 → 部署 Vercel / Cloudflare
-- 流式 promise → Suspense 风格 UX
-- 环境变量四象限 → 鉴权（Better Auth）
+- prerender / ssr / csr → adapter 选型 → Vercel / Cloudflare → 鉴权
 
 **第 4 周+：进阶**
-- Drizzle / Prisma 数据层 → Sentry 监控 → Playwright E2E
-- shallow routing → service worker → i18n（Paraglide）
-- Storybook 组件库 → mdsvex 内容站
+- Drizzle / Prisma → Sentry → Playwright E2E → Storybook → mdsvex
 
 </v-clicks>
 

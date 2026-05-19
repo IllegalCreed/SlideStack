@@ -115,16 +115,14 @@ transition: fade-out
 
 <v-click>
 
-| 维度 | Starlight | VitePress 1 | Nextra 4 | Docusaurus 3 | MkDocs |
-| --- | --- | --- | --- | --- | --- |
-| 底层运行时 | **Astro 5 Islands** | Vue 3 + Vite | Next.js 15 + RSC | React 18 + Webpack | Python + Jinja |
-| 默认首屏 JS | **0 KB** | 极少 | 80~200 KB | 较多 | 0 KB |
-| 内容格式 | MD + MDX | Markdown + Vue | MDX 3 | MDX 3 | Markdown |
-| 路由模型 | 文件路由 (Astro) | 文件路由 | App Router | 文件路由 | 配置文件 |
-| 搜索 | **Pagefind 内置** | MiniSearch 内置 | Pagefind 内置 | Algolia | 内置 |
-| 多版本文档 | 第三方 | 第三方 | 第三方 | **✅ 一等公民** | mike 插件 |
-| 部署目标 | 任意（静态） | 任意 | Vercel / 任意 | 任意 | 任意 |
-| 典型用户 | **Astro / Cloudflare** | Vue / Vite | SWR / Turborepo | React Native / Jest | FastAPI |
+| 维度 | Starlight | VitePress 1 | Nextra 4 | Docusaurus 3 |
+| --- | --- | --- | --- | --- |
+| 底层运行时 | **Astro 5 Islands** | Vue 3 + Vite | Next.js 15 + RSC | React 18 |
+| 默认首屏 JS | **0 KB** | 极少 | 80~200 KB | 较多 |
+| 内容格式 | MD + MDX | Markdown + Vue | MDX 3 | MDX 3 |
+| 搜索 | **Pagefind 内置** | MiniSearch | Pagefind | Algolia |
+| 多版本文档 | 第三方 | 第三方 | 第三方 | **✅ 一等公民** |
+| 典型用户 | **Astro / Cloudflare** | Vue / Vite | SWR / Turborepo | React Native |
 
 </v-click>
 
@@ -183,8 +181,7 @@ transition: fade-out
 
 **主流开源项目**
 
-- Bun（部分页面）/ Biome / Astro 周边社区项目
-- Outerbase / Sentry 部分文档 / Triplit Docs
+- Bun / Biome / Outerbase / Sentry / Triplit Docs
 
 </v-click>
 
@@ -239,10 +236,10 @@ Starlight 的精神图腾来自 Astro
 
 **Astro Islands 是什么？**
 
-- 默认所有组件都**编译成 HTML**，不向浏览器发送 JS
-- 只有显式标记 `client:load` / `client:visible` 的组件才 hydrate
-- 一个页面里可以同时有 React 岛、Vue 岛、Svelte 岛 —— 互不干扰
-- 没有交互组件 = 没有运行时 JS = 0 KB 首屏
+- 默认所有组件**编译成 HTML**，不向浏览器发送 JS
+- 仅显式 `client:load` / `client:visible` 的组件才 hydrate
+- 一个页面可同时混入 React / Vue / Svelte 岛
+- 没有交互 = 0 KB 首屏
 
 </v-click>
 
@@ -255,8 +252,6 @@ import VueChart from '../components/Chart.vue'
 ---
 
 <h1>静态内容，零 JS</h1>
-
-<!-- 仅这两个组件 hydrate，其他都是纯 HTML -->
 <ReactCounter client:visible />
 <VueChart client:idle />
 ```
@@ -265,11 +260,7 @@ import VueChart from '../components/Chart.vue'
 
 <div v-click>
 
-**Starlight 的体现**
-
-- 文档站 90% 内容是静态文章 ⇒ 几乎零 JS
-- 搜索 / 主题切换 / 折叠侧边栏 才是 hydrate 的少数岛
-- Lighthouse Performance 默认 95~100 分
+**Starlight 体现**：90% 内容静态 ⇒ 几乎零 JS，仅搜索 / 主题切换 hydrate，Lighthouse 默认 95~100。
 
 </div>
 
@@ -316,12 +307,9 @@ Node.js 18+，一条命令拉起
 **推荐：从官方模板创建**
 
 ```bash
-# 用 Astro 脚手架 + starlight 模板
 npm create astro@latest -- --template starlight
-
 # 也可以用 pnpm / yarn
 pnpm create astro@latest --template starlight
-yarn create astro --template starlight
 ```
 
 </v-click>
@@ -331,8 +319,7 @@ yarn create astro --template starlight
 **启动 / 构建 / 预览**
 
 ```bash
-cd my-docs
-pnpm install
+cd my-docs && pnpm install
 pnpm dev          # http://localhost:4321
 pnpm build        # 输出 dist/
 pnpm preview      # 预览生产构建
@@ -342,17 +329,13 @@ pnpm preview      # 预览生产构建
 
 <div v-click>
 
-**手动安装（已有 Astro 项目）**
-
-```bash
-pnpm astro add starlight   # 自动改 astro.config + 装依赖
-```
+**手动安装（已有 Astro 项目）**：`pnpm astro add starlight` —— 自动改 `astro.config` + 装依赖。
 
 </div>
 
 <div v-click>
 
-> 💡 **零配置即用**：Astro CLI 的 `astro add` 子命令会自动注册集成、写入 `astro.config.mjs`、安装依赖 —— 比 Nextra 手动接入更省事。
+> 💡 比 Nextra 手动接入更省事。
 
 </div>
 
@@ -469,7 +452,7 @@ transition: fade-out
 
 <v-click>
 
-```js {1-2|5-12|13-23|all}
+```js {1-2|5-12|13-19|all}
 import { defineConfig } from 'astro/config'
 import starlight from '@astrojs/starlight'
 
@@ -477,21 +460,13 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'My Docs',
-      description: '一个 Starlight 文档站示例',
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/x/y' },
-        { icon: 'discord', label: 'Discord', href: 'https://astro.build/chat' },
       ],
       sidebar: [
         { label: '开始', link: '/intro/' },
-        {
-          label: '指南',
-          items: ['guides/installation', 'guides/configuration'],
-        },
-        {
-          label: '参考',
-          autogenerate: { directory: 'reference' },
-        },
+        { label: '指南', items: ['guides/installation', 'guides/configuration'] },
+        { label: '参考', autogenerate: { directory: 'reference' } },
       ],
     }),
   ],
@@ -502,7 +477,7 @@ export default defineConfig({
 
 <div v-click>
 
-`starlight()` 是 Astro 集成工厂函数，接受配置对象 ⇒ 返回 Astro 集成对象，由 Astro 加载后注入文档站 UI + 路由 + 数据。
+`starlight()` 是 Astro 集成工厂函数 —— 接受配置对象，注入文档站 UI + 路由 + 数据。
 
 </div>
 
@@ -569,10 +544,9 @@ export const collections = {
 
 **docsLoader / docsSchema 做什么？**
 
-- **`docsLoader()`**：告诉 Astro 从 `src/content/docs/` 读 MD/MDX，自动建立文件 → 路由映射
-- **`docsSchema()`**：Zod 类型 schema，校验 frontmatter（title / description / sidebar / hero / template ...）
-- 写错字段 IDE 立即报红、build 阶段直接失败
-- 0.36+ 推荐用 loader + schema 写法（旧版用 `type: 'content'`，已弃用）
+- **`docsLoader()`**：从 `src/content/docs/` 读 MD/MDX，自动建立文件 → 路由映射
+- **`docsSchema()`**：Zod 类型 schema，校验 frontmatter
+- 0.36+ 推荐用 loader + schema 写法（旧 `type: 'content'` 已弃用）
 
 </div>
 
@@ -632,19 +606,12 @@ transition: fade-out
 ```js
 sidebar: [
   { label: '介绍', link: '/intro/' },
-  { label: '快速开始', link: '/getting-started/', badge: 'New' },
+  { label: '快速开始', link: '/start/', badge: 'New' },
   {
     label: '指南',
     items: [
       { label: '安装', link: '/guides/install/' },
-      { label: '配置', link: '/guides/config/' },
-      { label: '部署', link: '/guides/deploy/', badge: { text: 'beta', variant: 'caution' } },
-    ],
-  },
-  {
-    label: '外部链接',
-    items: [
-      { label: 'GitHub', link: 'https://github.com/x/y', attrs: { target: '_blank' } },
+      { label: '部署', link: '/guides/deploy/', badge: { text: 'beta' } },
     ],
   },
 ]
@@ -658,18 +625,10 @@ sidebar: [
 
 ```js
 sidebar: [
-  {
-    label: 'Reference',
-    autogenerate: { directory: 'reference' },     // 扫描 src/content/docs/reference/
-  },
-  {
-    label: 'Plugins',
-    autogenerate: { directory: 'plugins', collapsed: true },  // 默认折叠
-  },
+  { label: 'Reference', autogenerate: { directory: 'reference' } },
+  { label: 'Plugins', autogenerate: { directory: 'plugins', collapsed: true } },
 ]
 ```
-
-每个目录加 `_meta` frontmatter 或文件顺序前缀可控制次序。
 
 </div>
 
@@ -727,28 +686,17 @@ sidebar:
   badge: New
 hero:
   tagline: 文档站的优雅未来
-  image:
-    file: ../../assets/hero.png
   actions:
     - text: 开始
       link: /getting-started/
-      icon: right-arrow
       variant: primary
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-# Starlight 入门
-
-欢迎来到 Starlight 文档。
-
 <CardGrid>
-  <Card title="安装" icon="rocket">
-    npm create astro@latest -- --template starlight
-  </Card>
-  <Card title="配置" icon="setting">
-    在 astro.config.mjs 启用 starlight 集成
-  </Card>
+  <Card title="安装" icon="rocket">npm create astro@latest</Card>
+  <Card title="配置" icon="setting">启用 starlight 集成</Card>
 </CardGrid>
 ```
 
@@ -756,7 +704,7 @@ import { Card, CardGrid } from '@astrojs/starlight/components';
 
 <div v-click>
 
-> 💡 **frontmatter 类型保护**：所有字段都由 `docsSchema()` 校验，IDE 提示 + build 期报错。
+> 💡 **类型保护**：所有字段由 `docsSchema()` Zod 校验，IDE 提示 + build 期报错。
 
 </div>
 
@@ -807,24 +755,18 @@ transition: fade-out
 import { Card, CardGrid, Tabs, TabItem, Steps } from '@astrojs/starlight/components';
 
 <CardGrid stagger>
-  <Card title="快速开始" icon="rocket">
-    一行命令拉起项目
-  </Card>
-  <Card title="完整配置" icon="setting">
-    所有选项参考
-  </Card>
+  <Card title="快速开始" icon="rocket">一行命令拉起项目</Card>
+  <Card title="完整配置" icon="setting">所有选项参考</Card>
 </CardGrid>
 
 <Tabs>
   <TabItem label="pnpm">pnpm add astro</TabItem>
   <TabItem label="npm">npm install astro</TabItem>
-  <TabItem label="yarn">yarn add astro</TabItem>
 </Tabs>
 
 <Steps>
 1. 安装依赖：pnpm install
 2. 启动 dev：pnpm dev
-3. 打开浏览器：http://localhost:4321
 </Steps>
 ```
 
@@ -882,29 +824,19 @@ import { Aside, FileTree, LinkCard, LinkButton, Icon } from '@astrojs/starlight/
 
 <Aside type="note">普通提示</Aside>
 <Aside type="tip" title="建议">这是建议</Aside>
-<Aside type="caution">谨慎操作</Aside>
+<Aside type="caution">谨慎</Aside>
 <Aside type="danger">危险</Aside>
 
 <FileTree>
 - src/
-  - content/
-    - docs/
-      - index.mdx
-      - guides/
-        - intro.md
-  - components/
+  - content/docs/
+    - index.mdx
 - astro.config.mjs
 </FileTree>
 
-<LinkCard
-  title="深入 Starlight"
-  description="完整参考文档"
-  href="/reference/configuration/"
-/>
+<LinkCard title="深入 Starlight" description="完整参考" href="/reference/" />
 
-<LinkButton href="/getting-started/" variant="primary" icon="right-arrow">
-  开始
-</LinkButton>
+<LinkButton href="/getting-started/" variant="primary">开始</LinkButton>
 
 <Icon name="star" color="goldenrod" size="2rem" />
 ```
@@ -957,10 +889,7 @@ import { defineConfig } from 'astro/config'
 import starlight from '@astrojs/starlight'
 
 export default defineConfig({
-  integrations: [
-    starlight({ title: '我的文档' }),
-  ],
-  // 这一行将被标记为删除
+  integrations: [starlight({ title: '我的文档' })],
 })
 ```
 ````
@@ -971,19 +900,16 @@ export default defineConfig({
 
 **支持的元数据**
 
-- `title="..."` —— 代码块顶部标题（文件名）
-- `{3-5}` —— 高亮行范围
-- `ins={6}` / `del={7}` —— 标记新增 / 删除（diff 视图）
-- `showLineNumbers` / `hideLineNumbers` —— 行号控制
-- `frame="terminal"` / `frame="code"` / `frame="none"` —— 边框样式
-- `'pattern'` —— 高亮匹配字符串
+- `title="..."` —— 代码块顶部标题
+- `{3-5}` / `ins={6}` / `del={7}` —— 高亮 / diff
+- `showLineNumbers` / `frame="terminal"` —— 行号 / 边框
 - `collapse={2-5}` —— 折叠某段（点击展开）
 
 </div>
 
 <div v-click>
 
-> 💡 **不需要配置**：Expressive Code 跟 Starlight 默认集成，所有上面的语法直接可用，不需要额外装包。
+> 💡 **不需要配置**：默认集成，语法直接可用。
 
 </div>
 
@@ -1033,11 +959,7 @@ Starlight 自带，构建期生成索引
 
 ```js
 // astro.config.mjs
-starlight({
-  title: 'My Docs',
-  // 搜索默认开启，使用 Pagefind
-  pagefind: true,  // 默认值，可省略
-})
+starlight({ title: 'My Docs', pagefind: true })  // 默认值，可省略
 ```
 
 </v-click>
@@ -1048,24 +970,19 @@ starlight({
 
 1. `astro build` 完成后，Starlight 自动调用 Pagefind 扫描 `dist/` HTML
 2. 生成 `dist/pagefind/` 目录（含索引切片 + 客户端 JS）
-3. Starlight 顶部搜索框（Cmd/Ctrl + K）自动调用 Pagefind 提供 UI
+3. 顶部搜索框（Cmd/Ctrl + K）自动调用 Pagefind UI
 
 </div>
 
 <div v-click>
 
-**特点**
-
-- 完全本地化 / 零成本 / 零外部依赖
-- 多语言内置（按 locale 自动分词）
-- 索引按需懒加载（搜什么加载什么切片）
-- 中等大小站（200 页）典型索引 ~50 KB
+**特点**：完全本地化 / 零成本 / 多语言分词 / 按需懒加载（200 页 ~50 KB）
 
 </div>
 
 <div v-click>
 
-> 💡 **企业级替代**：自部署的 [Algolia DocSearch](https://docsearch.algolia.com/) 对开源项目免费，可用 `pagefind: false` 关闭后接入 `algolia` 字段配置。
+> 💡 **企业级替代**：[Algolia DocSearch](https://docsearch.algolia.com/) 对开源项目免费，可 `pagefind: false` 切换。
 
 </div>
 
@@ -1139,34 +1056,12 @@ starlight({
 
 ```text
 src/content/docs/
-├── zh-cn/
-│   ├── intro.md
-│   └── guides/install.md
-├── en/
-│   ├── intro.md
-│   └── guides/install.md
-└── ar/
-    └── intro.md
+├── zh-cn/intro.md
+├── en/intro.md
+└── ar/intro.md
 ```
 
-URL：`zh-cn` → `/zh-cn/intro/`，`en` → `/en/intro/`
-
-</div>
-
-<div v-click>
-
-**Step 3（可选）：i18n collection 覆盖 UI 翻译**
-
-```ts
-// src/content.config.ts
-import { i18nLoader } from '@astrojs/starlight/loaders'
-import { i18nSchema } from '@astrojs/starlight/schema'
-
-i18n: defineCollection({
-  loader: i18nLoader(),
-  schema: i18nSchema(),
-})
-```
+URL：`zh-cn` → `/zh-cn/intro/`；缺翻译自动 fallback 到 `defaultLocale`
 
 </div>
 
@@ -1223,37 +1118,23 @@ transition: fade-out
 ```css
 /* src/styles/custom.css */
 :root {
-  --sl-color-accent-low: #c0a3ff;
   --sl-color-accent: #6b46e5;
-  --sl-color-accent-high: #2a0a99;
 }
-
 :root[data-theme='dark'] {
   --sl-color-accent: #a78bfa;
 }
-```
-
-```js
-// astro.config.mjs
-starlight({
-  customCss: ['./src/styles/custom.css'],
-})
 ```
 
 </v-click>
 
 <div v-click>
 
-**Level 2：自定义 Logo / Social / Footer**
+**Level 2：自定义 Logo / Footer**
 
 ```js
 starlight({
   logo: { src: './src/assets/logo.svg', replacesTitle: true },
-  social: [{ icon: 'github', label: 'GitHub', href: '...' }],
-  components: {
-    Footer: './src/components/CustomFooter.astro',
-    Head: './src/components/CustomHead.astro',
-  },
+  components: { Footer: './src/components/CustomFooter.astro' },
 })
 ```
 
@@ -1261,9 +1142,7 @@ starlight({
 
 <div v-click>
 
-**Level 3：组件 Overrides（重定制）**
-
-通过 `components` 字段覆盖 Starlight 内部任意组件（Hero / Sidebar / PageTitle ...）—— 类似 Docusaurus swizzle。
+**Level 3：组件 Overrides** —— 覆盖内部组件（Hero / Sidebar / PageTitle），类似 Docusaurus swizzle。
 
 </div>
 
@@ -1313,14 +1192,11 @@ transition: fade-out
 
 **热门官方 / 社区插件**
 
-- **starlight-blog**：在文档站上嵌入博客模块（列表 / 标签 / RSS）
-- **starlight-openapi**：从 OpenAPI spec 自动生成 API 参考页
-- **starlight-image-zoom**：点击图片放大 lightbox
-- **starlight-links-validator**：build 期校验内部链接，断链自动报错
-- **starlight-sidebar-topics**：sidebar 顶部多 topic 切换
-- **starlight-versions**：多版本文档（v1 / v2 / v3 切换）
-- **starlight-typedoc**：从 TypeScript 类型自动生成参考文档
-- **starlight-llms-txt**：自动生成 `/llms.txt` 给 LLM 抓取
+- **starlight-blog**：嵌入博客模块（列表 / 标签 / RSS）
+- **starlight-openapi**：从 OpenAPI 自动生成 API 参考
+- **starlight-links-validator**：build 期校验断链
+- **starlight-versions**：多版本文档切换
+- **starlight-typedoc** / **starlight-llms-txt**：TS 文档 / LLM 抓取
 
 </v-click>
 
@@ -1329,11 +1205,10 @@ transition: fade-out
 **插件接入示例**
 
 ```js
-import starlight from '@astrojs/starlight'
 import starlightBlog from 'starlight-blog'
 
 starlight({
-  plugins: [starlightBlog({ authors: { zhangxu: { name: 'Hillary', title: 'Engineer' } } })],
+  plugins: [starlightBlog({ authors: { hil: { name: 'Hillary' } } })],
 })
 ```
 
@@ -1387,20 +1262,19 @@ Astro 静态产物 ⇒ 任意 CDN
 
 <v-click>
 
-**1. Vercel（推荐，零配置）**
+**1. Vercel（零配置）**
 
 ```bash
 pnpm dlx vercel deploy
-# 或 GitHub repo 接入 Vercel Dashboard → 自动 PR 预览 + main 生产
 ```
 
-Vercel 直接识别 Astro 项目（`astro build` → `dist/`），无需写 vercel.json。
+直接识别 Astro 项目（`astro build` → `dist/`），无需 vercel.json。
 
 </v-click>
 
 <div v-click>
 
-**2. Netlify**
+**2. Netlify / Cloudflare Pages**
 
 ```toml
 # netlify.toml
@@ -1409,31 +1283,13 @@ Vercel 直接识别 Astro 项目（`astro build` → `dist/`），无需写 verc
   publish = "dist"
 ```
 
-</div>
-
-<div v-click>
-
-**3. Cloudflare Pages（推荐免费方案）**
-
-```text
-Build command: pnpm build
-Build output directory: dist
-```
-
-Cloudflare 免费额度大方（500 build / month + 全球 CDN），适合中大型文档站。
+Cloudflare Pages：免费 500 build/month + 全球 CDN，适合中大型文档站。
 
 </div>
 
 <div v-click>
 
-**4. GitHub Pages**
-
-```yaml
-# .github/workflows/deploy.yml
-- uses: withastro/action@v3   # 官方 Action
-```
-
-需要在 `astro.config.mjs` 配 `site` + `base: '/repo-name/'`。
+**3. GitHub Pages**：官方 Action `withastro/action@v3`，需在 `astro.config.mjs` 配 `base: '/repo-name/'`。
 
 </div>
 
@@ -1485,23 +1341,14 @@ transition: fade-out
 | --- | --- | --- |
 | 底层 | Astro Islands | Next.js 15 + RSC |
 | 默认 JS | **0 KB** | 80-200 KB |
-| 多 framework | **✅ 任意 import** | 仅 React |
-| 集成方式 | Astro Integration | Next.js HOC + Theme |
-| 多版本 | 插件 (starlight-versions) | 第三方 |
-| 学习曲线 | 低（Astro 直观） | 中（Next.js 全栈） |
-| 适合 | 纯文档 / Web 性能党 | Next.js 项目融合 |
+| 多 framework | **✅ 任意** | 仅 React |
+| 适合 | 性能党 | Next.js 融合 |
 
 </v-click>
 
 <div v-click>
 
-**典型场景对比**
-
-- **要文档 + 主站融合（如 SaaS）** ⇒ Nextra（同栈复用）
-- **纯文档 + 极致性能** ⇒ Starlight（首屏 0 JS 天花板）
-- **要 React Server Components / Server Actions** ⇒ Nextra
-- **要 i18n / 多版本 + 静态部署** ⇒ Starlight（i18n 内置无中间件依赖）
-- **团队已有 Astro 项目** ⇒ Starlight（共享 astro.config / 组件）
+**典型场景**：主站融合 / RSC ⇒ Nextra；纯文档 + 性能 + 静态 i18n ⇒ Starlight
 
 </div>
 
@@ -1550,9 +1397,8 @@ transition: fade-out
 **vs VitePress**
 
 - VitePress = Vue 3 + Vite，**Vue 单一 framework**
-- Starlight 能 import React/Vue/Svelte/Solid 岛 —— framework 自由
-- VitePress 构建更快（纯 Vite），但功能比 Starlight 少（无 hero / 无内置组件库 / 无 i18n 配置）
-- **决策**：纯 Vue 团队 + 极简 → VitePress；多 framework 内容 + 完整 UI → Starlight
+- Starlight 能 import React/Vue/Svelte/Solid，framework 自由
+- **决策**：纯 Vue + 极简 → VitePress；多 framework + 完整 UI → Starlight
 
 </v-click>
 
@@ -1560,21 +1406,15 @@ transition: fade-out
 
 **vs Docusaurus**
 
-- Docusaurus = Meta 出品 React-based，**多版本 + 博客 + i18n** 都是一等公民
-- Starlight 多版本走插件路线，博客走 starlight-blog
-- Docusaurus 首屏 ~150 KB JS（React），Starlight ~0 KB
-- **决策**：要多版本 + 博客一体化 → Docusaurus；要极致性能 + Astro 生态 → Starlight
+- Docusaurus = Meta 出品 React-based，多版本 + 博客 + i18n 都是一等公民
+- 首屏 ~150 KB JS vs Starlight ~0 KB
+- **决策**：多版本 + 博客一体化 → Docusaurus；性能 + Astro → Starlight
 
 </div>
 
 <div v-click>
 
-**vs MkDocs Material**
-
-- MkDocs = Python + Jinja，**纯 Markdown + YAML 配置**
-- Starlight 用 JS / TS 配置 + MDX 内容，扩展性远超 MkDocs
-- MkDocs Material 主题美但只能 Markdown，Starlight 能 MDX + 组件
-- **决策**：Python 团队 + 纯文档 → MkDocs；想要现代组件 + JS 生态 → Starlight
+**vs MkDocs Material**：Python + Jinja，纯 Markdown；Starlight 能 MDX + 组件。Python 团队 → MkDocs；JS 团队 → Starlight。
 
 </div>
 
@@ -1725,8 +1565,7 @@ transition: fade-out
 **入门 → 进阶**
 
 - [Getting Started](https://starlight.astro.build/getting-started/) —— 官方手把手
-- [Authoring Content](https://starlight.astro.build/guides/authoring-content/) —— frontmatter + MDX 完整能力
-- [Sidebar Configuration](https://starlight.astro.build/reference/configuration/#sidebar) —— sidebar 字段全表
+- [Authoring Content](https://starlight.astro.build/guides/authoring-content/) —— frontmatter + MDX
 - [Components Overview](https://starlight.astro.build/components/using-components/) —— 11+ 内置组件
 
 </v-click>
@@ -1735,9 +1574,8 @@ transition: fade-out
 
 **专题深入**
 
-- [Site Search](https://starlight.astro.build/guides/site-search/) —— Pagefind / Algolia 配置
-- [Internationalization (i18n)](https://starlight.astro.build/guides/i18n/) —— 多语言完整流程
-- [CSS & Styling](https://starlight.astro.build/guides/css-and-tailwind/) —— Tailwind 集成 + 变量定制
+- [Site Search](https://starlight.astro.build/guides/site-search/) —— Pagefind / Algolia
+- [i18n](https://starlight.astro.build/guides/i18n/) —— 多语言完整流程
 - [Overriding Components](https://starlight.astro.build/guides/overriding-components/) —— 重定制路线
 - [Plugins](https://starlight.astro.build/resources/plugins/) —— 完整插件列表
 
@@ -1745,11 +1583,7 @@ transition: fade-out
 
 <div v-click>
 
-**社区资源**
-
-- [Showcase](https://starlight.astro.build/resources/showcase/) —— Cloudflare / Astro Docs 真实案例
-- [Astro Discord](https://astro.build/chat) —— 官方答疑，#starlight 频道
-- [Starlight GitHub](https://github.com/withastro/starlight) —— issues + discussions
+**社区**：[Showcase](https://starlight.astro.build/resources/showcase/) / [Astro Discord](https://astro.build/chat) #starlight / [GitHub](https://github.com/withastro/starlight)
 
 </div>
 

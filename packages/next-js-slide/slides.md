@@ -132,31 +132,28 @@ transition: slide-up
 
 **服务端组件默认 + 客户端组件按需 + 全套全栈能力开箱即用**
 
-```mermaid {scale: 0.7}
-graph TD
-  A[请求到来] --> B{路由匹配}
-  B --> C[Server Components 渲染]
-  C --> D[fetch / DB / Server Actions]
+```mermaid {scale: 0.6}
+graph LR
+  A[请求] --> C[Server Components]
+  C --> D[fetch / DB / Actions]
   D --> E[RSC Payload + HTML]
-  E --> F[浏览器收到 HTML]
-  F --> G[Client Components 水合]
-  G --> H[交互就绪]
-  C -.use cache.-> I[静态壳 prerender]
+  E --> G[Client Components 水合]
+  C -.use cache.-> I[静态壳]
   C -.Suspense.-> J[流式注入]
 ```
 
-<v-click>
+---
+transition: slide-up
+---
 
-对比 Vue / Nuxt：
+# 对比 Vue / Nuxt
 
 | 维度 | Next.js 16 | Nuxt 4 |
 |---|---|---|
 | 默认组件 | Server Component | SSR Vue 组件 |
 | 数据获取 | `await fetch` + `use cache` | `useFetch` + `routeRules` |
 | 渲染 | Static / Dynamic / PPR | SSR / SSG / ISR / SWR |
-| 自动导入 | ❌ 显式 import | ✅ 全自动 |
-
-</v-click>
+| 自动导入 | 显式 import | 全自动 |
 
 ---
 transition: slide-up
@@ -164,29 +161,16 @@ transition: slide-up
 
 # App Router vs Pages Router
 
-```
-my-app/
-├── app/                    ← App Router（推荐，新项目专用）
-│   ├── layout.tsx          ← 共享布局
-│   ├── page.tsx            ← 首页 /
-│   ├── about/page.tsx      ← /about
-│   └── ...
-├── pages/                  ← Pages Router（旧项目兼容）
-│   ├── index.tsx           ← getStaticProps / getServerSideProps
-│   └── api/                ← API Routes
-└── next.config.ts
-```
-
 <v-clicks>
 
-| 维度 | App Router | Pages Router |
+| 维度 | App Router (`app/`) | Pages Router (`pages/`) |
 |---|---|---|
 | 出现时间 | Next.js 13 (2022) | Next.js 1 (2016) |
 | 默认渲染 | Server Components | Client Components |
 | 数据获取 | `await fetch` 直接组件内 | `getStaticProps` / `getServerSideProps` |
 | 布局 | 嵌套 `layout.js` | `_app.tsx` 一层 |
 | API | Route Handlers (`route.ts`) | API Routes (`pages/api/`) |
-| 流式 / Suspense | ✅ 原生 | ❌ 不支持 |
+| 流式 / Suspense | 原生 | 不支持 |
 | React 版本 | 19+ Canary（含 RSC） | 自选 React 18+ |
 
 新项目永远 App Router；旧项目可逐目录迁移（两者可共存）。
@@ -249,8 +233,7 @@ export default function Counter() {
 **何时需要**：
 
 - 状态 + 事件处理（`useState`、`onClick`、`onChange`）
-- 生命周期（`useEffect`、`useLayoutEffect`）
-- 浏览器 API（`localStorage`、`window`、`navigator`）
+- 生命周期 / 浏览器 API（`useEffect`、`localStorage`、`window`）
 - 自定义 Hook 中含上述任一项
 
 `'use client'` 是**模块图边界**：标记后该文件及其 import 的所有模块都进客户端 bundle。**不要在根布局加** —— 整树都会变 Client。
@@ -265,7 +248,7 @@ transition: slide-up
 
 ```tsx
 // app/page.tsx —— Server Component
-import LikeButton from './like-button'        // Client Component
+import LikeButton from './like-button'
 import { getPost } from '@/lib/data'
 
 export default async function Page() {
@@ -273,8 +256,7 @@ export default async function Page() {
   return (
     <article>
       <h1>{post.title}</h1>
-      <p>{post.content}</p>
-      <LikeButton likes={post.likes} />        {/* 把数据 props 给 Client */}
+      <LikeButton likes={post.likes} />        {/* props 传给 Client */}
     </article>
   )
 }
@@ -306,7 +288,6 @@ transition: slide-up
 ```tsx
 // app/actions.ts
 'use server'
-
 import { db } from '@/lib/db'
 import { revalidatePath } from 'next/cache'
 
@@ -324,7 +305,7 @@ import { createPost } from '../actions'
 export default function NewPostPage() {
   return (
     <form action={createPost}>
-      <input name="title" placeholder="Title" required />
+      <input name="title" required />
       <button type="submit">Publish</button>
     </form>
   )
@@ -333,7 +314,7 @@ export default function NewPostPage() {
 
 <v-click>
 
-**特点**：底层走 POST 单次往返；表单 progressive enhancement（JS 没加载也能提交）；可在任何 Server / Client 组件 import 使用。
+**特点**：底层走 POST 单次往返；progressive enhancement（JS 没加载也能提交）。
 
 </v-click>
 
@@ -419,24 +400,12 @@ export default function RootLayout({ children }) {
 }
 ```
 
-```tsx
-// app/dashboard/layout.tsx —— 嵌套 Layout
-export default function DashboardLayout({ children }) {
-  return (
-    <section className="flex">
-      <Sidebar />
-      <main>{children}</main>
-    </section>
-  )
-}
-```
-
 <v-click>
 
 **机制**：
 
 - Root Layout 必须，包含 `<html>` 和 `<body>`
-- 子 Layout 嵌套在父 Layout 内（自动包裹 `children`）
+- 子 Layout（如 `app/dashboard/layout.tsx`）嵌套在父内，自动包裹 `children`
 - **导航时只重渲染受影响段**，Layout 状态保留
 - 多 Root Layout：用 Route Groups `(marketing)/layout.tsx` + `(dashboard)/layout.tsx`
 
@@ -523,12 +492,8 @@ transition: slide-up
 # Cache Components：`use cache` 指令
 
 ```ts
-// next.config.ts
-import type { NextConfig } from 'next'
-
-const nextConfig: NextConfig = {
-  cacheComponents: true,    // Next.js 16 启用
-}
+// next.config.ts —— Next.js 16 启用
+const nextConfig: NextConfig = { cacheComponents: true }
 export default nextConfig
 ```
 
@@ -564,18 +529,12 @@ transition: slide-up
 ```ts
 import { revalidatePath, revalidateTag, updateTag, refresh } from 'next/cache'
 
-// 1. 按路径失效
-revalidatePath('/posts')
+revalidatePath('/posts')                  // 1. 按路径失效
 revalidatePath('/posts/[slug]', 'page')
 
-// 2. 按标签失效（Next.js 16 必须传 cacheLife 第二参数）
-revalidateTag('posts', 'max')
-
-// 3. read-your-writes 立即生效（Server Actions 限定）
-updateTag('user-profile')
-
-// 4. 刷新客户端 router
-refresh()
+revalidateTag('posts', 'max')             // 2. 按标签失效（Next.js 16 必须传第二参数）
+updateTag('user-profile')                 // 3. read-your-writes 立即生效（Actions 限定）
+refresh()                                 // 4. 刷新客户端 router
 ```
 
 <v-clicks>
@@ -605,12 +564,10 @@ export default function Dashboard() {
   return (
     <>
       <h1>Dashboard</h1>
-
       {/* 慢数据用 Suspense 包，先回 HTML 后流式补 */}
       <Suspense fallback={<p>Loading posts...</p>}>
         <Posts />
       </Suspense>
-
       <Suspense fallback={<p>Loading stats...</p>}>
         <Stats />
       </Suspense>
@@ -639,13 +596,9 @@ import { cookies } from 'next/headers'
 export default function Page() {
   return (
     <>
-      {/* 静态部分：构建时 prerender */}
-      <Nav />
-      <Hero />
-
-      {/* 动态洞：请求时流入 */}
+      <Nav /> <Hero />            {/* 静态部分：构建时 prerender */}
       <Suspense fallback={<CartSkeleton />}>
-        <Cart />
+        <Cart />                  {/* 动态洞：请求时流入 */}
       </Suspense>
     </>
   )
@@ -653,8 +606,7 @@ export default function Page() {
 
 async function Cart() {
   const session = (await cookies()).get('session')?.value
-  const items = await getCart(session)
-  return <CartView items={items} />
+  return <CartView items={await getCart(session)} />
 }
 ```
 
@@ -670,29 +622,28 @@ transition: slide-up
 
 # 渲染策略决策树
 
-```mermaid {scale: 0.65}
-graph TD
-  A[这个路由的数据特点?] --> B{数据是否每个用户不同?}
-  B -->|否，所有人一样| C{数据多久变一次?}
-  B -->|是，依赖 cookies/headers| D[Dynamic / 请求时渲染]
-  C -->|从不变| E[Static / 构建时 prerender]
-  C -->|定时变| F[ISR: fetch revalidate: N]
-  C -->|外部触发| G[On-demand: revalidateTag]
-  D --> H{页面是否含通用部分?}
-  H -->|是| I[PPR: 静态壳 + 动态洞]
-  H -->|否| J[纯 Dynamic SSR]
+```mermaid {scale: 0.5}
+graph LR
+  B{每个用户不同?} -->|否| C{多久变?}
+  B -->|是| D[Dynamic SSR]
+  C -->|从不| E[Static]
+  C -->|定时| F[ISR]
+  C -->|触发| G[revalidateTag]
+  D --> H{含通用部分?}
+  H -->|是| I[PPR]
+  H -->|否| J[纯 Dynamic]
 ```
 
-<v-click>
+---
+transition: slide-up
+---
 
-**实战速记**：
+# 渲染策略实战速记
 
-- 内容站首页 / 文档 → Static
-- 博客 / 产品列表（小时级新鲜度） → ISR
-- 仪表盘 / 个人页 → Dynamic（或 PPR）
-- 电商页（静态 SEO + 动态价格 / 购物车） → PPR
-
-</v-click>
+- 内容站首页 / 文档 → **Static**
+- 博客 / 产品列表（小时级新鲜度） → **ISR**
+- 仪表盘 / 个人页 → **Dynamic**（或 PPR）
+- 电商页（静态 SEO + 动态价格 / 购物车） → **PPR**
 
 ---
 transition: slide-up
@@ -704,9 +655,8 @@ transition: slide-up
 // app/api/posts/route.ts
 import { NextResponse } from 'next/server'
 
-export async function GET(request: Request) {
-  const posts = await db.posts.findMany()
-  return NextResponse.json(posts)
+export async function GET() {
+  return NextResponse.json(await db.posts.findMany())
 }
 
 export async function POST(request: Request) {
@@ -718,10 +668,7 @@ export async function POST(request: Request) {
 
 ```ts
 // app/api/posts/[id]/route.ts —— 动态段同样要 await params
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   await db.posts.delete({ where: { id } })
   return new Response(null, { status: 204 })
@@ -742,35 +689,27 @@ transition: slide-up
 
 ```ts
 // proxy.ts （Next.js 16 起，旧名 middleware.ts）
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export function proxy(request: NextRequest) {
-  // 鉴权检查
   const token = request.cookies.get('token')
   if (!token && request.nextUrl.pathname.startsWith('/admin')) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
-
-  // 改写
   const response = NextResponse.next()
   response.headers.set('x-custom', 'value')
   return response
 }
 
-export const config = {
-  matcher: ['/admin/:path*', '/dashboard/:path*'],
-}
+export const config = { matcher: ['/admin/:path*', '/dashboard/:path*'] }
 ```
 
 <v-clicks>
 
 **Next.js 16 变化**：
 
-- 文件名 `middleware.ts` → `proxy.ts`
-- 函数名 `middleware` → `proxy`
-- **不再支持 Edge runtime**，固定 Node.js
-- 旧 `middleware` 仍可继续用 Edge runtime（过渡期）
+- 文件名 `middleware.ts` → `proxy.ts`，函数名同步改
+- **不再支持 Edge runtime**，固定 Node.js（旧 `middleware` 过渡期保留）
 - 配置 `skipMiddlewareUrlNormalize` → `skipProxyUrlNormalize`
 
 </v-clicks>
@@ -788,21 +727,9 @@ export default function Hero() {
   return (
     <>
       {/* 自动 srcset + WebP / AVIF + lazy + LCP 提示 */}
-      <Image
-        src="/hero.jpg"
-        alt="Hero"
-        width={1200}
-        height={600}
-        priority           // LCP 图片不 lazy load
-      />
-
+      <Image src="/hero.jpg" alt="Hero" width={1200} height={600} priority />
       {/* 远程图：必须配 remotePatterns */}
-      <Image
-        src="https://cdn.example.com/photo.jpg"
-        alt=""
-        width={400}
-        height={300}
-      />
+      <Image src="https://cdn.example.com/photo.jpg" alt="" width={400} height={300} />
     </>
   )
 }
@@ -828,16 +755,8 @@ transition: slide-up
 // app/layout.tsx —— Google Fonts 自托管（零运行时请求）
 import { Inter, Roboto_Mono } from 'next/font/google'
 
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-})
-
-const mono = Roboto_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-})
+const inter = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' })
+const mono = Roboto_Mono({ subsets: ['latin'], variable: '--font-mono' })
 
 export default function RootLayout({ children }) {
   return (
@@ -865,17 +784,12 @@ transition: slide-up
 import type { Metadata } from 'next'
 
 // 静态元数据
-export const metadata: Metadata = {
-  title: 'My Blog',
-  description: 'Read the latest posts',
-}
+export const metadata: Metadata = { title: 'My Blog', description: 'Read the latest posts' }
 
 // 动态元数据（基于 params 生成）
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>
-}): Promise<Metadata> {
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> },
+): Promise<Metadata> {
   const { slug } = await params
   const post = await getPost(slug)
   return {
@@ -937,20 +851,18 @@ transition: slide-up
 
 # 部署目标对比
 
-| 目标 | 配置 | 特性支持 | 适合 |
-|---|---|---|---|
-| **Vercel** | 零配置 | 全 | 默认推荐（同公司）|
-| **Node.js 自托管** | `next build` + `next start` | 全 | 自有 VPS / K8s |
-| **Docker** | `output: 'standalone'` | 全 | 容器化部署 |
-| **Static Export** | `output: 'export'` | **不含 SSR / Server Actions / ISR / Route Handlers** | 纯静态 SPA |
-| **Cloudflare / Netlify** | 平台适配器 | 多数 | Edge 全球 CDN |
-| **Bun** | 官方验证适配器 | 多数 | 极速运行 |
+| 目标 | 配置 | 特性支持 |
+|---|---|---|
+| **Vercel** | 零配置 | 全（默认推荐）|
+| **Node.js 自托管** | `next build` + `next start` | 全（VPS / K8s）|
+| **Docker** | `output: 'standalone'` | 全（容器化）|
+| **Static Export** | `output: 'export'` | **不含 SSR / Actions / ISR** |
+| **Cloudflare / Netlify** | 平台适配器 | 多数（Edge CDN）|
+| **Bun** | 官方验证适配器 | 多数（极速运行）|
 
 ```ts
 // next.config.ts —— Docker 最小镜像
-const nextConfig = {
-  output: 'standalone',   // 输出 .next/standalone/，自带 node_modules 子集
-}
+const nextConfig = { output: 'standalone' }   // 输出 .next/standalone/
 ```
 
 ---
@@ -1023,14 +935,11 @@ transition: slide-up
 'use server'
 import { auth } from '@/lib/auth'
 import { revalidatePath, redirect } from 'next/cache'
-
 export async function createPost(formData: FormData) {
   const session = await auth()
   if (!session?.user) throw new Error('Unauthorized')
-
   const title = formData.get('title') as string
   await db.posts.create({ data: { title, authorId: session.user.id } })
-
   revalidatePath('/posts')
   redirect('/posts')
 }
@@ -1041,17 +950,15 @@ export async function createPost(formData: FormData) {
 'use client'
 import { useActionState } from 'react'
 import { createPost } from '@/app/lib/actions'
-
 export default function NewPostForm() {
-  const [state, action, pending] = useActionState(createPost, null)
-  return (
-    <form action={action}>
-      <input name="title" required />
-      <button disabled={pending}>{pending ? 'Publishing...' : 'Publish'}</button>
-    </form>
-  )
+  const [, action, pending] = useActionState(createPost, null)
+  return <form action={action}>
+    <input name="title" required />
+    <button disabled={pending}>{pending ? '...' : 'Publish'}</button>
+  </form>
 }
 ```
+
 
 ---
 transition: slide-up
@@ -1063,13 +970,9 @@ transition: slide-up
 // app/posts/error.tsx —— 必须 'use client'（要绑 reset）
 'use client'
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error & { digest?: string }
-  reset: () => void
-}) {
+type Props = { error: Error & { digest?: string }; reset: () => void }
+
+export default function Error({ error, reset }: Props) {
   return (
     <div>
       <h2>Something went wrong</h2>
@@ -1105,23 +1008,15 @@ NEXT_PUBLIC_API_URL=https://api.example.com
 ```
 
 ```ts
-// 服务端读
-const dbUrl = process.env.DATABASE_URL
-
+const dbUrl = process.env.DATABASE_URL                   // 服务端读
 // 客户端读：必须 NEXT_PUBLIC_ 前缀
 'use client'
-function Component() {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL
-  return <span>{apiUrl}</span>
-}
+const apiUrl = process.env.NEXT_PUBLIC_API_URL
 ```
 
 <v-clicks>
 
-**约定**：
-
-- `NEXT_PUBLIC_*` 编译期注入客户端 bundle（**写死，无法运行时改**）
-- 其它前缀仅服务端可见
+- `NEXT_PUBLIC_*` 编译期注入客户端 bundle（**写死，无法运行时改**）；其它前缀仅服务端可见
 - 想要**运行时**读环境变量？用 `connection()` 强制延迟到请求时：
 
 ```ts
@@ -1142,13 +1037,12 @@ transition: slide-up
 
 | 维度 | Next.js 16 | Nuxt 4 | SvelteKit 2 | Astro 5 |
 |---|---|---|---|---|
-| 基础 | React 19 | Vue 3 | Svelte 5 | 多框架（React/Vue/Svelte）|
+| 基础 | React 19 | Vue 3 | Svelte 5 | 多框架 |
 | 路由 | `app/` | `pages/` | `routes/` | `pages/` |
-| 默认 | Server Components | SSR Vue | 同构 SSR | Islands（默认静态）|
-| 渲染 | Static / Dynamic / PPR | SSR / SSG / ISR / SWR | SSR / SSG | 静态 + Islands |
-| 数据 | `await fetch` + RSC | `useFetch` / `useAsyncData` | `load()` 函数 | `getStaticPaths` |
-| 部署 | Vercel / Node / Adapter | Nitro 30+ preset | Adapter 多平台 | 静态 + Adapter |
-| 学习曲线 | 高（RSC / Cache） | 中 | 低 | 低 |
+| 默认 | Server Components | SSR Vue | 同构 SSR | Islands |
+| 渲染 | Static / Dynamic / PPR | SSR / SSG / ISR | SSR / SSG | 静态 + Islands |
+| 数据 | `await fetch` + RSC | `useFetch` | `load()` | `getStaticPaths` |
+| 学习曲线 | 高 | 中 | 低 | 低 |
 | 招聘市场 | **最大** | 中 | 小 | 小 |
 
 ---
@@ -1164,15 +1058,11 @@ transition: slide-up
 | **博客 / 营销站 / 多框架混搭** | Astro 5 |
 | **极致包体积 / DX 简洁** | SvelteKit 2 |
 | **纯 SPA + 自建后端** | Vite + React + React Router v7 |
-| **超复杂数据图层** | Next.js + TanStack Query / Apollo |
 | **跨端（Web + Mobile）** | Next.js（Web） + Expo（Mobile）|
 
 <v-click>
 
-> 💡 **关键判断**
->
-> 团队主语言决定 80%；Next.js 在 React 圈是工业标准，不需要犹豫。Nuxt 在 Vue 圈同理。
-> 真要在两个语言之间选 → 看招聘市场和现有项目栈。
+> 团队主语言决定 80%；Next.js 在 React 圈是工业标准。两个语言之间选 → 看招聘市场和现有栈。
 
 </v-click>
 
@@ -1247,17 +1137,14 @@ pnpm dlx @next/codemod@canary upgrade latest
 
 **codemod 能做**：
 
-- 更新 `next.config` 配置（`experimental.turbopack` → `turbopack`）
+- 更新 `next.config`（`experimental.turbopack` → `turbopack`）
 - `middleware.ts` → `proxy.ts`，函数名 / config flag 同步改
 - `cookies()` / `headers()` / `params` 加 `await`
-- 移除 `unstable_` 前缀（`cacheLife` / `cacheTag` 等已稳定）
-- 移除 `experimental_ppr` route segment config
-- `next lint` → ESLint CLI 调用
+- 移除 `unstable_` 前缀 / `experimental_ppr` segment config / `next lint` 调用
 
 **手动确认**：
 
-- Node.js **≥ 20.9.0**（Node 18 不再支持）
-- TypeScript **≥ 5.1**
+- Node.js **≥ 20.9.0**（Node 18 不再支持） / TypeScript **≥ 5.1**
 - 浏览器：Chrome 111+ / Edge 111+ / Firefox 111+ / Safari 16.4+
 - 所有 Parallel Routes 加 `default.tsx`
 
@@ -1345,11 +1232,7 @@ export async function onRequestError(err, request, context) {
 ```ts
 // instrumentation-node.ts
 import * as Sentry from '@sentry/nextjs'
-
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  tracesSampleRate: 1.0,
-})
+Sentry.init({ dsn: process.env.SENTRY_DSN, tracesSampleRate: 1.0 })
 ```
 
 <v-click>
@@ -1425,21 +1308,19 @@ transition: slide-up
 <v-clicks>
 
 **第 1 周：基础**
-- React 19 基础（如果不熟）→ App Router 文件约定 → 第一个 Server Component
-- 跟着 [Learn Next.js](https://nextjs.org/learn) 走一遍（官方互动教程）
+- React 19 基础 → App Router 文件约定 → 第一个 Server Component
+- 跟着 [Learn Next.js](https://nextjs.org/learn) 走一遍
 
 **第 2 周：核心范式**
-- Server vs Client Components 边界 → Server Actions → revalidatePath / revalidateTag
+- Server vs Client Components 边界 → Server Actions → revalidate
 - Suspense + Streaming → loading.tsx / error.tsx
 
 **第 3 周：性能 / 部署**
-- Cache Components + `use cache` + PPR
-- next/image + next/font → Metadata API → Sitemap / Robots
+- Cache Components + `use cache` + PPR → next/image / font → Metadata
 - Vercel / Docker 部署
 
 **第 4 周+：进阶**
-- Auth.js v5 鉴权 → TanStack Query 客户端缓存 → Prisma / Drizzle ORM
-- Sentry 监控 → Playwright E2E → React Compiler
+- Auth.js v5 → TanStack Query → Prisma / Drizzle → Sentry → React Compiler
 
 </v-clicks>
 

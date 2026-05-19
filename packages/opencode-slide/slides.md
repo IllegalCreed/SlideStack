@@ -182,20 +182,12 @@ OpenCode 的核心卖点：一份 CLI 接所有家模型
 
 | Provider | 类型 |
 | --- | --- |
-| `anthropic` | Claude 全家桶 |
-| `openai` | GPT-5 / GPT-4 / o-series |
-| `google` | Gemini |
-| `openrouter` | 一个 key 接 100+ 模型 |
-| `ollama` | 本地推理 |
+| `anthropic` / `openai` / `google` | Claude / GPT / Gemini |
+| `openrouter` / `ollama` | 100+ 模型聚合 / 本地推理 |
 | `deepseek` | 国内可用 + 性价比高 |
-| `groq` | 快速推理 |
 | `azure` / `bedrock` / `vertex` | 企业云 |
 
-</v-click>
-
-<v-click>
-
-凭据持久化到 `~/.local/share/opencode/auth.json`（不 commit）。
+凭据存 `~/.local/share/opencode/auth.json`（不 commit）。
 
 </v-click>
 
@@ -211,9 +203,6 @@ transition: slide-up
 {
   "$schema": "https://opencode.ai/config.json",
   "provider": {
-    "anthropic": {
-      "options": { "baseURL": "https://api.anthropic.com/v1" }
-    },
     "deepseek": {
       "options": { "baseURL": "https://api.deepseek.com/v1" }
     },
@@ -233,9 +222,7 @@ transition: slide-up
 
 <v-click>
 
-> 💡 **OpenAI 兼容 API 通用接法**
->
-> 任何 OpenAI 兼容 API（智谱 / Kimi / 阶跃星辰 / 自建 vLLM）都能走 `@ai-sdk/openai-compatible`，填 baseURL 就接好。
+> 💡 任何 OpenAI 兼容 API（智谱 / Kimi / 阶跃星辰 / 自建 vLLM）都能走 `@ai-sdk/openai-compatible`，填 baseURL 就接好。
 
 </v-click>
 
@@ -297,22 +284,11 @@ transition: slide-up
 | --- | --- |
 | `anthropic/claude-opus-4-7` | 复杂规划 / 大重构 |
 | `anthropic/claude-sonnet-4-6` | 日常编码 |
-| `openai/gpt-5.5` | OpenAI 旗舰 |
-| `google/gemini-2.5-pro` | Google 主力 |
 | `deepseek/deepseek-v3` | 国内 + 便宜 |
 | `ollama/llama-3.3-70b` | 完全离线 |
-| `groq/llama-3.3-70b` | 快速推理 |
-
-</v-click>
-
-<v-click>
 
 ```bash
-# CLI flag 启动时指定
 opencode --model anthropic/claude-sonnet-4-6
-
-# 或在 opencode.json
-{ "model": "anthropic/claude-sonnet-4-6" }
 ```
 
 </v-click>
@@ -445,32 +421,18 @@ Vue 3 + Vite + TS 的电商前台
 ## 代码规范
 
 - 注释用中文（函数加 JSDoc）
-- 组件 PascalCase，函数 camelCase
 - 偏好 SCSS + UnoCSS @apply
 
 ## 常用命令
 
-- `pnpm dev`：启动 dev server（10000）
-- `pnpm test`：单元测试
-- `pnpm lint:fix`：自动修复格式
+- `pnpm dev` / `pnpm test` / `pnpm lint:fix`
 ```
 
 <v-click>
 
-```bash
-# 新项目快速生成 AGENTS.md
-/init
-```
+`/init` 扫 README / package.json / 路由 / 测试目录，自动起草 `AGENTS.md`。
 
-`/init` 扫 README / package.json / 路由 / 测试目录，自动起草。
-
-</v-click>
-
-<v-click>
-
-> 💡 **兼容 Claude Code**
->
-> 查找顺序：`AGENTS.md` → `CLAUDE.md`（项目根）+ `~/.config/opencode/AGENTS.md`（用户级）。已有 Claude Code 项目零成本切。
+> 💡 查找顺序：`AGENTS.md` → `CLAUDE.md` + `~/.config/opencode/AGENTS.md`。Claude Code 项目零成本切。
 
 </v-click>
 
@@ -480,29 +442,21 @@ transition: slide-up
 
 # 配置文件位置
 
-| 路径 | 作用 | 优先级 |
-| --- | --- | --- |
-| `.well-known/opencode`（远程） | 组织默认 | 1（最低） |
-| `~/.config/opencode/opencode.json` | 用户全局 | 2 |
-| `$OPENCODE_CONFIG` | 自定义路径 | 3 |
-| `<project>/opencode.json` | 项目共享 | 4 |
-| Managed settings | admin 强制 | 5（最高） |
+| 路径 | 作用 |
+| --- | --- |
+| `~/.config/opencode/opencode.json` | 用户全局 |
+| `<project>/opencode.json` | 项目共享（优先级更高） |
+| Managed settings | admin 强制（最高） |
 
 <v-click>
 
 | 文件 | 作用 |
 | --- | --- |
 | `auth.json` | provider 凭据（`~/.local/share/opencode/`） |
-| `tui.json` | 主题 / 键位 |
-| `AGENTS.md` | 项目说明书 |
-| `.opencode/commands/` | 自定义命令 |
-| `.opencode/agents/` | 自定义 agent |
+| `tui.json` / `AGENTS.md` | 主题 / 项目说明书 |
+| `.opencode/{commands,agents}/` | 自定义命令 / agent |
 
-</v-click>
-
-<v-click>
-
-**合并而非替换**——多层配置后字段累加，特定字段后者覆盖前者。
+**合并而非替换**——多层配置字段累加，特定字段后者覆盖前者。
 
 </v-click>
 
@@ -563,23 +517,12 @@ OpenCode 主代理（Plan / Build）可调用**子代理**做独立子任务
 
 <v-click>
 
-主代理对话里调用：
-
 ```
 > 用 @explore 帮我找出所有 useUser 调用点
 > 然后 @scout 看看 react-query v5 的迁移指南
 ```
 
-</v-click>
-
-<v-click>
-
-**关键属性**：
-
-- 主线程只看子代理最终报告，**不污染主上下文**
-- 子代理可用工具子集（如 explore 只读）
-- 失败可独立重试
-- 适合并行 / 大搜索 / 领域专家
+**关键属性**：主线程只看最终报告（不污染上下文）、工具子集、失败可独立重试、适合并行 / 大搜索。
 
 </v-click>
 
@@ -623,26 +566,18 @@ transition: slide-up
 
 字段一览：
 
-| 字段 | 类型 | 说明 |
-| --- | --- | --- |
-| `description` | string | 何时调用 |
-| `model` | string | 模型覆盖 |
-| `small_model` | string | 小任务模型 |
-| `temperature` | number | 0.0-1.0 |
-| `max_steps` | number | 最大步数（防失控） |
-| `tools` | object | 工具权限 |
-| `mcp` | string[] | 允许的 MCP server |
-| `prompt` | string | 系统提示（也可写在 body） |
+| 字段 | 说明 |
+| --- | --- |
+| `description` | 何时调用 |
+| `model` / `small_model` | 模型覆盖 |
+| `temperature` / `max_steps` | 温度 / 最大步数 |
+| `tools` | 工具权限（object） |
+| `mcp` | 允许的 MCP server（string[]） |
+| `prompt` | 系统提示（也可写在 body） |
 
 <v-click>
 
-调用：`@bug-hunter 帮我...`
-
-</v-click>
-
-<v-click>
-
-也可在 `opencode.json` 的 `agent` 字段内联，不必单独建文件。
+调用：`@bug-hunter 帮我...`。也可在 `opencode.json` 的 `agent` 字段内联，不必单独建文件。
 
 </v-click>
 
@@ -654,20 +589,15 @@ transition: slide-up
 
 | 工具 | 用途 |
 | --- | --- |
-| `read` | 读文件（offset / limit） |
-| `write` | 写整个文件 |
-| `edit` | 精确 string replace |
-| `apply_patch` | 应用 patch |
+| `read` / `write` | 读文件 / 写整个文件 |
+| `edit` / `apply_patch` | 精确替换 / 应用 patch |
 | `bash` | shell 命令（支持后台） |
-| `glob` | 文件名匹配 |
-| `grep` | 全文搜索（ripgrep） |
+| `glob` / `grep` | 文件名匹配 / 全文搜索（ripgrep） |
 | `lsp` | LSP 集成（experimental） |
 
 <v-click>
 
-> 💡 **lsp 工具是亮点**
->
-> 自动启动语言服务器（tsserver / gopls / rust-analyzer），LLM 可调「找引用」「跳定义」「重命名」等。比 grep 精准但启动慢。
+> 💡 **lsp 工具是亮点**：自动启动语言服务器（tsserver / gopls / rust-analyzer），LLM 可调「找引用」「跳定义」「重命名」。比 grep 精准但启动慢。
 
 </v-click>
 
@@ -679,26 +609,14 @@ transition: slide-up
 
 | 工具 | 用途 |
 | --- | --- |
-| `webfetch` | 抓 URL（markdown 转换） |
-| `websearch` | Web 搜索（Exa AI） |
+| `webfetch` / `websearch` | 抓 URL / Web 搜索（Exa AI） |
 | `todowrite` | 任务清单 |
 | `question` | 交互式问用户 |
-| `skill` | 加载 skill 文档 |
 | `task` | spawn 子代理 |
 
 <v-click>
 
-工具权限三档：
-
-| 值 | 行为 |
-| --- | --- |
-| `allow` | 自动执行 |
-| `ask` | 询问用户 |
-| `deny` | 拒绝 |
-
-</v-click>
-
-<v-click>
+工具权限三档：`allow`（自动执行）/ `ask`（询问用户）/ `deny`（拒绝）。
 
 `.env` 默认 `deny` 读取（安全），其他工具默认 `allow`（信任本地仓库）。
 
@@ -749,12 +667,7 @@ transition: slide-up
 
 ```json
 {
-  "bash": {
-    "*": "ask",
-    "git *": "allow",
-    "rm *": "deny",
-    "rm -rf*": "deny"
-  }
+  "bash": { "*": "ask", "git *": "allow", "rm -rf*": "deny" }
 }
 ```
 
@@ -766,11 +679,7 @@ transition: slide-up
 {
   "agent": {
     "code-reviewer": {
-      "tools": {
-        "edit": "deny",
-        "write": "deny",
-        "bash": "deny"
-      }
+      "tools": { "edit": "deny", "write": "deny", "bash": "deny" }
     }
   }
 }
@@ -778,13 +687,7 @@ transition: slide-up
 
 `code-reviewer` 永远只读，即使主代理 Build 模式启动它。
 
-</v-click>
-
-<v-click>
-
-> ⚠️ **bash 全开很危险**
->
-> 生产 / 共享机器建议显式改 `"*": "ask"` 全询问，再 allow 几个白名单。
+> ⚠️ 生产 / 共享机器建议改 `"*": "ask"` + 白名单。
 
 </v-click>
 
@@ -810,16 +713,7 @@ model: anthropic/claude-sonnet-4-6
 
 TUI 内 `/test` 触发。
 
-</v-click>
-
-<v-click>
-
-| 字段 | 说明 |
-| --- | --- |
-| `description` | 命令描述（`/help` 显示） |
-| `agent` | 用哪个 agent 跑 |
-| `model` | 模型覆盖 |
-| `template` | 也可写在 frontmatter |
+字段：`description`（`/help` 显示）/ `agent`（用哪个 agent 跑）/ `model`（覆盖）/ `template`（可写在 frontmatter）。
 
 </v-click>
 
@@ -829,14 +723,7 @@ transition: slide-up
 
 # 自定义命令（2/2）
 
-动态内容占位符
-
-| 占位符 | 含义 |
-| --- | --- |
-| `$ARGUMENTS` | 全部参数 |
-| `$1` `$2` `$3` | 位置参数 |
-| `` !`cmd` `` | 注入 bash 输出 |
-| `@filename` | 引用文件内容 |
+动态内容占位符：`$ARGUMENTS`（全部参数）/ `$1` `$2`（位置参数）/ `` !`cmd` ``（注入 bash 输出）/ `@filename`（引用文件）
 
 ```md
 ---
@@ -889,10 +776,7 @@ OpenCode 一类支持 MCP，配在 `opencode.json` 的 `mcp` 字段
 
 <v-click>
 
-**两类**：
-
-- `type: "local"` → 本地启 stdio 进程
-- `type: "remote"` → 接远程 HTTP MCP（OAuth 自动处理）
+**两类**：`type: "local"`（本地 stdio 进程）/ `type: "remote"`（远程 HTTP MCP，OAuth 自动处理）。
 
 </v-click>
 
@@ -1014,20 +898,15 @@ transition: slide-up
 | --- | --- | --- | --- | --- |
 | 模型 | **75+ provider** | Anthropic | OpenAI | Google |
 | 开源 | **✓ MIT** | ✗ | ✓ Apache-2.0 | 部分 |
-| 私有部署 | **任意** | Bedrock / Vertex | OpenAI 服务 | Vertex |
-| 中国可用 | **极友好** | 需自备网络 | 需自备网络 | 需自备网络 |
+| 中国可用 | **极友好** | 需网络 | 需网络 | 需网络 |
 
 <v-click>
 
 | 维度 | OpenCode | Claude Code | Codex CLI | Gemini CLI |
 | --- | --- | --- | --- | --- |
-| Modes | Plan / Build / 自定义 | default / accept / bypass / plan | Plan + sandbox | 受限 |
-| Skills | ✗ | ✓ | ✗ | ✗ |
-| Hooks | 简化 | ✓ | ✓ | 受限 |
-| MCP | ✓ | ✓ | ✓ | ✓（部分） |
+| Skills / Hooks | 简化 | ✓ | ✓ | 受限 |
 | Subagents | ✓ | ✓ | ✓ | ✗ |
-| LSP 内置 | **✓** | ✗ | ✗ | ✗ |
-| Session 分享 | **✓** | ✗ | ✗ | ✗ |
+| LSP / Session 分享 | **✓** | ✗ | ✗ | ✗ |
 
 </v-click>
 
@@ -1146,19 +1025,12 @@ transition: slide-up
 
 | 命令 | 作用 |
 | --- | --- |
-| `/help` | 显示帮助 |
-| `/connect` | 添加 provider |
-| `/models` | 选模型 |
-| `/agents` | 列出 agent |
-| `/init` | 生成 AGENTS.md |
-| `/clear` | 清会话 |
-| `/undo` | 撤销最近改动 |
-| `/redo` | 重做 |
-| `/share` | 分享会话链接 |
-| `/theme` | 切主题 |
+| `/help` / `/connect` | 帮助 / 添加 provider |
+| `/models` / `/init` | 选模型 / 生成 AGENTS.md |
+| `/undo` / `/redo` | 撤销 / 重做改动 |
+| `/share` / `/theme` | 分享会话 / 切主题 |
 | `/<custom>` | 用户 / 项目自定义命令 |
 | `@<file>` | 引用文件加进上下文 |
-| `:q` | 退出 TUI |
 
 ---
 transition: slide-up
@@ -1168,19 +1040,13 @@ transition: slide-up
 
 | Flag | 说明 |
 | --- | --- |
-| `-h, --help` | 帮助 |
-| `-v, --version` | 版本 |
 | `-c, --continue` | 继续上次 session |
 | `-m, --model <provider/model>` | 指定模型 |
 | `--agent <name>` | 指定 agent |
-| `--cwd <dir>` | 工作目录 |
-| `--config <path>` | 指定配置文件 |
-| `--format <text|json>` | 输出格式 |
-| `--debug` | 详细日志 |
-| `--print-config` | 输出当前配置 |
+| `--config <path>` / `--format <text|json>` | 配置文件 / 输出格式 |
+| `--debug` / `--print-config` | 详细日志 / 输出当前配置 |
 | `--no-lsp` | 禁用 lsp |
-| `--port <n>` | serve / web 端口 |
-| `--password <pwd>` | serve 鉴权密码 |
+| `--port <n>` / `--password <pwd>` | serve 端口 / 鉴权 |
 
 ---
 transition: slide-up
@@ -1195,7 +1061,6 @@ transition: slide-up
 | `OPENCODE_EXPERIMENTAL_DISABLE_WATCHER` | 1 禁用文件 watcher |
 | `OPENCODE_EXPERIMENTAL_DISABLE_LSP` | 1 禁用 LSP |
 | `OPENCODE_LOG_LEVEL` | debug / info / warn / error |
-| `OPENCODE_NO_TELEMETRY` | 1 关闭遥测 |
 | `ANTHROPIC_API_KEY` 等 | provider 凭据（替代 auth.json） |
 | `HTTPS_PROXY` / `HTTP_PROXY` | 网络代理 |
 
@@ -1400,11 +1265,8 @@ transition: slide-up
 | 模型选不到 | `/models` 看 provider 是否连通 |
 | MCP server 红色未连接 | 终端跑 `command + args` 看 stderr |
 | AGENTS.md 不生效 | 路径在项目根吗 + 重启 opencode |
-| 自定义 agent 不识别 | `.opencode/agents/<name>.md` 文件名对吗 |
-| TUI 渲染乱码 | 换主题 `/theme system` 或换 terminal |
 | Plan 模式仍在改文件 | 确认顶栏 agent 显示 `plan` 而非 `build` |
-| 大陆连不上 OpenAI | 换 provider 走 OpenRouter / DeepSeek / Ollama |
-| 限流 | 切到备用 provider 或 small_model |
+| 大陆连不上 OpenAI / 限流 | 换 OpenRouter / DeepSeek / Ollama |
 
 ---
 transition: slide-up
@@ -1432,7 +1294,6 @@ transition: slide-up
 
 | 版本 | 时间 | 主要变化 |
 | --- | --- | --- |
-| 0.x | 2025 初 | sst 团队启动，TUI 雏形 |
 | 1.0 | 2025 中 | TypeScript 重写 / Models.dev 接入 |
 | 1.5 | 2025 末 | MCP 一类支持 / Plan-Build agent |
 | 2.0 | 2026 初 | Subagents 内置 / OpenCode Zen 上线 |
@@ -1440,13 +1301,7 @@ transition: slide-up
 
 <v-click>
 
-**关键演进**：
-
-- **Models.dev** → 75+ provider 接入
-- **AGENTS.md** → 兼容 Claude Code 生态
-- **Plan/Build** → Tab 切换两档主代理
-- **Subagents** → 内置 + 自定义两条路
-- **/share** → 业内首创会话分享
+**关键演进**：Models.dev（75+ provider）、AGENTS.md（兼容 Claude Code）、Plan/Build、Subagents、`/share`（业内首创）。
 
 </v-click>
 
@@ -1462,25 +1317,20 @@ transition: slide-up
 
 - 装 + `/connect` 加 provider + 第一次对话
 - 写 `AGENTS.md`（或从已有 `CLAUDE.md` 复制）
-- 用 `/init` + 让 OpenCode 改一个小 bug
 
 **Week 2 — 多 Provider 玩**
 
-- 加 DeepSeek / Ollama / OpenRouter 三家凭据
-- 配 `small_model` 省钱
+- 加 DeepSeek / Ollama 凭据 + 配 `small_model` 省钱
 - 切 Plan 模式规划，再 Build 实施
 
 **Week 3 — 扩展**
 
-- 装 1-2 个 MCP server（context7 / chrome-devtools）
-- 写第一个自定义命令（`.opencode/commands/`）
-- 写第一个自定义 agent（`.opencode/agents/`）
+- 装 1-2 个 MCP server（context7 等）
+- 写第一个自定义命令 / agent
 
 **Week 4 — 工作流**
 
-- 配 `opencode.json` 的 permissions / 多 provider
-- `@explore` / `@scout` 子代理做并行任务
-- `/share` 把方案分享给团队
+- 配 permissions / 多 provider + `@explore` / `/share`
 
 </v-clicks>
 

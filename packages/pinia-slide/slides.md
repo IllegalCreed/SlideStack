@@ -104,16 +104,14 @@ transition: fade-out
 
 <v-click>
 
-| 维度          | Pinia 3                | Vuex 4              | Zustand           | Redux Toolkit       | Jotai             |
-| ------------- | ---------------------- | ------------------- | ----------------- | ------------------- | ----------------- |
-| 框架绑定      | **Vue 3 官方**         | Vue 2/3             | React             | React               | React             |
-| API 风格      | Composition / Options  | Vuex 模式           | Hook 风格         | Slice + Hook        | Atom 原子化       |
-| Mutations     | **无**                 | 必须                | 无                | 内部 Immer          | 无                |
-| TS 支持       | **原生推导**           | 弱（需手写类型）    | 优                | 优                  | 优                |
-| 包体积        | **~1.5 KB**            | ~10 KB              | ~1 KB             | ~10 KB              | ~3 KB             |
-| 模块化        | 多 Store 自动注册      | namespaced modules  | 多 Store          | createSlice         | 多 atom           |
-| DevTools      | Vue DevTools 深度集成  | Vue DevTools        | Redux DevTools    | Redux DevTools      | Jotai DevTools    |
-| SSR           | **官方支持**           | 支持                | 中等              | 中等                | 中等              |
+| 维度       | Pinia 3               | Vuex 4             | Zustand        | Redux Toolkit  |
+| ---------- | --------------------- | ------------------ | -------------- | -------------- |
+| 框架绑定   | **Vue 3 官方**        | Vue 2/3            | React          | React          |
+| API 风格   | Composition / Options | Vuex 模式          | Hook 风格      | Slice + Hook   |
+| Mutations  | **无**                | 必须               | 无             | 内部 Immer     |
+| TS 支持    | **原生推导**          | 弱                 | 优             | 优             |
+| 包体积     | **~1.5 KB**           | ~10 KB             | ~1 KB          | ~10 KB         |
+| SSR        | **官方支持**          | 支持               | 中等           | 中等           |
 
 </v-click>
 
@@ -428,17 +426,12 @@ transition: fade-out
 import { defineStore } from "pinia";
 
 export const useCounterStore = defineStore("counter", {
-  state: () => ({
-    count: 0,
-    name: "Eduardo",
-  }),
+  state: () => ({ count: 0, name: "Eduardo" }),
   getters: {
     doubleCount: (state) => state.count * 2,
   },
   actions: {
-    increment() {
-      this.count++;
-    },
+    increment() { this.count++ },
   },
 });
 ```
@@ -447,13 +440,7 @@ export const useCounterStore = defineStore("counter", {
 
 <v-click>
 
-**对照映射**
-
-| Setup           | Option        |
-| --------------- | ------------- |
-| `ref()`         | `state()`     |
-| `computed()`    | `getters`     |
-| `function()`    | `actions`     |
+**对照映射**：`ref()` ↔ `state()` | `computed()` ↔ `getters` | `function()` ↔ `actions`
 
 </v-click>
 
@@ -651,17 +638,7 @@ store.$patch((state) => {
 
 <v-click>
 
-**对比逐个赋值**
-
-```ts
-// ❌ 三次独立变更 → DevTools 显示 3 条记录
-store.count += 1;
-store.age = 120;
-store.name = "DIO";
-
-// ✅ 一次批量变更 → DevTools 显示 1 条记录
-store.$patch({ count: store.count + 1, age: 120, name: "DIO" });
-```
+**对比**：逐个赋值 → DevTools 显示 3 条记录；`$patch` 合并为 1 条，便于 time-travel 回滚。
 
 </v-click>
 
@@ -722,12 +699,7 @@ store.$reset();   // count 回到 0, name 回到 "Eduardo"
 export const useCounterStore = defineStore("counter", () => {
   const count = ref(0);
   const name = ref("Eduardo");
-
-  function $reset() {
-    count.value = 0;
-    name.value = "Eduardo";
-  }
-
+  function $reset() { count.value = 0; name.value = "Eduardo"; }
   return { count, name, $reset };
 });
 ```
@@ -736,7 +708,7 @@ export const useCounterStore = defineStore("counter", () => {
 
 <div v-click text-xs class="mt-3">
 
-> 💡 **为什么 Setup Store 不内置 $reset？** Setup 函数内的 ref 初始值在外部不可见，Pinia 无法知道「初始值是什么」。如果需要通用方案，可以写插件存初值后注入。
+> 💡 Setup Store 的 ref 初值对外不可见 → Pinia 无法自动生成 $reset；通用方案见后续插件章节。
 
 </div>
 
@@ -861,18 +833,13 @@ getters: {
 
 <v-click>
 
-**带参数的 getter（返回函数）**
+**带参数的 getter（返回函数，不被缓存）**
 
 ```ts
 getters: {
-  getUserById: (state) => {
-    return (id: number) => state.users.find((u) => u.id === id);
-  },
+  getUserById: (state) => (id: number) => state.users.find((u) => u.id === id),
 }
-
-// 调用方
-const findUser = store.getUserById;
-findUser(42);   // 注意：返回函数不会被缓存
+store.getUserById(42);   // 每次调用重新计算
 ```
 
 </v-click>
@@ -913,16 +880,14 @@ transition: fade-out
 
 <v-click>
 
-**Option Store 内引用**
+**Option Store**：在 getter **内部**实例化
 
 ```ts
-import { useUserStore } from "./user";
-
 export const useCartStore = defineStore("cart", {
   state: () => ({ items: [] as CartItem[] }),
   getters: {
     summary(state) {
-      const user = useUserStore();         // 在 getter 内实例化
+      const user = useUserStore();   // 调用时点实例化
       return `Hi ${user.name}, ${state.items.length} items`;
     },
   },
@@ -933,19 +898,13 @@ export const useCartStore = defineStore("cart", {
 
 <v-click>
 
-**Setup Store 内引用**
+**Setup Store**：在 setup 开头直接调用
 
 ```ts
-import { useUserStore } from "./user";
-
 export const useCartStore = defineStore("cart", () => {
-  const user = useUserStore();            // 在 setup 开头实例化即可
+  const user = useUserStore();
   const items = ref<CartItem[]>([]);
-
-  const summary = computed(
-    () => `Hi ${user.name}, ${items.value.length} items`,
-  );
-
+  const summary = computed(() => `Hi ${user.name}, ${items.value.length} items`);
   return { items, summary };
 });
 ```
@@ -992,12 +951,8 @@ transition: fade-out
 
 ```ts
 actions: {
-  increment() {
-    this.count++;
-  },
-  randomize() {
-    this.count = Math.round(Math.random() * 100);
-  },
+  increment() { this.count++ },
+  randomize() { this.count = Math.round(Math.random() * 100) },
 }
 ```
 
@@ -1008,18 +963,12 @@ actions: {
 **异步 action（推荐 async/await）**
 
 ```ts
-import { fetchUser } from "@/api/user";
-
 actions: {
   async loadUser(id: number) {
     this.loading = true;
-    try {
-      this.user = await fetchUser(id);
-    } catch (e) {
-      this.error = (e as Error).message;
-    } finally {
-      this.loading = false;
-    }
+    try { this.user = await fetchUser(id); }
+    catch (e) { this.error = (e as Error).message; }
+    finally { this.loading = false; }
   },
 }
 ```
@@ -1064,17 +1013,14 @@ transition: fade-out
 <v-click>
 
 ```ts
-import { defineStore } from "pinia";
 import { useAuthStore } from "./auth";
 
 export const useSettingsStore = defineStore("settings", {
   state: () => ({ preferences: null as Preferences | null }),
   actions: {
     async fetchPreferences() {
-      const auth = useAuthStore();        // 在 action 内实例化
-      if (!auth.isAuthenticated) {
-        throw new Error("Not authenticated");
-      }
+      const auth = useAuthStore();   // 在 action 内实例化
+      if (!auth.isAuthenticated) throw new Error("Not authenticated");
       this.preferences = await api.getPreferences(auth.token);
     },
   },
@@ -1085,12 +1031,7 @@ export const useSettingsStore = defineStore("settings", {
 
 <v-click>
 
-**典型场景**
-
-- 鉴权检查：`useAuthStore` 提供 `isAuthenticated` / `token`
-- 用户偏好：`useUserStore` 提供 `userId`
-- 通知推送：`useNotifyStore` 在 action 成功后 `notify.success("...")`
-- 路由跳转：action 内 `router.push(...)`（但建议放组件层）
+**典型场景**：鉴权（`useAuthStore`）/ 用户偏好 / 通知推送 / 路由跳转（建议组件层）
 
 </v-click>
 
@@ -1132,36 +1073,18 @@ transition: fade-out
 ```ts
 const cart = useCartStore();
 
-const unsubscribe = cart.$onAction(({ name, store, args, after, onError }) => {
+const unsubscribe = cart.$onAction(({ name, args, after, onError }) => {
   const start = Date.now();
-  console.log(`▶ ${name}(`, ...args, ")");
-
-  after((result) => {
-    console.log(`✓ ${name} done in ${Date.now() - start}ms`, result);
-  });
-
-  onError((err) => {
-    console.warn(`✗ ${name} failed in ${Date.now() - start}ms`, err);
-  });
+  after((result) => console.log(`✓ ${name} ${Date.now() - start}ms`));
+  onError((err) => console.warn(`✗ ${name}`, err));
 });
-
-// 取消订阅
-unsubscribe();
 ```
 
 </v-click>
 
 <v-click>
 
-**回调参数**
-
-| 字段       | 说明                              |
-| ---------- | --------------------------------- |
-| `name`     | action 名字                       |
-| `store`    | 当前 Store 实例                   |
-| `args`     | action 调用参数数组               |
-| `after`    | action 成功 resolve 后触发        |
-| `onError`  | action 抛错 / Promise reject 触发 |
+**回调参数**：`name` / `store` / `args` / `after`（成功）/ `onError`（失败）
 
 </v-click>
 
@@ -1282,9 +1205,7 @@ Router guards / service 模块 / VueUse 集成
 **❌ 错误：在 module 顶层调用**
 
 ```ts
-// stores/index.ts
 import { useAuthStore } from "./auth";
-
 const auth = useAuthStore();   // 报错：pinia 还未注册
 ```
 
@@ -1295,15 +1216,9 @@ const auth = useAuthStore();   // 报错：pinia 还未注册
 **✅ 正确：在调用时点动态调用**
 
 ```ts
-// router/index.ts
-import { useAuthStore } from "@/stores/auth";
-
-router.beforeEach((to, from) => {
-  const auth = useAuthStore();              // ✅ 此时 pinia 已注册
-
-  if (to.meta.requiresAuth && !auth.isLoggedIn) {
-    return "/login";
-  }
+router.beforeEach((to) => {
+  const auth = useAuthStore();   // ✅ 此时 pinia 已注册
+  if (to.meta.requiresAuth && !auth.isLoggedIn) return "/login";
 });
 ```
 
@@ -1361,13 +1276,7 @@ transition: fade-out
 **Setup Store：直接用 ref 泛型**
 
 ```ts
-import { ref } from "vue";
-
-interface User {
-  id: number;
-  name: string;
-}
-
+interface User { id: number; name: string }
 const user = ref<User | null>(null);
 const userList = ref<User[]>([]);
 ```
@@ -1379,15 +1288,10 @@ const userList = ref<User[]>([]);
 **Option Store：用 as 断言初值**
 
 ```ts
-interface UserInfo {
-  name: string;
-  age: number;
-}
-
 export const useUserStore = defineStore("user", {
   state: () => ({
-    userList: [] as UserInfo[],
-    user: null as UserInfo | null,
+    userList: [] as User[],
+    user: null as User | null,
   }),
 });
 ```
@@ -1589,18 +1493,10 @@ export const useCartStore = defineStore(
   },
   {
     persist: [
-      {
-        // 长期持久化到 localStorage
-        key: "cart-items",
-        storage: localStorage,
-        paths: ["items"],
-      },
-      {
-        // 会话级持久化到 sessionStorage
-        key: "cart-session",
-        storage: sessionStorage,
-        paths: ["sessionFlag"],
-      },
+      // 长期持久化到 localStorage
+      { key: "cart-items", storage: localStorage, paths: ["items"] },
+      // 会话级持久化到 sessionStorage
+      { key: "cart-session", storage: sessionStorage, paths: ["sessionFlag"] },
     ],
   },
 );
@@ -1657,10 +1553,6 @@ transition: fade-out
 
 ```ts
 // app.ts
-import { createSSRApp } from "vue";
-import { createPinia } from "pinia";
-import App from "./App.vue";
-
 export function createApp() {
   const app = createSSRApp(App);
   const pinia = createPinia();
@@ -1676,17 +1568,10 @@ export function createApp() {
 **服务端：序列化 state**
 
 ```ts
-import { renderToString } from "vue/server-renderer";
-import devalue from "@nuxt/devalue";
-
 const { app, pinia } = createApp();
 const html = await renderToString(app);
 const state = devalue(pinia.state.value);
-
-return `
-  <div id="app">${html}</div>
-  <script>window.__PINIA__ = ${state}</script>
-`;
+return `<div id="app">${html}</div><script>window.__PINIA__=${state}</script>`;
 ```
 
 </v-click>
@@ -1790,24 +1675,15 @@ Nuxt 3+ 默认状态库，零配置自动导入
 
 <v-click>
 
-**安装**
+**安装 + 注册**
 
 ```bash
-npx nuxi@latest module add pinia
-# 或手动
-pnpm add pinia @pinia/nuxt
+npx nuxi@latest module add pinia      # 或 pnpm add pinia @pinia/nuxt
 ```
 
-</v-click>
-
-<v-click>
-
-**nuxt.config.ts**
-
 ```ts
-export default defineNuxtConfig({
-  modules: ["@pinia/nuxt"],
-});
+// nuxt.config.ts
+export default defineNuxtConfig({ modules: ["@pinia/nuxt"] });
 ```
 
 </v-click>
@@ -1820,9 +1696,7 @@ export default defineNuxtConfig({
 // stores/counter.ts  (Nuxt 3) 或 app/stores/counter.ts (Nuxt 4)
 export const useCounterStore = defineStore("counter", () => {
   const count = ref(0);
-  function increment() {
-    count.value++;
-  }
+  function increment() { count.value++ }
   return { count, increment };
 });
 ```
@@ -1874,32 +1748,20 @@ transition: fade-out
 **最简插件：返回字段挂到 store**
 
 ```ts
-import { createPinia } from "pinia";
-
 function secretPlugin() {
   return { secret: "the cake is a lie" };
 }
 
 const pinia = createPinia();
 pinia.use(secretPlugin);
-
-// 之后所有 store 都有 secret 字段
-const store = useAnyStore();
-console.log(store.secret);   // "the cake is a lie"
+console.log(useAnyStore().secret);   // "the cake is a lie"
 ```
 
 </v-click>
 
 <v-click>
 
-**context 参数四件套**
-
-| 字段                | 说明                          |
-| ------------------- | ----------------------------- |
-| `context.pinia`     | createPinia() 实例            |
-| `context.app`       | 当前 Vue 应用                 |
-| `context.store`     | 正在被增强的 Store            |
-| `context.options`   | Store 定义时的 options 对象   |
+**context 四件套**：`pinia`（实例）/ `app`（Vue app）/ `store`（被增强的 Store）/ `options`（定义时的选项）
 
 </v-click>
 
@@ -2018,9 +1880,7 @@ import { defineStore, acceptHMRUpdate } from "pinia";
 
 export const useCounterStore = defineStore("counter", () => {
   const count = ref(0);
-  function increment() {
-    count.value++;
-  }
+  function increment() { count.value++ }
   return { count, increment };
 });
 
@@ -2034,12 +1894,7 @@ if (import.meta.hot) {
 
 <v-click>
 
-**效果**
-
-- 修改 action 实现：保持 state，新逻辑立即生效
-- 增加 state 字段：保持现有字段，新字段初始化
-- 删除 state 字段：保持其他字段，删除字段自动清理
-- DevTools 显示 store 已热更新
+**效果**：改 action 立即生效保 state / 增删字段自动同步 / DevTools 显示已热更新
 
 </v-click>
 
@@ -2082,19 +1937,13 @@ setActivePinia + createPinia 隔离每个测试
 <v-click>
 
 ```ts
-// counter.spec.ts
-import { describe, it, expect, beforeEach } from "vitest";
 import { setActivePinia, createPinia } from "pinia";
-import { useCounterStore } from "@/stores/counter";
 
 describe("Counter Store", () => {
-  beforeEach(() => {
-    setActivePinia(createPinia());   // 每个测试一个干净实例
-  });
+  beforeEach(() => setActivePinia(createPinia()));   // 每测试一个干净实例
 
   it("increments", () => {
     const counter = useCounterStore();
-    expect(counter.count).toBe(0);
     counter.increment();
     expect(counter.count).toBe(1);
   });
@@ -2149,22 +1998,15 @@ createTestingPinia mock actions / initialState
 <v-click>
 
 ```ts
-// CounterButton.spec.ts
-import { mount } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
-import { vi } from "vitest";
-import { useCounterStore } from "@/stores/counter";
-import CounterButton from "@/components/CounterButton.vue";
 
 it("calls increment on click", () => {
   const wrapper = mount(CounterButton, {
     global: {
       plugins: [
         createTestingPinia({
-          createSpy: vi.fn,            // Vitest 配合
-          initialState: {
-            counter: { count: 99 },    // 注入初始 state
-          },
+          createSpy: vi.fn,                         // Vitest 配合
+          initialState: { counter: { count: 99 } }, // 注入初始 state
         }),
       ],
     },
@@ -2215,18 +2057,14 @@ API 对照表 + 渐进迁移策略
 
 <v-click>
 
-| Vuex 4                               | Pinia                                |
-| ------------------------------------ | ------------------------------------ |
-| `Vuex.Store({ modules })`            | `createPinia()`                      |
-| `module.state`                       | `defineStore.state`                  |
-| `module.mutations`                   | **无**（actions 直接改 state）       |
-| `module.actions`                     | `defineStore.actions`                |
-| `module.getters`                     | `defineStore.getters`                |
-| `useStore().state.user.profile.name` | `useUserStore().profile.name`        |
-| `store.commit('user/SET_NAME', n)`   | `store.name = n` 或 `store.setName(n)` |
-| `store.dispatch('user/login')`       | `store.login()`                      |
-| `mapState(['user'])`                 | `storeToRefs(store)`                 |
-| `mapActions(['login'])`              | `const { login } = store`            |
+| Vuex 4                             | Pinia                                  |
+| ---------------------------------- | -------------------------------------- |
+| `Vuex.Store({ modules })`          | `createPinia()`                        |
+| `module.mutations`                 | **无**（actions 直接改 state）         |
+| `module.actions` / `getters`       | `defineStore.actions` / `getters`      |
+| `store.commit('user/SET_NAME', n)` | `store.name = n` 或 `store.setName(n)` |
+| `store.dispatch('user/login')`     | `store.login()`                        |
+| `mapState` / `mapActions`          | `storeToRefs(store)` / 直接解构        |
 
 </v-click>
 
@@ -2348,11 +2186,8 @@ transition: fade-out
 **❌ 错误：import 阶段执行**
 
 ```ts
-// services/api.ts
 import { useAuthStore } from "@/stores/auth";
-
-const auth = useAuthStore();   // ❌ 报错：getActivePinia() called before...
-
+const auth = useAuthStore();   // ❌ getActivePinia() called before...
 export const apiClient = axios.create({
   headers: { Authorization: `Bearer ${auth.token}` },
 });
@@ -2365,9 +2200,6 @@ export const apiClient = axios.create({
 **✅ 正确：调用时延迟到函数体内**
 
 ```ts
-// services/api.ts
-import { useAuthStore } from "@/stores/auth";
-
 export function getAuthHeader() {
   const auth = useAuthStore();   // ✅ 调用时 pinia 已就绪
   return { Authorization: `Bearer ${auth.token}` };
@@ -2425,14 +2257,11 @@ A → B → A 的 getter 链路
 **❌ 危险模式**
 
 ```ts
-// stores/cart.ts
 export const useCartStore = defineStore("cart", () => {
   const user = useUserStore();
   const total = computed(() => user.creditLimit - 100);
   return { total };
 });
-
-// stores/user.ts
 export const useUserStore = defineStore("user", () => {
   const cart = useCartStore();
   const remainingCredit = computed(() => cart.total + 50);  // ⚠️ 死循环
@@ -2492,11 +2321,7 @@ transition: fade-out
 
 <v-click>
 
-**典型现象**
-
-- 控制台警告：`Hydration completed but contains mismatches`
-- 首屏闪烁：服务端渲染的内容被客户端替换
-- 数据丢失：客户端拿到的是初始值而非服务端预填值
+**典型现象**：控制台 `Hydration mismatch` 警告 / 首屏闪烁 / 数据丢失（客户端拿到初始值）
 
 </v-click>
 
@@ -2504,12 +2329,12 @@ transition: fade-out
 
 **常见根因**
 
-| 根因                                      | 解决方案                                |
-| ----------------------------------------- | --------------------------------------- |
-| 忘记 hydrate `pinia.state.value`          | 客户端 mount 前 `JSON.parse(window.__PINIA__)` |
-| 服务端 store 调用了 `Date.now()` / 随机数 | 改用预先计算的固定值，或仅在 onMounted 调用 |
-| 客户端 store 又发了一次 API 请求         | action 内判断 `if (this.data) return;`  |
-| 持久化 plugin 覆盖了服务端预填           | persist 配置 `clientOnly: true` 仅客户端 |
+| 根因                                | 解决方案                                       |
+| ----------------------------------- | ---------------------------------------------- |
+| 忘记 hydrate `pinia.state.value`    | mount 前 `JSON.parse(window.__PINIA__)`        |
+| 服务端调用 `Date.now()` / 随机数    | 用固定值，或仅在 onMounted 调用                |
+| 客户端 store 又发了一次 API 请求    | action 内判断 `if (this.data) return;`         |
+| 持久化 plugin 覆盖了服务端预填      | persist 配 `clientOnly: true`                  |
 
 </v-click>
 
@@ -2560,44 +2385,26 @@ transition: fade-out
 ```ts
 // stores/cart.ts
 import { defineStore, acceptHMRUpdate } from "pinia";
-import { ref, computed } from "vue";
-import { useAuthStore } from "./auth";
-import { fetchCart, submitOrder } from "@/api/cart";
 
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  qty: number;
-}
+interface CartItem { id: number; name: string; price: number; qty: number }
 
 export const useCartStore = defineStore("cart", () => {
   const auth = useAuthStore();
   const items = ref<CartItem[]>([]);
   const loading = ref(false);
-
-  const total = computed(() =>
-    items.value.reduce((sum, i) => sum + i.price * i.qty, 0),
-  );
-  const itemCount = computed(() =>
-    items.value.reduce((n, i) => n + i.qty, 0),
-  );
+  const total = computed(() => items.value.reduce((s, i) => s + i.price * i.qty, 0));
+  const itemCount = computed(() => items.value.reduce((n, i) => n + i.qty, 0));
 
   async function load() {
     if (!auth.isAuthenticated) return;
     loading.value = true;
-    try {
-      items.value = await fetchCart(auth.token);
-    } finally {
-      loading.value = false;
-    }
+    try { items.value = await fetchCart(auth.token); }
+    finally { loading.value = false; }
   }
   return { items, loading, total, itemCount, load };
 });
 
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useCartStore, import.meta.hot));
-}
+if (import.meta.hot) import.meta.hot.accept(acceptHMRUpdate(useCartStore, import.meta.hot));
 ```
 
 </v-click>
@@ -2644,16 +2451,14 @@ transition: fade-out
 
 <v-click>
 
-| 场景                            | 推荐方案              | 原因                                |
-| ------------------------------- | --------------------- | ----------------------------------- |
-| Vue 3 + 跨组件共享              | **Pinia**             | 官方推荐，DevTools 集成             |
-| 单组件 / 父子组件               | `ref` + `provide`     | Pinia 是 overkill                   |
-| 小项目（< 3 个 Store）          | `ref` 模块 + import   | 不必引入 Pinia                      |
-| Vue 2 老项目维护                | **Vuex 3**            | Pinia v2 兼容 Vue 2 但生态匮乏     |
-| 异步数据 / 缓存 / 请求          | **TanStack Query**    | Pinia 不是数据缓存层，需配合使用    |
-| 离线 / IndexedDB 同步           | Pinia + Dexie + plugin| Pinia 管状态，Dexie 管存储          |
-| 表单状态                        | VeeValidate / 本地 ref| Pinia 全局存表单 = 状态泄漏        |
-| URL query 同步                  | Vue Router + 本地 ref | Pinia 不是路由状态层                |
+| 场景                       | 推荐方案               | 原因                          |
+| -------------------------- | ---------------------- | ----------------------------- |
+| Vue 3 + 跨组件共享         | **Pinia**              | 官方推荐，DevTools 集成       |
+| 单组件 / 父子组件          | `ref` + `provide`      | Pinia 是 overkill             |
+| 小项目（< 3 个 Store）     | `ref` 模块 + import    | 不必引入 Pinia                |
+| 异步数据 / 缓存 / 请求     | **TanStack Query**     | Pinia 不是数据缓存层，需配合  |
+| 表单状态                   | VeeValidate / 本地 ref | Pinia 全局存表单 = 状态泄漏   |
+| URL query 同步             | Vue Router + 本地 ref  | Pinia 不是路由状态层          |
 
 </v-click>
 
@@ -2717,25 +2522,15 @@ const cache = shallowRef(markRaw(new Map<string, BigData>()));
 **2. 高频更新用 $patch 合并**
 
 ```ts
-// ❌ 一帧内多次单字段更新
-items.value.forEach((i) => (i.selected = true));
-
 // ✅ 批量 patch 减少响应式触发
-store.$patch((state) => {
-  state.items.forEach((i) => (i.selected = true));
-});
+store.$patch((state) => state.items.forEach((i) => (i.selected = true)));
 ```
 
 </v-click>
 
 <v-click>
 
-**3. 派生状态懒计算**
-
-```ts
-// 用 computed 缓存，仅当依赖变化才重算
-const expensiveSummary = computed(() => heavyCalc(items.value));
-```
+**3. 派生状态懒计算**：用 `computed` 缓存，依赖未变不重算（`computed(() => heavyCalc(items.value))`）
 
 </v-click>
 
@@ -2844,18 +2639,15 @@ stores/ 目录组织建议
 **按业务领域划分**
 
 ```
-src/
-├── stores/
-│   ├── index.ts              # pinia 实例 + plugin 注册
-│   ├── auth.ts               # 认证 / 当前用户 / token
-│   ├── user.ts               # 用户列表 / profile
-│   ├── cart.ts               # 购物车
-│   ├── product.ts            # 商品列表 / 详情
-│   ├── ui.ts                 # 全局 UI 状态（侧边栏 / 主题）
-│   └── plugins/
-│       ├── reset.ts          # 通用 $reset 插件
-│       └── logger.ts         # action 日志插件
-└── components/
+src/stores/
+├── index.ts         # pinia 实例 + plugin 注册
+├── auth.ts          # 认证 / 当前用户 / token
+├── user.ts          # 用户列表 / profile
+├── cart.ts          # 购物车
+├── ui.ts            # 全局 UI 状态（侧边栏 / 主题）
+└── plugins/
+    ├── reset.ts     # 通用 $reset 插件
+    └── logger.ts    # action 日志插件
 ```
 
 </v-click>
@@ -2990,18 +2782,13 @@ transition: fade-out
 - [pinia-plugin-persistedstate](https://prazdevs.github.io/pinia-plugin-persistedstate/) — 持久化
 - [@pinia/testing](https://www.npmjs.com/package/@pinia/testing) — 测试工具
 - [@pinia/nuxt](https://nuxt.com/modules/pinia) — Nuxt 集成
-- [pinia-undo](https://www.npmjs.com/package/pinia-undo) — 撤销/重做
-- [pinia-shared-state](https://www.npmjs.com/package/pinia-shared-state) — 跨标签页同步
+- [pinia-undo](https://www.npmjs.com/package/pinia-undo) / [pinia-shared-state](https://www.npmjs.com/package/pinia-shared-state) — 撤销 / 跨标签页同步
 
 </v-click>
 
 <v-click>
 
-**实战项目参考**
-
-- VueUse 组合式函数库（与 Pinia 完美配合）
-- Nuxt 官方示例 / nuxt-shadcn-dashboard
-- Vue Mastery 项目案例
+**实战项目参考**：VueUse / Nuxt 官方示例 / Vue Mastery 项目案例
 
 </v-click>
 

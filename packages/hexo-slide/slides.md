@@ -110,22 +110,14 @@ transition: fade-out
 
 | 维度 | Hexo 8 | Hugo | Jekyll | Astro | VitePress |
 | --- | --- | --- | --- | --- | --- |
-| 语言 / 运行时 | **Node.js** | Go | Ruby | Node.js | Node.js |
-| 安装成本 | 一行 npm | 一个二进制 | gem install | npm | npm |
+| 语言 | **Node.js** | Go | Ruby | Node.js | Node.js |
 | 主打场景 | **个人博客** | 多用途 SSG | 个人博客 | 内容站 | 文档站 |
-| 模板引擎 | EJS / Pug / Nunjucks | Go Template | Liquid | Astro | Vue |
 | 构建速度 | 中（千篇 ~10s） | **极快** | 慢 | 快 | 极快 |
-| 主题生态 | **极丰富**（数十款）| 丰富 | 中 | 丰富 | 少 |
+| 主题生态 | **极丰富** | 丰富 | 中 | 丰富 | 少 |
 | 中文社区 | **极活跃** | 活跃 | 一般 | 活跃 | 活跃 |
-| 典型用户 | 个人技术博客 | 文档 / 营销站 | GitHub Pages 默认 | 内容平台 | Vue / Vite 项目 |
+| 典型用户 | 个人技术博客 | 文档 / 营销站 | GH Pages 默认 | 内容平台 | Vue 项目 |
 
 </v-click>
-
-<div v-click text-xs text-right>
-
-_Read more about_ [_Hexo Themes_](https://hexo.io/themes/)
-
-</div>
 
 <style>
 h1 {
@@ -239,15 +231,9 @@ Node 18+，三条命令完成脚手架
 **前置 + 安装**
 
 ```bash
-# Node.js 18+ 必须
-node -v
-
-# 全局安装 hexo-cli
-npm install hexo-cli -g
-
-# 初始化项目
-hexo init blog
-cd blog
+node -v                          # Node.js 18+ 必须
+npm install hexo-cli -g          # 全局安装
+hexo init blog && cd blog        # 初始化
 npm install
 ```
 
@@ -270,17 +256,14 @@ hexo clean         # 清除缓存
 
 | 完整命令 | 简写 |
 | --- | --- |
-| `hexo new` | `hexo n` |
-| `hexo server` | `hexo s` |
-| `hexo generate` | `hexo g` |
-| `hexo deploy` | `hexo d` |
+| `hexo new` / `server` | `hexo n` / `s` |
+| `hexo generate` / `deploy` | `hexo g` / `d` |
 | `hexo clean` | （无简写） |
 
 常见组合：
 
 ```bash
-hexo clean && hexo g -d
-# 清缓存 + 构建 + 部署
+hexo clean && hexo g -d    # 清缓存 + 构建 + 部署
 ```
 
 </v-click>
@@ -386,10 +369,9 @@ transition: fade-out
 
 <v-click>
 
-```yaml {1-5|7-12|14-18|20-25|27-31}
+```yaml {1-5|7-11|13-16|18-22}
 # Site —— 站点元数据
 title: 我的博客
-subtitle: 慢一点也没关系
 description: 个人技术笔记
 author: 我
 language: zh-CN
@@ -398,25 +380,18 @@ language: zh-CN
 url: https://my-blog.com
 root: /                                # 子目录部署改这里
 permalink: :year/:month/:day/:title/   # 永久链接格式
-permalink_defaults:
-pretty_urls:
-  trailing_index: true                 # /foo/index.html
-  trailing_html: true
+pretty_urls: { trailing_index: true, trailing_html: true }
 
 # Directory —— 目录约定
 source_dir: source
 public_dir: public
-tag_dir: tags
 archive_dir: archives
-category_dir: categories
 
 # Extensions —— 主题 + 部署
 theme: landscape
-
 deploy:
   type: git
   repo: git@github.com:user/user.github.io.git
-  branch: main
 ```
 
 </v-click>
@@ -563,28 +538,11 @@ YAML 头部声明 layout / title / date / tags / categories
 ---
 title: 我的第一篇博客
 date: 2026-05-18 10:00:00
-updated: 2026-05-19 12:30:00
-tags:
-  - hexo
-  - 博客
-categories:
-  - 技术
-  - SSG
-permalink: my-first-post/        # 覆盖站点 permalink 设置
-excerpt: 这是一段摘要，会出现在列表页
-description: SEO 描述
-keywords: hexo, ssg, blog
-comments: true
-published: true
+tags: [hexo, 博客]
+categories: [技术, SSG]
+permalink: my-first-post/        # 覆盖站点 permalink
 disableNunjucks: false           # 关闭 Nunjucks 解析
-lang: zh
 ---
-
-正文从这里开始……
-
-<!-- more -->
-
-`<!-- more -->` 之前是摘要，之后是正文（列表页只显示摘要）。
 ```
 
 </v-click>
@@ -609,23 +567,17 @@ h1 {
 
 <!--
 [click] Front Matter 是 Hexo 文章的「灵魂」：
+- title / date / updated：基础三件套
+- tags / categories：见下条说明
+- permalink：覆盖全站规则，单篇自定义 URL
+- excerpt：手动摘要（与 <!-- more --> 二选一）
+- description：SEO meta
+- disableNunjucks：含 Nunjucks 语法的文章设 true
 
-- title / date / updated：基础三件套，时间格式按 _config.yml 的 date_format 渲染。
-- tags / categories：见下条说明。
-- permalink：覆盖全站 permalink 规则，单篇文章自定义 URL。
-- excerpt：手动指定摘要（与 <!-- more --> 二选一）。
-- description / keywords：SEO 三剑客（主题决定是否注入到 head meta）。
-- comments / published：评论开关 + 是否发布。
-- disableNunjucks：含 Nunjucks 语法的文章设 true，避免 {% %} 被解析。
-
-<!-- more --> 是经典的摘要分隔符，跨平台兼容性最好。
-
-[click] categories 与 tags 的核心区别：
-- categories: [技术, SSG] —— 表示「技术」是父、「SSG」是子
+[click] categories 与 tags 的区别：
+- categories: [技术, SSG] —— 「技术」是父、「SSG」是子
 - tags: [hexo, 博客] —— 两个标签平等无序
-
-想给文章打「多个独立分类」要用 `categories: [[A], [B]]` 嵌套数组语法，
-否则会被理解成 A 是 B 的父级。
+多独立分类用 `categories: [[A], [B]]` 嵌套数组语法。
 -->
 
 ---
@@ -638,48 +590,16 @@ transition: fade-out
 
 <v-click>
 
-**默认行为**：列表页显示**全文**
+**默认**：列表页显示全文；两种方式截断：
 
-```md
----
-title: 我的文章
----
-
-第一段……第二段……第三段……  ← 全部出现在列表页
-```
+- 正文里 `<!-- more -->`（之后仅文章页可见）
+- front matter 写 `excerpt: 自定义摘要`（与正文无关）
 
 </v-click>
 
 <div v-click>
 
-**用 `<!-- more -->` 截断**
-
-```md
-第一段（摘要）
-
-<!-- more -->
-
-第二段、第三段……（仅文章页可见）
-```
-
-</div>
-
-<div v-click>
-
-**或用 Front Matter excerpt 字段**
-
-```yaml
----
-title: 我的文章
-excerpt: 自定义摘要，与正文内容无关
----
-```
-
-</div>
-
-<div v-click>
-
-> ⚠️ **HTML 注释里的连字符**：`<!-- more -->` 必须**完全顶格写**，前后空一行，否则可能被 Markdown 渲染器吞掉。
+> ⚠️ `<!-- more -->` 必须**顶格写**前后空一行。
 
 </div>
 
@@ -722,12 +642,12 @@ transition: fade-out
 
 <v-click>
 
-| 主题 | 风格 | 特色 | 适合 |
-| --- | --- | --- | --- |
-| **landscape** | 默认 / 简约 | 开箱即用 | 临时博客 / 学习 |
-| **NexT** | 经典 / 多 schema | 5 套配色 + 极致可定制 | 技术博客 / 老牌党 |
-| **Butterfly** | 现代 / 大图 | 颜值天花板 + 功能全 | 中文博客 / 颜值党 |
-| **Fluid** | Material Design | 大字号 / 卡片式 | 简洁极客风 |
+| 主题 | 风格 | 适合 |
+| --- | --- | --- |
+| **landscape** | 默认 / 简约 | 临时博客 / 学习 |
+| **NexT** | 5 套配色 + 极致可定制 | 技术博客 / 老牌党 |
+| **Butterfly** | 现代 / 颜值天花板 | 中文博客 / 颜值党 |
+| **Fluid** | Material Design / 大字号 | 简洁极客风 |
 
 </v-click>
 
@@ -736,24 +656,16 @@ transition: fade-out
 **安装与切换**
 
 ```bash
-# 拷贝主题到 themes/
 git clone https://github.com/next-theme/hexo-theme-next themes/next
-
-# 或用 npm 安装（新主题趋势）
-npm install hexo-theme-butterfly
-
-# _config.yml 切换
-theme: next       # 或 butterfly / fluid
-
-# 主题独立配置（推荐）
-# 在站点根目录建 _config.next.yml，与站点配置合并
+npm install hexo-theme-butterfly      # 或用 npm（新趋势）
+# _config.yml: theme: next（主题配置：站点根目录建 _config.next.yml）
 ```
 
 </div>
 
 <div v-click text-xs text-right>
 
-_Read more about_ [_Hexo Themes_](https://hexo.io/themes/) · [_NexT_](https://theme-next.org/) · [_Butterfly_](https://butterfly.js.org/) · [_Fluid_](https://hexo.fluid-dev.com/)
+[_Themes_](https://hexo.io/themes/) · [_NexT_](https://theme-next.org/) · [_Butterfly_](https://butterfly.js.org/) · [_Fluid_](https://hexo.fluid-dev.com/)
 
 </div>
 
@@ -886,8 +798,7 @@ transition: fade-out
 **开启 post_asset_folder**
 
 ```yaml
-# _config.yml
-post_asset_folder: true
+post_asset_folder: true             # _config.yml
 ```
 
 开启后，`hexo new post "Hello"` 同时生成同名目录：
@@ -907,14 +818,9 @@ source/_posts/
 **在文章中引用**
 
 ```md
-推荐 ⭐ 标签插件方式：
-
-{% asset_img cover.jpg "封面图" %}
+{% asset_img cover.jpg "封面图" %}    ← 推荐 ⭐ 标签插件
 {% asset_link report.pdf "下载报告" %}
-
-或相对路径（部分主题不支持）：
-
-![封面](cover.jpg)
+![封面](cover.jpg)                    ← 或相对路径
 ```
 
 </div>
@@ -969,21 +875,11 @@ transition: fade-out
 
 **典型场景：菜单 / 友链 / 项目展示**
 
-```text
-source/_data/
-├── menu.yml         # 导航菜单
-├── friends.yml      # 友情链接
-└── projects.json    # 项目列表
-```
-
 ```yaml
-# source/_data/menu.yml
-- name: 首页
-  url: /
-- name: 归档
-  url: /archives/
-- name: 关于
-  url: /about/
+# source/_data/menu.yml （文件名即变量名 site.data.menu）
+- { name: 首页, url: / }
+- { name: 归档, url: /archives/ }
+- { name: 关于, url: /about/ }
 ```
 
 </v-click>
@@ -994,19 +890,16 @@ source/_data/
 
 ```html
 <!-- themes/next/layout/_partials/nav.ejs -->
-<ul>
 <% for (const item of site.data.menu) { %>
   <li><a href="<%= url_for(item.url) %>"><%= item.name %></a></li>
 <% } %>
-</ul>
 ```
 
 </div>
 
 <div v-click>
 
-> 💡 **使用约定**：把「数据」从「文章」中剥离 —— 菜单 / 配置 / 表格数据放 `_data/`，
-> 主题模板按需引用 `site.data.<file_basename>`。
+> 💡 **约定**：菜单 / 配置 / 表格数据放 `_data/`，模板按需引用 `site.data.<basename>`。
 
 </div>
 
@@ -1044,40 +937,45 @@ EJS 模板用 <% %> 控制流 + <%= %> 输出，类似 JSP / ERB 语法。
 -->
 
 ---
+layout: two-cols-header
 transition: fade-out
+layoutClass: gap-x-16
 ---
 
 # 模板变量速查
 
-`site` / `page` / `config` / `theme` / `path` / `url`
+`site` / `page` / `config` / `theme` 等全局变量
+
+::left::
 
 <v-click>
 
-| 变量 | 用途 | 常用属性 |
-| --- | --- | --- |
-| `site` | 站点集合 | `site.posts` / `site.pages` / `site.categories` / `site.tags` |
-| `page` | 当前页面 | `page.title` / `page.date` / `page.content` / `page.excerpt` |
-| `config` | 站点配置 | `config.title` / `config.url` / `config.author` |
-| `theme` | 主题配置 | `theme.<任意字段>`（合并自 `_config.theme.yml`） |
-| `path` | 当前页面相对路径 | 用于生成相对链接 |
-| `url` | 当前页面完整 URL | SEO 用 |
-| `env` | 运行环境 | `env.version` / `env.args` |
+**全局变量**
+
+| 变量 | 常用属性 |
+| --- | --- |
+| `site` | `site.posts` / `categories` / `tags` |
+| `page` | `page.title` / `date` / `content` |
+| `config` | `config.title` / `url` / `author` |
+| `theme` | `theme.<任意字段>` |
+| `path` / `url` | 相对路径 / 完整 URL |
 
 </v-click>
 
-<div v-click>
+::right::
+
+<v-click>
 
 **最常用 Helpers**
 
 | 函数 | 作用 |
 | --- | --- |
-| `url_for(path)` | 给路径加 root 前缀（必用） |
-| `full_url_for(path)` | 加 url + root（绝对 URL） |
+| `url_for(path)` | 加 root 前缀（必用） |
+| `full_url_for(path)` | 绝对 URL |
 | `date(page.date, 'YYYY-MM-DD')` | 时间格式化 |
 | `partial('_partials/header')` | 加载片段模板 |
-| `list_categories()` / `list_tags()` | 分类 / 标签列表 |
 
-</div>
+</v-click>
 
 <style>
 h1 {
@@ -1125,44 +1023,25 @@ transition: fade-out
 
 <v-click>
 
-```yaml
-# _config.yml
-permalink: :year/:month/:day/:title/         # 默认
-```
-
-**常见格式对照**
+**常见格式对照**（`_config.yml` 的 `permalink` 字段）
 
 | 配置 | 示例 URL |
 | --- | --- |
-| `:year/:month/:day/:title/` | `/2026/05/18/hello/` |
-| `:year/:title.html` | `/2026/hello.html` |
+| `:year/:month/:day/:title/` | `/2026/05/18/hello/`（默认） |
 | `posts/:title/` | `/posts/hello/` |
 | `:category/:title/` | `/技术/hello/` |
-| `:id` | `/abc123` |
 
 </v-click>
 
 <div v-click>
 
-**所有可用占位符**
-
-- 时间：`:year` `:month` `:day` `:hour` `:minute` `:second` `:timestamp`
-- 内容：`:title`（slug 化）`:name`（文件名）`:post_title`（原标题）`:category`
-- 标识：`:id`（自增）`:hash`（SHA1）
+**占位符**：时间 `:year` `:month` `:day` `:hour` `:timestamp` / 内容 `:title` `:name` `:category` / 标识 `:id` `:hash`
 
 </div>
 
 <div v-click>
 
-**单篇覆盖**
-
-```yaml
-# 文章 front matter
----
-title: 重要文章
-permalink: special-post/         # 覆盖全站规则
----
-```
+**单篇覆盖**：front matter 写 `permalink: special-post/` 覆盖全站规则
 
 </div>
 
@@ -1211,31 +1090,20 @@ transition: fade-out
 
 | 分类 | 代表插件 | 作用 |
 | --- | --- | --- |
-| **部署** | `hexo-deployer-git` | git push 到 gh-pages |
-| **部署** | `hexo-deployer-rsync` | rsync 到自建服务器 |
-| **RSS** | `hexo-generator-feed` | 生成 atom.xml / rss2.xml |
-| **Sitemap** | `hexo-generator-sitemap` | sitemap.xml（SEO 必装） |
+| **部署** | `hexo-deployer-git` / `-rsync` | gh-pages / 自建服务器 |
+| **SEO** | `hexo-generator-feed` / `-sitemap` | atom.xml / sitemap |
 | **搜索** | `hexo-generator-searchdb` | 客户端搜索索引 |
-| **渲染** | `hexo-renderer-pandoc` | 用 Pandoc 替代默认 markdown 引擎 |
-| **渲染** | `hexo-renderer-pug` | Pug 模板支持 |
-| **统计** | `hexo-symbols-count-time` | 字数 / 阅读时间统计 |
-| **嵌入** | `hexo-tag-embed` | YouTube / Gist / JsFiddle 嵌入 |
-| **图片** | `hexo-img-lazyload` | 图片懒加载 |
+| **渲染** | `hexo-renderer-pandoc` / `-pug` | 替代 markdown / Pug |
+| **嵌入** | `hexo-tag-embed` | YouTube / Gist / JsFiddle |
+| **体验** | `-symbols-count-time` / `-img-lazyload` | 字数 / 懒加载 |
 
 </v-click>
 
 <div v-click>
 
 ```bash
-# 一行装 RSS + Sitemap，两个 SEO 必装
-npm install hexo-generator-feed hexo-generator-sitemap --save
+npm install hexo-generator-feed hexo-generator-sitemap --save  # SEO 双开
 ```
-
-</div>
-
-<div v-click text-xs text-right>
-
-_Read more about_ [_Plugins Directory_](https://hexo.io/plugins/)
 
 </div>
 
@@ -1317,8 +1185,8 @@ hexo clean && hexo deploy --generate
 <div v-click>
 
 > 💡 **用户站 vs 项目站**：
-> - `user.github.io` 仓库 → 部署到 `main` → URL `https://user.github.io`
-> - `blog` 仓库 → 部署到 `gh-pages` → URL `https://user.github.io/blog/`（要改 `root: /blog/`）
+> `user.github.io` 仓库 → `main` → `https://user.github.io`；
+> `blog` 仓库 → `gh-pages` → `https://user.github.io/blog/`（要改 `root: /blog/`）
 
 </div>
 
@@ -1372,29 +1240,19 @@ CI 自动构建，源码与产物分离
 
 ```yaml
 name: Pages
-on:
-  push:
-    branches: [main]
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+on: { push: { branches: [main] } }
+permissions: { contents: read, pages: write, id-token: write }
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive    # 主题在 submodule 里要这行
+        with: { submodules: recursive }  # 主题在 submodule 时必加
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-      - run: npm ci
-      - run: npx hexo generate
+        with: { node-version: 20, cache: npm }
+      - run: npm ci && npx hexo generate
       - uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
+        with: { path: public }
       - uses: actions/deploy-pages@v4
 ```
 
@@ -1466,11 +1324,10 @@ transition: fade-out
 
 **Vercel / Netlify（零配置）**
 
-直接在 Dashboard 导入 GitHub 仓库 —— Build Command 和 Output Directory 自动识别：
+Dashboard 导入 GitHub 仓库即可，自动识别 Build / Output：
 
 ```text
-Build command: npx hexo generate
-Output directory: public
+Build command: npx hexo generate          Output directory: public
 ```
 
 每个 PR 自动生成 Preview 部署。
@@ -1481,37 +1338,19 @@ Output directory: public
 
 **自建服务器：rsync**
 
-```bash
-npm install hexo-deployer-rsync --save
-```
-
 ```yaml
-deploy:
-  type: rsync
-  host: my-server.com
-  user: deploy
-  root: /var/www/blog/
-  port: 22
-  delete: true
-  verbose: true
-  ignore_errors: false
-```
-
-```bash
-hexo clean && hexo d -g       # 一键推送
+# _config.yml （先 npm i hexo-deployer-rsync）
+deploy: { type: rsync, host: my-server.com, user: deploy, root: /var/www/blog/, delete: true }
 ```
 
 </div>
 
 <div v-click>
 
-**Nginx 配置**
+**Nginx 兜底**
 
 ```nginx
-location / {
-  root /var/www/blog;
-  try_files $uri $uri/index.html /404.html;
-}
+location / { root /var/www/blog; try_files $uri $uri/index.html /404.html; }
 ```
 
 </div>
@@ -1562,20 +1401,9 @@ transition: fade-out
 **v7.0.0+ 简化配置**
 
 ```yaml
-# _config.yml
-syntax_highlighter: highlight.js    # 或 prismjs，或留空禁用
-
-highlight:                          # highlight.js 配置
-  line_number: true
-  auto_detect: false
-  tab_replace: '  '
-  wrap: true
-  hljs: false
-
-prismjs:                            # prismjs 配置
-  preprocess: true                  # true = 构建期渲染，false = 浏览器渲染
-  line_number: true
-  tab_replace: ''
+syntax_highlighter: highlight.js    # 或 prismjs，留空禁用
+highlight: { line_number: true, auto_detect: false, hljs: false }
+prismjs:   { preprocess: true,   line_number: true }  # true=构建期 false=浏览器
 ```
 
 </v-click>
@@ -1587,17 +1415,14 @@ prismjs:                            # prismjs 配置
 | 维度 | highlight.js | prismjs |
 | --- | --- | --- |
 | 默认 | ✅ | ❌ |
-| 体积 | 较大（自动检测） | 极小（按需加载） |
-| 服务端渲染 | ✅ 总是 | preprocess: true 时 |
-| 浏览器渲染 | ❌ | preprocess: false 时 |
-| 插件生态 | 中 | 丰富（line-number / copy / etc.） |
-| 主题样式 | hljs CSS | prism CSS |
+| 体积 | 较大（自动检测） | 极小（按需） |
+| 插件生态 | 中 | 丰富（copy / toolbar） |
 
 </div>
 
 <div v-click>
 
-> 💡 **怎么选**：默认就用 highlight.js（出厂配置，主题适配最好）；想要 line-number 插件 + Copy 按钮 ⇒ prismjs。
+> 💡 默认 highlight.js；想要 Copy 按钮 ⇒ prismjs。
 
 </div>
 
@@ -1647,12 +1472,9 @@ Hexo 7（2024）+ Hexo 8（2025）合集
 
 **Hexo 7.0.0（2024）破坏性变更**
 
-- ❌ 移除内置嵌入标签：`{% jsfiddle %}` `{% gist %}` `{% youtube %}` `{% vimeo %}`
-  - **迁移**：`npm install hexo-tag-embed` 找回
-- ❌ 旧版 `highlight.enable` / `prismjs.enable` 弃用
-  - **迁移**：改用 `syntax_highlighter: highlight.js | prismjs`
-- ✅ 新增 `url_for` / `full_url_for` 标签插件
-- ✅ Node.js 14+（之后 7.x 又升到 16+）
+- ❌ 移除内置嵌入标签 `{% jsfiddle %}` / `{% gist %}` / `{% youtube %}` / `{% vimeo %}` → `npm i hexo-tag-embed`
+- ❌ 旧版 `highlight.enable` / `prismjs.enable` 弃用 → 改用 `syntax_highlighter`
+- ✅ 新增 `url_for` / `full_url_for` 标签插件；Node 14+
 
 </v-click>
 
@@ -1722,28 +1544,17 @@ transition: fade-out
 
 | 诉求 | 首选 | 理由 |
 | --- | --- | --- |
-| 个人技术博客 + 中文社区 | **Hexo** | 主题美 / 教程多 / Markdown 友好 |
-| 极速构建 + 多用途 | **Hugo** | Go 单二进制 / 千篇 1 秒构建 |
+| 个人博客 + 中文社区 | **Hexo** | 主题美 / 教程多 / Markdown 友好 |
+| 极速构建 + 多用途 | **Hugo** | Go 单二进制 / 千篇 1 秒 |
 | GitHub Pages 默认 | **Jekyll** | 内置支持 / 不用 CI |
-| Vue 文档站 / 项目文档 | **VitePress** | Vite 驱动 / Vue 生态 |
-| 多版本文档 + 博客 + i18n | **Docusaurus** | React 圈一等公民 |
+| Vue 文档站 | **VitePress** | Vite 驱动 / Vue 生态 |
+| 多版本文档 + i18n | **Docusaurus** | React 圈一等公民 |
 
 </v-click>
 
 <div v-click>
 
-**额外维度**
-
-- **Hexo**：Node.js / 个人博客之王 / 主题颜值天花板 / 构建中等
-- **Hugo**：Go / 多用途 SSG / 速度最快 / 学习曲线陡
-- **Jekyll**：Ruby / GitHub Pages 原生 / 老但稳 / 速度慢
-- **VitePress**：Node.js / Vue 项目首选 / 偏文档非博客
-
-</div>
-
-<div v-click>
-
-> 💡 **决策路径**：先看「写什么」—— 个人博客 ⇒ Hexo / Hugo；项目文档 ⇒ VitePress / Docusaurus；介于之间 ⇒ Astro。
+> 💡 个人博客 ⇒ Hexo / Hugo；项目文档 ⇒ VitePress / Docusaurus；介于之间 ⇒ Astro。
 
 </div>
 
@@ -1791,18 +1602,14 @@ transition: fade-out
 
 <v-click>
 
-| 问题 | 原因 | 修复 |
-| --- | --- | --- |
-| YAML 解析报错 | 标题含 `:` 未引用 | 整行用双引号包裹 |
-| 文章 <span v-pre>`{% raw %}{{ var }}{% endraw %}`</span> 字面被解析 | Nunjucks 语法冲突 | front matter 加 `disableNunjucks: true` |
-| 子目录部署样式全丢 | `root` 没改 | `_config.yml` 设 `root: /sub/` |
-| `hexo g` 后内容没更新 | 缓存残留 | `hexo clean` 后再 `hexo g` |
-| 浏览器 404 但本地正常 | URL 大小写不一致 | 检查 permalink / 文件名 |
-| 主题改了无反应 | 浏览器缓存 | Ctrl+F5 或换无痕窗口 |
-| EMFILE 文件数过多 | 系统句柄限制 | `ulimit -n 10000` |
-| Memory 不足 | Node 默认堆小 | `node --max_old_space_size=8192` |
-| Git 部署失败 | 没装 deployer 或 SSH key | `npm i hexo-deployer-git` + 配 key |
-| WSL 文件监听失效 | WSL 限制 | 用 `hexo g` 后跑 nginx 替代 server |
+| 问题 | 修复 |
+| --- | --- |
+| YAML 解析报错（标题含 `:`） | 整行用双引号包裹 |
+| <span v-pre>`{{ var }}`</span> 字面被解析 | front matter 加 `disableNunjucks: true` |
+| 子目录部署样式丢 | `_config.yml` 设 `root: /sub/` |
+| `hexo g` 内容没更新 | `hexo clean` 后再 `hexo g` |
+| EMFILE / Memory 不足 | `ulimit -n 10000` / `node --max_old_space_size=8192` |
+| WSL 文件监听失效 | 跑 nginx 替代 server |
 
 </v-click>
 
@@ -1920,10 +1727,7 @@ transition: fade-out
 
 **入门 → 进阶**
 
-- [Setup](https://hexo.io/docs/setup) —— 官方安装与初始化
-- [Writing](https://hexo.io/docs/writing) —— `hexo new` 全流程
-- [Configuration](https://hexo.io/docs/configuration) —— `_config.yml` 字段全表
-- [Front-matter](https://hexo.io/docs/front-matter) —— 文章元数据
+- [Setup](https://hexo.io/docs/setup) / [Writing](https://hexo.io/docs/writing) / [Configuration](https://hexo.io/docs/configuration) / [Front-matter](https://hexo.io/docs/front-matter)
 
 </v-click>
 
@@ -1931,10 +1735,7 @@ transition: fade-out
 
 **专题深入**
 
-- [Tag Plugins](https://hexo.io/docs/tag-plugins) —— Nunjucks 标签速查
-- [Permalinks](https://hexo.io/docs/permalinks) —— URL 结构定制
-- [Themes](https://hexo.io/docs/themes) —— 主题开发基础
-- [Plugins](https://hexo.io/docs/plugins) —— 插件 API
+- [Tag Plugins](https://hexo.io/docs/tag-plugins) / [Permalinks](https://hexo.io/docs/permalinks) / [Themes](https://hexo.io/docs/themes) / [Plugins](https://hexo.io/docs/plugins)
 
 </div>
 
@@ -1942,9 +1743,8 @@ transition: fade-out
 
 **社区资源**
 
-- [Themes Gallery](https://hexo.io/themes/) —— 300+ 主题预览
-- [Plugins Directory](https://hexo.io/plugins/) —— 官方插件目录
-- [NexT 主题文档](https://theme-next.org/) · [Butterfly 文档](https://butterfly.js.org/)
+- [Themes Gallery](https://hexo.io/themes/)（300+ 预览）· [Plugins Directory](https://hexo.io/plugins/)
+- [NexT 文档](https://theme-next.org/) · [Butterfly 文档](https://butterfly.js.org/)
 
 </div>
 

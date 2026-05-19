@@ -103,14 +103,12 @@ level: 2
 - 复杂度大幅下降，无 JSON Schema / 类型同步 / SPA 路由 / 客户端 store
 - Bundle 体积极小（~14 KB），无构建步骤、无虚拟 DOM
 - HATEOAS 工程化，服务端返回的 HTML 自带可用动作
-- 与服务端框架天然契合，复用后端原生 partials / views
 - 扩展生态实用，覆盖错误分发 / 实时 / 预加载 / DOM 合并
 
 **缺点**
 - 不适合「高度本地状态」（图形编辑器、IDE、3D、协同白板）
 - 离线 / PWA 弱，每次交互依赖服务端往返
 - 前端工具链断层，无 Vite/HMR 体验、无 TypeScript 强类型
-- 测试范式不同，主体转向 E2E + 后端集成测试
 - 后端必须能返回 HTML，纯 JSON 后端落地价值急剧下降
 - HATEOAS 哲学有争议，部分工程师认为「回到 90 年代」
 
@@ -144,30 +142,22 @@ transition: slide-up
 
 # 心智模型：HTMX 是「hypermedia 驱动」不是「SPA」
 
-**根本差异：前端不持有应用状态——服务端永远是「当前真相」，前端只是渲染窗口**
+**根本差异：前端不持有应用状态——服务端永远是「当前真相」**
 
 ```html
-<button hx-post="/incr"
-        hx-target="#count"
-        hx-swap="innerHTML">
-  +1
-</button>
+<button hx-post="/incr" hx-target="#count" hx-swap="innerHTML">+1</button>
 <span id="count">0</span>
 ```
 
-服务端响应：`<span>1</span>`——HTMX 把它替换到 `#count`。**整个流程无一行 JS**。
+服务端响应 `<span>1</span>` 替换到 `#count`——**全程无 JS**。
 
 <v-click>
-
-对比 SPA：
 
 | 维度 | HTMX | SPA |
 |---|---|---|
 | 数据载体 | HTML 片段 | JSON |
 | 应用状态 | 服务端 + URL | 客户端 store |
-| 类型同步 | 不需要 | OpenAPI / tRPC / GraphQL |
 | 体积 | ~14 KB | 50-200 KB |
-| 学习曲线 | 平缓 | 陡 |
 
 </v-click>
 
@@ -296,10 +286,8 @@ transition: slide-up
   <input name="email"><button>Submit</button>
 </form>
 
-<!-- PUT：整体更新 -->
+<!-- PUT 整体更新 / PATCH 部分更新 -->
 <button hx-put="/users/1">Replace</button>
-
-<!-- PATCH：部分更新 -->
 <button hx-patch="/users/1">Update name</button>
 
 <!-- DELETE：删除 -->
@@ -308,11 +296,7 @@ transition: slide-up
 
 <v-click>
 
-默认触发事件：
-
-- `<form>` → submit
-- `<input>` / `<textarea>` / `<select>` → change
-- 其他元素 → click
+默认触发事件：`<form>` → submit；`<input>/<textarea>/<select>` → change；其他 → click
 
 </v-click>
 
@@ -358,21 +342,16 @@ transition: slide-up
 |---|---|
 | `innerHTML`（默认） | 替换目标内部 |
 | `outerHTML` | 替换整个目标元素 |
-| `textContent` | 作为纯文本插入 |
-| `beforebegin` | 插入到目标前面 |
-| `afterbegin` | 插入到目标内最前 |
 | `beforeend` | 插入到目标内最后（常见追加） |
-| `afterend` | 插入到目标后面 |
 | `delete` | 删除目标（忽略响应） |
 | `none` | 不替换（OOB 仍生效） |
+
+其余：`textContent` / `beforebegin` / `afterbegin` / `afterend`
 
 <v-click>
 
 ```html
-<!-- 列表追加 -->
 <form hx-post="/items" hx-target="#list" hx-swap="beforeend">...</form>
-
-<!-- 删除自身 -->
 <button hx-delete="/items/1" hx-target="closest li" hx-swap="delete">×</button>
 ```
 
@@ -656,25 +635,18 @@ transition: slide-up
 
 | 扩展 | 用途 |
 |---|---|
-| `head-support` | 合并响应 `<head>` 内容 |
-| `htmx-1-compat` | HTMX 1.x 兼容 |
 | `idiomorph` | 智能 DOM 合并（保留状态） |
 | `preload` | 悬停 prefetch |
 | `response-targets` | 按状态码分发 target |
-| `sse` | Server-Sent Events |
-| `ws` | WebSocket |
+| `sse` / `ws` | Server-Sent Events / WebSocket |
+| `head-support` | 合并响应 `<head>` 内容 |
+| `htmx-1-compat` | HTMX 1.x 兼容 |
 
 <v-click>
 
 ```html
-<!-- 在 body 上启用 -->
-<body hx-ext="response-targets, preload, sse, ws, morph">
-  ...
-</body>
-
-<!-- 必须单独引入 script -->
+<body hx-ext="response-targets, preload, sse, ws, morph">...</body>
 <script src=".../htmx-ext-response-targets.js"></script>
-<script src=".../htmx-ext-sse.js"></script>
 ```
 
 </v-click>
@@ -691,12 +663,10 @@ transition: slide-up
 | `class-tools` | 定时增删 class |
 | `json-enc` | 发送 JSON 而非 form-urlencoded |
 | `multi-swap` | 一次响应交换多个元素 |
-| `alpine-morph` | 用 Alpine.morph 算法 swap |
 | `client-side-templates` | JSON 响应客户端模板 |
-| `remove-me` | 定时移除元素 |
-| `path-deps` | 声明 endpoint 间依赖 |
-| `signalr` | SignalR 实时通信 |
 | `no-cache` | 禁用客户端缓存 |
+
+其余：`alpine-morph` / `remove-me` / `signalr` / `path-deps` 等
 
 <v-click>
 
@@ -773,17 +743,7 @@ async def stream():
 
 <v-click>
 
-**精细控制**：
-
-```html
-<!-- 多个事件 -->
-<div sse-connect="/stream" sse-swap="msg,alert,heartbeat"></div>
-
-<!-- SSE 触发 HX-Trigger 风格事件 -->
-<div sse-connect="/stream"
-     hx-trigger="sse:refresh"
-     hx-get="/refresh"></div>
-```
+**精细控制**：多事件 `sse-swap="msg,alert"`；触发 HX 风格事件 `hx-trigger="sse:refresh"`
 
 </v-click>
 
@@ -872,10 +832,7 @@ transition: slide-up
 
 <v-click>
 
-**怎么选**：
-
-- **Hotwire**：Rails 全家桶、需要 Turbo Streams 服务端推送
-- **HTMX**：非 Rails 后端（Django / Laravel / FastAPI / Express）、希望框架无关
+**怎么选**：Rails 全家桶选 Hotwire；非 Rails 后端 / 框架无关选 HTMX
 
 </v-click>
 
@@ -896,10 +853,7 @@ transition: slide-up
 
 <v-click>
 
-**怎么选**：
-
-- **LiveView**：实时性极高、单页停留时间长、可接受 stateful 后端
-- **HTMX**：常规 CRUD + 局部交互、保持 REST stateless
+**怎么选**：实时性极高 / 长会话选 LiveView；常规 CRUD / REST 选 HTMX
 
 </v-click>
 
@@ -944,20 +898,14 @@ transition: slide-up
 ```html
 <script src="https://unpkg.com/idiomorph@0.7.4/dist/idiomorph-ext.min.js"></script>
 <body hx-ext="morph">
-  <button hx-get="/list"
-          hx-target="#list"
-          hx-swap="morph:innerHTML">Refresh</button>
+  <button hx-get="/list" hx-target="#list" hx-swap="morph:innerHTML">Refresh</button>
   <ul id="list">...</ul>
 </body>
 ```
 
 <v-click>
 
-支持的 swap 值：
-
-- `morph` —— 默认 outerHTML 风格
-- `morph:innerHTML`
-- `morph:outerHTML`
+支持的 swap 值：`morph` / `morph:innerHTML` / `morph:outerHTML`
 
 **vs morphdom**：
 
@@ -1267,26 +1215,16 @@ transition: slide-up
 | 场景 | HTMX | SPA |
 |---|---|---|
 | 用户信息 | 服务端 + 当前页 HTML | 客户端 store |
-| 表单输入中 | DOM（form value） | 客户端 store |
 | 列表筛选条件 | URL query string | 客户端 store |
 | 错误信息 | HTML 错误段 | store + Toast |
-| 加载状态 | `htmx-request` class | store + Spinner |
 | 路由切换 | URL + 服务端响应 | client router |
 | 类型同步 | 不需要 | OpenAPI / tRPC |
 
 <v-click>
 
-**HTMX 数据流**：
+**HTMX**：用户操作 → HTML 属性触发 → HTTP → 服务端 → HTML 片段 → DOM 替换
 
-```
-用户操作 → HTML 属性触发 → HTTP 请求 → 服务端处理 → 返回 HTML 片段 → DOM 替换
-```
-
-**SPA 数据流**：
-
-```
-用户操作 → 事件 handler → action → reducer/store → 重新渲染 → DOM diff/patch
-```
+**SPA**：用户操作 → handler → action → store → 重新渲染 → DOM diff
 
 </v-click>
 
@@ -1339,13 +1277,7 @@ def todo_count(request):
 <button hx-get="/page" hx-select="#content" hx-target="#main">Click</button>
 ```
 
-**4. 客户端 history 缓存**
-
-默认 10 页 sessionStorage 缓存，按返回不发请求（`htmx.config.historyCacheSize` 调整）
-
-**5. HTTP/2 多路复用**
-
-HTMX 应用通常发大量小请求——必须 HTTP/2 或 HTTP/3，否则 HOL 阻塞
+**4. 客户端缓存 + HTTP/2** —— 默认 10 页 sessionStorage；大量小请求必须开 HTTP/2 防 HOL 阻塞
 
 </v-clicks>
 
@@ -1365,11 +1297,6 @@ describe('Todo HTMX flow', () => {
     cy.get('input[name="title"]').type('Buy milk')
     cy.get('button[type="submit"]').click()
     cy.get('#list').should('contain.text', 'Buy milk')
-  })
-
-  it('toggles a todo', () => {
-    cy.get('#todo-1 input[type="checkbox"]').click()
-    cy.get('#todo-1').should('have.class', 'done')
   })
 })
 ```

@@ -118,18 +118,13 @@ transition: fade-out
 
 <v-click>
 
-| 维度          | PrimeVue            | Element Plus      | Vuetify 3       | Naive UI         | Ant Design Vue   |
-| ------------- | ------------------- | ----------------- | --------------- | ---------------- | ---------------- |
-| 框架绑定      | **Vue 3**           | Vue 3             | Vue 3           | Vue 3            | Vue 3            |
-| 组件数量      | **100+**            | 60+               | 80+             | 90+              | 60+              |
-| 主题预设      | **4 个内置**        | 1（中后台）       | 1（Material）   | 1（默认 + 暗）   | 1（Ant Design）  |
-| 设计语言      | **多 Preset 切换**  | 中后台通用        | Material 3      | 现代简约         | Ant Design       |
-| 样式方案      | **CSS 变量**        | SCSS + CSS vars   | SCSS + Theme    | CSS-in-JS        | LESS + Token     |
-| 深度定制      | **pt + Unstyled**   | 自定义主题        | SCSS 变量       | themeOverrides   | LESS 变量        |
-| Tailwind 集成 | **官方插件**        | 社区              | 社区            | 社区             | 社区             |
-| 主导团队      | **PrimeTek（土耳其）** | 饿了么          | 社区 / Vuetify  | TUSEN AI         | 蚂蚁集团         |
-| 国外人气      | **★★★★★**           | ★★★               | ★★★★            | ★★★★             | ★★★              |
-| 中文生态      | ★★★                 | **★★★★★**         | ★★★             | ★★★★             | ★★★★             |
+| 维度            | PrimeVue            | Element Plus      | Vuetify 3       | Naive UI       | Ant Design Vue |
+| --------------- | ------------------- | ----------------- | --------------- | -------------- | -------------- |
+| 组件数量        | **100+**            | 60+               | 80+             | 90+            | 60+            |
+| 主题预设        | **4 个内置**        | 1                 | 1（Material）   | 默认 + 暗      | 1（Ant）       |
+| 样式方案        | **CSS 变量**        | SCSS + CSS vars   | SCSS + Theme    | CSS-in-JS      | LESS + Token   |
+| 深度定制        | **pt + Unstyled**   | 自定义主题        | SCSS 变量       | themeOverrides | LESS 变量      |
+| 国外 / 中文人气 | ★★★★★ / ★★★        | ★★★ / ★★★★★      | ★★★★ / ★★★     | ★★★★ / ★★★★   | ★★★ / ★★★★    |
 
 </v-click>
 
@@ -197,15 +192,12 @@ transition: fade-out
 
 | 时间       | 关键事件                                                       |
 | ---------- | -------------------------------------------------------------- |
-| 2008       | PrimeTek 成立，发布 PrimeFaces（JSF 组件库）                   |
-| 2014       | PrimeUI 发布（jQuery 时代）                                    |
-| 2016       | PrimeNG 发布（Angular 版）                                     |
-| 2017       | PrimeReact 发布（React 版）                                    |
+| 2008       | PrimeTek 成立，发布 PrimeFaces（JSF）                          |
+| 2014-17    | PrimeUI / PrimeNG / PrimeReact 陆续发布                        |
 | 2019       | **PrimeVue 立项**（Vue 2 时代）                                |
 | 2021       | PrimeVue 3.0，全面适配 Vue 3 Composition API                   |
-| 2024       | **PrimeVue 4.0 重构**：脱离 SASS、CSS 变量、4 个 Preset、pt API |
-| 2025       | Volt UI 发布（基于 PrimeVue Unstyled + Tailwind v4）           |
-| 2025-26    | 当前主线 v4.5+，活跃迭代，14K+ GitHub star                     |
+| 2024       | **PrimeVue 4.0 重构**：CSS 变量、4 个 Preset、pt API           |
+| 2025-26    | Volt UI 发布；当前主线 v4.5+，14K+ GitHub star                 |
 
 </v-click>
 
@@ -383,20 +375,13 @@ layoutClass: gap-x-8
 
 ```bash
 pnpm add primevue @primeuix/themes
-# 或
-npm install primevue @primeuix/themes
+pnpm add primeicons   # 图标包（可选）
 ```
 
-**图标包（可选）**
-
-```bash
-pnpm add primeicons
-```
-
-| 版本   | Vue 兼容  | 状态                 |
-| ------ | --------- | -------------------- |
-| v4.x   | Vue 3.4+  | **当前主线**         |
-| v3.x   | Vue 3.0+  | 维护中               |
+| 版本 | Vue 兼容 | 状态         |
+| ---- | -------- | ------------ |
+| v4.x | Vue 3.4+ | **当前主线** |
+| v3.x | Vue 3.0+ | 维护中       |
 
 </v-click>
 
@@ -407,13 +392,9 @@ pnpm add primeicons
 **入口注册（main.ts）**
 
 ```ts
-import { createApp } from "vue";
 import PrimeVue from "primevue/config";
 import Aura from "@primeuix/themes/aura";
 import "primeicons/primeicons.css";
-import App from "./App.vue";
-
-const app = createApp(App);
 
 app.use(PrimeVue, {
   theme: {
@@ -498,12 +479,9 @@ Aura / Material / Lara / Nora 切换设计语言只改一行
 
 ```ts
 // 切换 preset = 改一行 import
-import Aura from "@primeuix/themes/aura";
-import Material from "@primeuix/themes/material";
-import Lara from "@primeuix/themes/lara";
-import Nora from "@primeuix/themes/nora";
+import Aura from "@primeuix/themes/aura";   // 或 material / lara / nora
 
-app.use(PrimeVue, { theme: { preset: Nora } });
+app.use(PrimeVue, { theme: { preset: Aura } });
 ```
 
 </v-click>
@@ -582,26 +560,9 @@ transition: fade-out
 <v-click>
 
 ```vue
-<script setup lang="ts">
-import { ref } from "vue";
-import Button from "primevue/button";
-
-const loading = ref(false);
-
-async function handleSubmit() {
-  loading.value = true;
-  try {
-    await fetch("/api/submit", { method: "POST" });
-  } finally {
-    loading.value = false;
-  }
-}
-</script>
-
 <template>
-  <Button label="提交订单" :loading="loading" @click="handleSubmit" />
+  <Button label="提交" :loading="loading" @click="onSubmit" />
   <Button label="成功" severity="success" />
-  <Button label="警告" severity="warn" />
   <Button label="危险" severity="danger" outlined />
   <Button icon="pi pi-plus" rounded />
 </template>
@@ -611,13 +572,12 @@ async function handleSubmit() {
 
 <v-click>
 
-| Prop              | 取值                                                                  | 说明           |
-| ----------------- | --------------------------------------------------------------------- | -------------- |
-| `severity`        | primary / secondary / success / info / warn / help / danger / contrast | 颜色语义       |
-| `variant`         | outlined / text / link                                                | 变体（替代 outlined / text prop） |
-| `size`            | small / large（默认中等）                                             | 尺寸           |
-| `raised` `rounded` `text` `outlined` `plain` | boolean                                              | 形态变体       |
-| `loading` `disabled` | boolean                                                            | 状态           |
+| Prop                                 | 取值                                                                  |
+| ------------------------------------ | --------------------------------------------------------------------- |
+| `severity`                           | primary / secondary / success / info / warn / help / danger / contrast |
+| `variant`                            | outlined / text / link                                                |
+| `size`                               | small / large（默认中等）                                             |
+| `raised` `rounded` `text` `outlined` | boolean（形态变体）+ `loading` / `disabled`                           |
 
 </v-click>
 
@@ -769,19 +729,14 @@ transition: fade-out
 
 <v-click>
 
-| 分组             | 代表组件                                                              |
-| ---------------- | --------------------------------------------------------------------- |
-| **Button**       | Button / ButtonGroup / SpeedDial                                      |
-| **Form**         | InputText / Textarea / Password / Checkbox / Select / DatePicker / FileUpload |
-| **Data**         | DataTable / DataView / Tree / TreeTable / Timeline / OrderList / PickList |
-| **Panel**        | Panel / Accordion / Card / Divider / Fieldset / Splitter / Tabs / Stepper |
-| **Overlay**      | Dialog / Drawer / Popover / ConfirmDialog / ConfirmPopup / Tooltip   |
-| **File**         | FileUpload                                                            |
-| **Menu**         | Menu / Menubar / TieredMenu / ContextMenu / Breadcrumb / Steps / Dock |
-| **Chart**        | Chart（基于 Chart.js）                                                |
-| **Messages**     | Toast / Message / InlineMessage                                       |
-| **Media**        | Carousel / Galleria / Image                                           |
-| **Misc**         | Avatar / Badge / Chip / Tag / ScrollPanel / Skeleton / Terminal       |
+| 分组                     | 代表组件                                                              |
+| ------------------------ | --------------------------------------------------------------------- |
+| **Form**                 | InputText / Select / DatePicker / Checkbox / FileUpload / InputOtp 等 |
+| **Data**                 | DataTable / DataView / Tree / TreeTable / Timeline / PickList         |
+| **Panel**                | Panel / Accordion / Card / Splitter / Tabs / Stepper                  |
+| **Overlay**              | Dialog / Drawer / Popover / ConfirmDialog / Tooltip                   |
+| **Menu**                 | Menubar / ContextMenu / Breadcrumb / Steps / Dock                     |
+| **Messages / Media / Misc** | Toast / Message / Carousel / Galleria / Chart / Avatar / Badge     |
 
 </v-click>
 
@@ -879,28 +834,18 @@ transition: fade-out
 
 ```vue
 <script setup lang="ts">
-import { ref } from "vue";
-import InputText from "primevue/inputtext";
-import Select from "primevue/select";
-import Textarea from "primevue/textarea";
-
 const name = ref("");
 const city = ref(null);
-const cities = ref([
-  { name: "北京", code: "BJ" },
-  { name: "上海", code: "SH" },
-  { name: "广州", code: "GZ" },
-]);
+const cities = ref([{ name: "北京", code: "BJ" }, { name: "上海", code: "SH" }]);
 </script>
 
 <template>
   <InputText v-model="name" placeholder="请输入姓名" />
-  <InputText v-model="name" size="small" />
   <InputText v-model="name" size="large" variant="filled" :invalid="!name" />
 
   <Select v-model="city" :options="cities" optionLabel="name" placeholder="选择城市" />
 
-  <Textarea v-model="description" rows="5" cols="30" autoResize />
+  <Textarea v-model="description" rows="5" autoResize />
 </template>
 ```
 
@@ -976,29 +921,13 @@ transition: fade-out
 <v-click>
 
 ```vue
-<script setup lang="ts">
-import DatePicker from "primevue/datepicker";
-import FileUpload from "primevue/fileupload";
-import InputOtp from "primevue/inputotp";
-
-const date = ref<Date | null>(null);
-const dateRange = ref<Date[] | null>(null);
-const otp = ref("");
-</script>
-
 <template>
   <DatePicker v-model="date" showTime hourFormat="24" />
   <DatePicker v-model="dateRange" selectionMode="range" :numberOfMonths="2" />
   <DatePicker v-model="date" view="month" dateFormat="mm/yy" />
 
-  <FileUpload
-    name="files[]"
-    url="/api/upload"
-    :multiple="true"
-    accept="image/*"
-    :maxFileSize="1000000"
-    @upload="onUpload"
-  />
+  <FileUpload name="files[]" url="/api/upload" :multiple="true"
+    accept="image/*" :maxFileSize="1000000" @upload="onUpload" />
 
   <InputOtp v-model="otp" :length="6" />
 </template>
@@ -1087,41 +1016,26 @@ Zod / Yup / Valibot 三大校验库官方集成
 
 <v-click>
 
-```bash
-pnpm add @primevue/forms
+```ts
+import { Form } from "@primevue/forms";
+import { zodResolver } from "@primevue/forms/resolvers/zod";
+
+const schema = z.object({
+  username: z.string().min(3, "至少 3 个字符"),
+  email: z.string().email("邮箱格式错误"),
+});
+const resolver = zodResolver(schema);
+const initialValues = { username: "", email: "" };
 ```
 
 ```vue
-<script setup lang="ts">
-import { Form } from "@primevue/forms";
-import { zodResolver } from "@primevue/forms/resolvers/zod";
-import { z } from "zod";
-
-const schema = z.object({
-  username: z.string().min(3, "用户名至少 3 个字符"),
-  email: z.string().email("邮箱格式错误"),
-  age: z.number().min(18, "需要年满 18 岁"),
-});
-
-const resolver = zodResolver(schema);
-const initialValues = { username: "", email: "", age: 0 };
-
-async function onFormSubmit({ valid, values, errors }) {
-  if (valid) {
-    await api.createUser(values);
-  }
-}
-</script>
-
-<template>
-  <Form v-slot="$form" :initialValues :resolver @submit="onFormSubmit">
-    <InputText name="username" placeholder="用户名" />
-    <Message v-if="$form.username?.invalid" severity="error">
-      {{ $form.username.error?.message }}
-    </Message>
-    <Button type="submit" label="提交" />
-  </Form>
-</template>
+<Form v-slot="$form" :initialValues :resolver @submit="onSubmit">
+  <InputText name="username" placeholder="用户名" />
+  <Message v-if="$form.username?.invalid" severity="error">
+    {{ $form.username.error?.message }}
+  </Message>
+  <Button type="submit" label="提交" />
+</Form>
 ```
 
 </v-click>
@@ -1193,47 +1107,28 @@ transition: fade-out
 <v-click>
 
 ```vue
-<script setup lang="ts">
-import { ref } from "vue";
-import DataTable from "primevue/datatable";
-import Column from "primevue/column";
-
-interface Product {
-  id: number;
-  code: string;
-  name: string;
-  category: string;
-  quantity: number;
-}
-
-const products = ref<Product[]>([
-  { id: 1, code: "P001", name: "iPhone 15", category: "手机", quantity: 100 },
-  { id: 2, code: "P002", name: "MacBook Pro", category: "电脑", quantity: 50 },
-]);
-
-const selectedProducts = ref<Product[]>([]);
-</script>
-
 <template>
   <DataTable
-    v-model:selection="selectedProducts"
-    :value="products"
-    dataKey="id"
-    selectionMode="multiple"
-    tableStyle="min-width: 50rem"
-    stripedRows
-    showGridlines
-    paginator
-    :rows="10"
+    v-model:selection="selected" :value="products" dataKey="id"
+    selectionMode="multiple" paginator :rows="10"
+    stripedRows showGridlines
   >
     <Column selectionMode="multiple" headerStyle="width: 3rem" />
     <Column field="code" header="编号" sortable />
     <Column field="name" header="名称" sortable />
-    <Column field="category" header="分类" sortable />
     <Column field="quantity" header="数量" sortable />
   </DataTable>
 </template>
 ```
+
+</v-click>
+
+<v-click text-xs class="mt-2">
+
+- 模板式声明（与 Element Plus 风格类似，Naive UI 是对象式 columns）
+- `dataKey` / `selectionMode` / `v-model:selection` 三件套实现多选
+- `paginator + rows` 内置分页，无需外接 Paginator
+- 高级：行编辑 / 行展开 / 列冻结 / 行重排全都支持
 
 </v-click>
 
@@ -1298,15 +1193,11 @@ transition: fade-out
 
 <v-click>
 
-**虚拟滚动（前端 10W+ 行）**
+**虚拟滚动（前端 10W+ 行）** —— 每行高度固定，DOM 只渲染可视区
 
 ```vue
-<DataTable
-  :value="hugeData"
-  :virtualScrollerOptions="{ itemSize: 46 }"
-  scrollHeight="400px"
-  tableStyle="min-width: 50rem"
->
+<DataTable :value="hugeData"
+  :virtualScrollerOptions="{ itemSize: 46 }" scrollHeight="400px">
   <Column field="id" header="ID" />
   <Column field="name" header="名称" />
 </DataTable>
@@ -1319,27 +1210,18 @@ transition: fade-out
 **Lazy Load（服务端分页 + 排序 + 过滤）**
 
 ```ts
-const lazyParams = ref({ first: 0, rows: 10, sortField: null, sortOrder: null });
-const totalRecords = ref(0);
-const loading = ref(false);
-
 async function loadLazyData(event) {
+  // event: { first, rows, sortField, sortOrder, filters }
   loading.value = true;
-  lazyParams.value = event;
-  const { items, total } = await api.queryProducts(lazyParams.value);
-  products.value = items;
-  totalRecords.value = total;
+  const { items, total } = await api.query(event);
+  products.value = items; totalRecords.value = total;
   loading.value = false;
 }
 ```
 
 ```vue
-<DataTable
-  :value="products" :totalRecords="totalRecords" :loading="loading"
-  lazy paginator :rows="10" @page="loadLazyData" @sort="loadLazyData"
->
-  …
-</DataTable>
+<DataTable :value="products" :totalRecords="totalRecords" :loading="loading"
+  lazy paginator :rows="10" @page="loadLazyData" @sort="loadLazyData">…</DataTable>
 ```
 
 </v-click>
@@ -1412,29 +1294,19 @@ transition: fade-out
 <v-click>
 
 ```ts
-// 三层 token 架构示例
 const Aura = {
   // 1. Primitive：原始色板（无语义）
-  primitive: {
-    blue: { 50: "#eff6ff", 500: "#3b82f6", 900: "#1e3a8a" },
-    emerald: { 500: "#10b981" },
-  },
-  // 2. Semantic：语义 token（有上下文）
+  primitive: { blue: { 500: "#3b82f6" }, emerald: { 500: "#10b981" } },
+  // 2. Semantic：语义 token（{token} 引用 Primitive）
   semantic: {
-    primary: {
-      50: "{emerald.50}",
-      500: "{emerald.500}",
-      900: "{emerald.900}",
-    },
+    primary: { 500: "{emerald.500}", 900: "{emerald.900}" },
     colorScheme: {
       light: { surface: { 0: "#ffffff", 100: "#f3f4f6" } },
       dark: { surface: { 0: "#020617", 100: "#1e293b" } },
     },
   },
-  // 3. Component：组件级 token（按需）
-  components: {
-    button: { primary: { background: "{primary.500}" } },
-  },
+  // 3. Component：组件级 token（按需细粒度覆盖）
+  components: { button: { primary: { background: "{primary.500}" } } },
 };
 ```
 
@@ -1515,13 +1387,7 @@ import Aura from "@primeuix/themes/aura";
 
 const MyPreset = definePreset(Aura, {
   semantic: {
-    primary: {
-      50: "{indigo.50}",
-      100: "{indigo.100}",
-      500: "{indigo.500}",
-      900: "{indigo.900}",
-      950: "{indigo.950}",
-    },
+    primary: { 50: "{indigo.50}", 500: "{indigo.500}", 900: "{indigo.900}" },
     colorScheme: {
       light: { surface: { 50: "#fafafa", 100: "#f4f4f5" } },
       dark: { surface: { 0: "#18181b", 50: "#27272a" } },
@@ -1536,17 +1402,7 @@ app.use(PrimeVue, { theme: { preset: MyPreset } });
 
 <v-click>
 
-**运行时动态修改**
-
-```ts
-import { updatePreset, updatePrimaryPalette } from "@primeuix/themes";
-
-// 完整替换 primary 色板
-updatePrimaryPalette({ 500: "#FF6B35" });
-
-// 合并 token 到当前 preset
-updatePreset({ semantic: { primary: { 500: "{rose.500}" } } });
-```
+**运行时动态修改** —— `updatePrimaryPalette({ 500: '#FF6B35' })` 替换 primary 色板；`updatePreset({ semantic: { primary: { 500: '{rose.500}' } } })` 合并 token。
 
 </v-click>
 
@@ -1614,33 +1470,17 @@ darkModeSelector 三种触发方式
 
 ```ts
 // 方式 1：跟随系统（prefers-color-scheme）
-app.use(PrimeVue, {
-  theme: {
-    preset: Aura,
-    options: { darkModeSelector: "system" },
-  },
-});
+app.use(PrimeVue, { theme: { preset: Aura,
+  options: { darkModeSelector: "system" } } });
 
-// 方式 2：手动控制（class 触发）
-app.use(PrimeVue, {
-  theme: {
-    preset: Aura,
-    options: { darkModeSelector: ".my-app-dark" },
-  },
-});
-
-// 切换函数
+// 方式 2：手动控制（class 触发，配合 useDark）
+app.use(PrimeVue, { theme: { preset: Aura,
+  options: { darkModeSelector: ".my-app-dark" } } });
 function toggleDarkMode() {
   document.documentElement.classList.toggle("my-app-dark");
 }
 
-// 方式 3：禁用暗色（只用浅色）
-app.use(PrimeVue, {
-  theme: {
-    preset: Aura,
-    options: { darkModeSelector: false },
-  },
-});
+// 方式 3：禁用暗色 —— darkModeSelector: false
 ```
 
 </v-click>
@@ -1839,50 +1679,34 @@ transition: fade-out
 **基础用法**
 
 ```vue
-<Panel header="标题" toggleable
-  :pt="{
-    root: 'border border-primary rounded-xl p-4',
-    header: { class: 'flex items-center justify-between' },
-    content: { class: 'text-primary-700 mt-4' },
-    title: 'text-xl',
-  }"
->
-  内容
-</Panel>
+<Panel header="标题" toggleable :pt="{
+  root: 'border border-primary rounded-xl p-4',
+  header: { class: 'flex items-center justify-between' },
+  content: 'text-primary-700 mt-4',
+}">内容</Panel>
 ```
 
 </v-click>
 
 <v-click>
 
-**声明式语法（v4 新增）**
+**声明式语法（v4 新增）** —— `pt:section:attr="value"`，与 Vue 模板属性扁平化对齐
 
 ```vue
-<Panel
-  pt:root:class="border border-solid"
-  pt:header:id="headerId"
-  pt:header:onClick="onHeaderClick"
->
-</Panel>
+<Panel pt:root:class="border border-solid" pt:header:onClick="onHeaderClick" />
 ```
 
 </v-click>
 
 <v-click>
 
-**全局配置（避免每处重写）**
+**全局配置** —— main.ts 一次定义，所有同类组件自动应用
 
 ```ts
-app.use(PrimeVue, {
-  pt: {
-    panel: {
-      header: { class: "bg-primary text-primary-contrast" },
-    },
-    button: {
-      root: { class: "shadow-md" },
-    },
-  },
-});
+app.use(PrimeVue, { pt: {
+  panel: { header: { class: 'bg-primary text-primary-contrast' } },
+  button: { root: { class: 'shadow-md' } },
+}})
 ```
 
 </v-click>
@@ -1987,26 +1811,13 @@ useToast / useConfirm 两个 Composable
 **Toast（顶部弹出消息）**
 
 ```ts
-// main.ts
-import ToastService from "primevue/toastservice";
-app.use(ToastService);
+// main.ts: app.use(ToastService)
+const toast = useToast();
+toast.add({ severity: "success", summary: "成功", detail: "保存完成", life: 3000 });
+toast.add({ severity: "error", summary: "错误", detail: "请求失败" });
 ```
 
 ```vue
-<script setup lang="ts">
-import { useToast } from "primevue/usetoast";
-import Toast from "primevue/toast";
-
-const toast = useToast();
-
-function showSuccess() {
-  toast.add({ severity: "success", summary: "成功", detail: "保存完成", life: 3000 });
-}
-function showError() {
-  toast.add({ severity: "error", summary: "错误", detail: "请求失败" });
-}
-</script>
-
 <template>
   <Toast position="top-right" />
   <Button label="成功" @click="showSuccess" />
@@ -2101,37 +1912,22 @@ transition: fade-out
 <v-click>
 
 ```ts
-// main.ts
-import ConfirmationService from "primevue/confirmationservice";
-app.use(ConfirmationService);
-```
-
-```vue
-<script setup lang="ts">
-import { useConfirm } from "primevue/useconfirm";
-import ConfirmDialog from "primevue/confirmdialog";
-
+// main.ts: app.use(ConfirmationService)
 const confirm = useConfirm();
 
 function handleDelete() {
   confirm.require({
     message: "确认删除此用户？此操作不可恢复。",
-    header: "危险操作",
-    icon: "pi pi-exclamation-triangle",
-    rejectLabel: "取消",
-    acceptLabel: "删除",
+    header: "危险操作", icon: "pi pi-exclamation-triangle",
+    acceptLabel: "删除", rejectLabel: "取消",
     acceptClass: "p-button-danger",
-    accept: async () => {
-      await api.deleteUser(id);
-      toast.add({ severity: "success", summary: "已删除" });
-    },
-    reject: () => {
-      // 取消逻辑
-    },
+    accept: () => api.deleteUser(id),
+    reject: () => { /* 取消逻辑 */ },
   });
 }
-</script>
+```
 
+```vue
 <template>
   <ConfirmDialog />
   <Button label="删除" severity="danger" @click="handleDelete" />
@@ -2231,25 +2027,14 @@ PrimeVue 自带的 locale 配置
 
 ```ts
 // main.ts
-import { definePreset } from "@primeuix/themes";
-
 app.use(PrimeVue, {
   theme: { preset: Aura },
   locale: {
-    accept: "确定",
-    reject: "取消",
-    choose: "选择",
-    upload: "上传",
-    cancel: "取消",
-    completed: "完成",
-    pending: "等待中",
+    accept: "确定", reject: "取消", choose: "选择", upload: "上传",
+    today: "今天", clear: "清除", weekHeader: "周",
     dayNames: ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
-    dayNamesShort: ["周日", "周一", "周二", "周三", "周四", "周五", "周六"],
     monthNames: ["一月", "二月", "三月", "四月", "五月", "六月",
                  "七月", "八月", "九月", "十月", "十一月", "十二月"],
-    today: "今天",
-    clear: "清除",
-    weekHeader: "周",
   },
 });
 ```
@@ -2337,25 +2122,15 @@ transition: fade-out
 
 <v-click>
 
-```bash
-pnpm add primevue @primeuix/themes
-pnpm add -D @primevue/nuxt-module
-```
+`pnpm add primevue @primeuix/themes && pnpm add -D @primevue/nuxt-module`
 
 ```ts
 // nuxt.config.ts
-import Aura from "@primeuix/themes/aura";
-
 export default defineNuxtConfig({
   modules: ["@primevue/nuxt-module"],
   primevue: {
-    options: {
-      theme: {
-        preset: Aura,
-        options: { darkModeSelector: ".my-app-dark" },
-      },
-      ripple: true,
-    },
+    options: { theme: { preset: Aura,
+      options: { darkModeSelector: ".my-app-dark" } }, ripple: true },
     importTheme: { from: "@/themes/my-preset.ts" },
     components: { include: "*" },        // 自动 import 所有组件
     directives: { include: ["Ripple", "Tooltip"] },
@@ -2436,42 +2211,27 @@ tailwindcss-primeui 官方插件
 
 <v-click>
 
-```bash
-pnpm add tailwindcss-primeui
-```
-
-**Tailwind v4 配置（CSS）**
+`pnpm add tailwindcss-primeui` —— 让 PrimeVue token 与 Tailwind utility 联动
 
 ```css
-/* main.css */
+/* Tailwind v4：CSS-first 配置 */
 @import "tailwindcss";
 @plugin "tailwindcss-primeui";
-
-@theme {
-  --color-primary-500: var(--p-primary-500);
-}
+@theme { --color-primary-500: var(--p-primary-500); }
 ```
 
-**Tailwind v3 配置（JS）**
-
 ```ts
-// tailwind.config.ts
+// Tailwind v3：tailwind.config.ts
 import PrimeUI from "tailwindcss-primeui";
-
-export default {
-  content: ["./src/**/*.{vue,ts}"],
-  plugins: [PrimeUI],
-};
+export default { content: ["./src/**/*.{vue,ts}"], plugins: [PrimeUI] };
 ```
 
 </v-click>
 
 <v-click>
 
-**使用**
-
 ```vue
-<!-- 用 PrimeVue 主题色的 Tailwind utility -->
+<!-- 主题色 utility，主题切换时自动跟随 -->
 <div class="bg-primary text-primary-contrast p-4 rounded-lg">主色卡片</div>
 <div class="bg-surface-100 dark:bg-surface-900">背景色随主题切换</div>
 ```
@@ -2578,19 +2338,13 @@ PrimeVue 在「组件数 / 主题 / 定制」上是天花板
 
 <v-click>
 
-| 能力              | PrimeVue          | Element Plus       | Vuetify 3       | Naive UI          | Ant Design Vue |
-| ----------------- | ----------------- | ------------------ | --------------- | ----------------- | -------------- |
-| 组件数量          | **100+**          | 60+                | 80+             | 90+               | 60+            |
-| 主题预设          | **4 内置**        | 1                  | 1（Material）   | 默认 + dark       | 1（Ant）       |
-| 定制深度          | **pt + Unstyled** | SCSS / CSS vars    | SCSS            | themeOverrides    | LESS           |
-| TS 支持           | 完整              | 完整               | 完整            | **100% 源码生根** | 完整           |
-| 表格虚拟滚动      | **内置**          | ElTableV2          | 内置            | **内置**          | 内置           |
-| Forms 校验        | **Zod/Yup/Valibot** | :rules 配置式    | VeeValidate     | :rules 配置式     | :rules 配置式  |
-| Tailwind 集成     | **官方插件**      | 社区               | 社区            | 社区              | 社区           |
-| Nuxt 集成         | **官方模块**      | 官方               | 官方            | 社区              | 社区           |
-| 国外人气          | **★★★★★**         | ★★★                | ★★★★            | ★★★★              | ★★★            |
-| 国内中文生态      | ★★★               | **★★★★★**          | ★★★             | ★★★★              | ★★★★           |
-| 中后台模板        | **PrimeBlocks**   | vue-element-admin  | Materio         | naive-ui-admin    | vue-vben-admin |
+| 能力            | PrimeVue            | Element Plus      | Vuetify 3       | Naive UI       | Ant Design Vue |
+| --------------- | ------------------- | ----------------- | --------------- | -------------- | -------------- |
+| 组件数量        | **100+**            | 60+               | 80+             | 90+            | 60+            |
+| 主题预设        | **4 内置**          | 1                 | Material        | 默认 + dark    | Ant Design     |
+| 定制深度        | **pt + Unstyled**   | SCSS / CSS vars   | SCSS            | themeOverrides | LESS           |
+| Forms 校验      | **Zod/Yup/Valibot** | :rules            | VeeValidate     | :rules         | :rules         |
+| 国外 / 国内人气 | ★★★★★ / ★★★        | ★★★ / ★★★★★      | ★★★★ / ★★★     | ★★★★ / ★★★★   | ★★★ / ★★★★    |
 
 </v-click>
 
@@ -2666,12 +2420,7 @@ transition: fade-out
 
 <v-click>
 
-**主要变化**
-
-- 完全脱离 SASS，全用 CSS 变量（删除 `primevue/resources` 引用）
-- 引入 4 个主题预设（Aura / Material / Lara / Nora）
-- pt（PassThrough）API v2，新增 `pc` 前缀引用嵌套组件
-- 设计 token 三层架构（Primitive / Semantic / Component）
+**主要变化** —— 脱离 SASS 全 CSS 变量；4 主题预设 + 设计 token 三层架构；pt API v2 + `pc` 前缀引用嵌套组件。
 
 </v-click>
 
@@ -2679,26 +2428,19 @@ transition: fade-out
 
 **组件改名（必改）**
 
-| v3                | v4                |
-| ----------------- | ----------------- |
-| Calendar          | **DatePicker**    |
-| Dropdown          | **Select**        |
-| InputSwitch       | **ToggleSwitch**  |
-| Sidebar           | **Drawer**        |
-| OverlayPanel      | **Popover**       |
-| TabView / TabPanel | **Tabs / Tab**   |
+| v3 → v4                        | v3 → v4                          |
+| ------------------------------ | -------------------------------- |
+| Calendar → **DatePicker**      | Sidebar → **Drawer**             |
+| Dropdown → **Select**          | OverlayPanel → **Popover**       |
+| InputSwitch → **ToggleSwitch** | TabView/TabPanel → **Tabs/Tab**  |
 
-**移除组件**：TriStateCheckbox / DataViewLayoutOptions
+**移除**：TriStateCheckbox / DataViewLayoutOptions
 
 </v-click>
 
 <v-click>
 
-**API 改动**
-
-- `switchTheme()` 已废弃 → 用 `usePreset()`
-- `primevue/api` 路径 → `@primevue/core/api`
-- 自定义 theme.css 必须重写为 definePreset 形式
+**API 改动**：`switchTheme()` → `usePreset()` / `primevue/api` → `@primevue/core/api` / 自定义 theme.css 改写成 definePreset
 
 </v-click>
 
@@ -2771,18 +2513,11 @@ Toast / Confirm / Dialog 必须放模板
 
 <v-click>
 
-**坑 1：useToast 报错 / toast.add 无效果**
+**坑 1：toast.add 无效果** —— 模板里忘了放 Toast 组件
 
 ```vue
-<!-- ❌ 模板里没放 <Toast /> -->
-<script setup>
-const toast = useToast()
-toast.add({ severity: 'success', summary: '保存' })  // 调用了但不显示
-</script>
-
-<!-- ✅ App.vue 根部放 <Toast /> 接收消息 -->
 <template>
-  <Toast />
+  <Toast />        <!-- ✅ App.vue 根部一次放好 -->
   <RouterView />
 </template>
 ```
@@ -2791,16 +2526,11 @@ toast.add({ severity: 'success', summary: '保存' })  // 调用了但不显示
 
 <v-click>
 
-**坑 2：忘记注册 ToastService / ConfirmationService**
+**坑 2：忘记注册服务插件**
 
 ```ts
-// ❌ main.ts 只 app.use(PrimeVue)
-app.use(PrimeVue)
-// useToast() 返回 undefined
-
-// ✅ 服务必须显式 use
-app.use(PrimeVue)
-app.use(ToastService)
+app.use(PrimeVue, { theme: { preset: Aura } })
+app.use(ToastService)         // ✅ 服务必须显式 use
 app.use(ConfirmationService)
 app.use(DialogService)
 ```
@@ -2809,17 +2539,7 @@ app.use(DialogService)
 
 <v-click>
 
-**坑 3：v3 组件名继续用**
-
-```vue
-<!-- ❌ v4 已移除 -->
-<Calendar v-model="date" />
-<Dropdown :options="cities" />
-
-<!-- ✅ v4 新名 -->
-<DatePicker v-model="date" />
-<Select :options="cities" />
-```
+**坑 3：v3 组件名继续用** —— v4 已移除 Calendar / Dropdown / InputSwitch / Sidebar / OverlayPanel / TabView / TabPanel，必须改为 DatePicker / Select / ToggleSwitch / Drawer / Popover / Tabs / Tab。
 
 </v-click>
 
@@ -2848,16 +2568,9 @@ PrimeVue 的服务模式与 Naive UI / Element Plus 完全不同：
 - <Toast /> 组件订阅 store 变化，渲染消息
 - 没有 <Toast /> = 没有渲染者 = 消息发出但不显示
 
-最佳实践：在 App.vue 根部放一次 <Toast />，全应用通用：
-```vue
-<!-- App.vue -->
-<template>
-  <Toast />
-  <ConfirmDialog />
-  <DynamicDialog />
-  <RouterView />
-</template>
-```
+最佳实践：在 App.vue 根部放一次 Toast，全应用通用 ——
+App.vue template 里放 Toast / ConfirmDialog / DynamicDialog 三个组件，
+搭配 RouterView 一起渲染。
 
 同理 ConfirmDialog / DynamicDialog 也是同样模式。
 
@@ -2919,32 +2632,18 @@ CSS 优先级 / pt section 不存在 / 全局 vs 局部
 
 <v-click>
 
-**坑 4：Tailwind class 不生效（specificity 问题）**
+**坑 4：Tailwind class 不生效（specificity 问题）** —— `class="bg-red-500"` 仍是绿色
 
 ```vue
-<!-- ❌ PrimeVue 默认样式优先级高 -->
-<Button class="bg-red-500" label="点我" />   <!-- 仍是绿色（primary） -->
-
-<!-- ✅ 用 ! 前缀强制 -->
-<Button class="!bg-red-500" label="点我" />
-
-<!-- ✅ 或者用 pt 直接覆盖 -->
-<Button :pt="{ root: 'bg-red-500' }" label="点我" />
+<Button class="!bg-red-500" label="点我" />            <!-- ✅ ! 前缀强制 -->
+<Button :pt="{ root: 'bg-red-500' }" label="点我" />   <!-- ✅ pt 直接覆盖 -->
 ```
 
 </v-click>
 
 <v-click>
 
-**坑 5：pt section 名不存在**
-
-```vue
-<!-- ❌ Panel 没有 'body' section（只有 root / header / content / footer） -->
-<Panel :pt="{ body: 'p-4' }">…</Panel>
-
-<!-- ✅ 查文档 PT Section 表，找正确的 section 名 -->
-<Panel :pt="{ content: 'p-4' }">…</Panel>
-```
+**坑 5：pt section 名不存在** —— Panel 没有 'body'，只有 root / header / content / footer。查文档 PT Section 表找正确的 section 名。
 
 </v-click>
 
@@ -2953,15 +2652,9 @@ CSS 优先级 / pt section 不存在 / 全局 vs 局部
 **坑 6：cssLayer 与 Tailwind 优先级冲突**
 
 ```ts
-// ✅ 开启 cssLayer，让 PrimeVue 样式在 Tailwind layer 之后
-app.use(PrimeVue, {
-  theme: {
-    preset: Aura,
-    options: {
-      cssLayer: { name: 'primevue', order: 'tailwind-base, primevue, tailwind-utilities' }
-    }
-  }
-})
+app.use(PrimeVue, { theme: { preset: Aura, options: {
+  cssLayer: { name: 'primevue', order: 'tailwind-base, primevue, tailwind-utilities' }
+}}})
 ```
 
 </v-click>
@@ -3060,34 +2753,19 @@ transition: fade-out
 
 <v-click>
 
-**项目初始化**
-
-- ✅ main.ts 一次注册 PrimeVue + ToastService + ConfirmationService + DialogService
-- ✅ App.vue 根部放 &lt;Toast /&gt; + &lt;ConfirmDialog /&gt; + &lt;DynamicDialog /&gt;
-- ✅ 按需引入用 PrimeVueResolver（@primevue/auto-import-resolver）
-- ✅ 开启 cssLayer 配合 Tailwind / UnoCSS
+**项目初始化** —— main.ts 一次注册 PrimeVue + ToastService + ConfirmationService + DialogService；App.vue 根部放 Toast / ConfirmDialog / DynamicDialog；按需引入用 PrimeVueResolver；开启 cssLayer 配合 Tailwind / UnoCSS。
 
 </v-click>
 
 <v-click>
 
-**主题与样式**
-
-- ✅ definePreset 在 Aura / Material / Lara / Nora 基础上微调
-- ✅ darkModeSelector: '.my-app-dark' 配合 VueUse useDark
-- ✅ tailwindcss-primeui 让 bg-primary / text-surface 与主题联动
-- ✅ 全局 pt 配置项目级样式预设（避免每个组件重写）
+**主题与样式** —— definePreset 在 Aura / Material / Lara / Nora 基础上微调；darkModeSelector: '.my-app-dark' 配合 VueUse useDark；tailwindcss-primeui 让 bg-primary / text-surface 与主题联动；全局 pt 配置项目级样式预设。
 
 </v-click>
 
 <v-click>
 
-**Form + DataTable**
-
-- ✅ @primevue/forms 配 Zod schema 替代 :rules 配置式
-- ✅ DataTable 大数据集启用 virtualScroller 或 lazy + paginator
-- ✅ DataTable 行编辑用 editingRows + @row-edit-save 事件
-- ✅ FileUpload 用 customUpload + uploader prop 接入七牛 / OSS 直传
+**Form + DataTable** —— @primevue/forms 配 Zod schema 替代 :rules 配置式；DataTable 大数据集启用 virtualScroller 或 lazy + paginator；行编辑用 editingRows + @row-edit-save；FileUpload 用 customUpload + uploader 接入云存储直传。
 
 </v-click>
 
@@ -3170,23 +2848,19 @@ transition: fade-out
 
 **优点**
 
-- 100+ 组件覆盖全场景（PickList / OrderList / Editor / Galleria 等冷门必备）
+- 100+ 组件覆盖全场景（PickList / Editor / Galleria 等冷门必备）
 - 4 个内置主题预设 + definePreset 微调，开箱即用 + 灵活定制
-- Styled / Unstyled 双模式，一个组件库满足两种工作流
-- pt（PassThrough）API 让定制深度直达 DOM
+- Styled / Unstyled 双模式 + pt API 直达 DOM
 - 设计 token 三层架构（Primitive / Semantic / Component）现代化
-- @primevue/forms 拥抱 Zod / Yup / Valibot 现代校验生态
-- tailwindcss-primeui 官方插件 + @primevue/nuxt-module 官方模块
+- @primevue/forms 拥抱 Zod / Yup / Valibot；tailwindcss-primeui + Nuxt 官方模块
 - WCAG 2.1 AA 无障碍合规，国际化项目友好
 
 **缺点**
 
 - 中文生态弱于 Element Plus / Naive UI / Ant Design Vue
 - v3 → v4 升级成本高（组件改名 + 主题重写）
-- PrimeBlocks 商业模板需要付费（社区免费替代品少）
-- 服务模式（Toast / Confirm / Dialog）新手容易踩坑
-- 国内大厂采用率低（阿里 / 字节 / 美团很少用）
-- CSS specificity 与 Tailwind 共存需要 cssLayer 配置
+- PrimeBlocks 商业模板付费；服务模式（Toast / Confirm）新手易踩坑
+- 国内大厂采用率低；与 Tailwind 共存需 cssLayer 配置
 
 </v-clicks>
 
@@ -3276,42 +2950,25 @@ transition: fade-out
 
 <v-click>
 
-**第 1 周：核心组件熟练**
-
-- 通读官方文档 Form + Data + Panel + Overlay 四大分组
-- 跟着官方示例改例子（每个组件都有 StackBlitz 在线编辑）
-- 实现一个 CRUD 页面（DataTable + Form + Dialog + Toast 四件套）
+**第 1 周：核心组件熟练** —— 通读 Form / Data / Panel / Overlay 四大分组；跟着 StackBlitz 改例子；实现一个 CRUD 页面（DataTable + Form + Dialog + Toast 四件套）。
 
 </v-click>
 
 <v-click>
 
-**第 2 周：服务 + Composable**
-
-- main.ts 注册 PrimeVue / ToastService / ConfirmationService / DialogService
-- 熟练 useToast / useConfirm / useDialog 命令式 API
-- 学习 @primevue/forms + Zod 表单校验
+**第 2 周：服务 + Composable** —— main.ts 注册 ToastService / ConfirmationService / DialogService；熟练 useToast / useConfirm / useDialog；学习 @primevue/forms + Zod。
 
 </v-click>
 
 <v-click>
 
-**第 3-4 周：主题 + 企业级整合**
-
-- 用 definePreset 在 Aura 基础上定制项目品牌色
-- 接 darkModeSelector + VueUse useDark 实现暗色模式
-- 接入 tailwindcss-primeui + cssLayer 解决样式优先级
-- 实现登录 / 权限 / 菜单 / 表单 / 表格全套
+**第 3-4 周：主题 + 企业级整合** —— definePreset 在 Aura 基础上定制品牌色；darkModeSelector + VueUse useDark；tailwindcss-primeui + cssLayer 解决样式优先级。
 
 </v-click>
 
 <v-click>
 
-**长期：pt + Unstyled 深入**
-
-- 项目级 pt 全局配置（main.ts 预设所有组件样式）
-- 探索 Unstyled 模式 + Tailwind 重写关键组件
-- 学习 Volt UI（PrimeTek 2025 新衍生库）
+**长期：pt + Unstyled 深入** —— 项目级 pt 全局配置；Unstyled + Tailwind 重写关键组件；跟进 Volt UI（PrimeTek 2025 新衍生库）。
 
 </v-click>
 
@@ -3415,12 +3072,7 @@ transition: fade-out
 
 <v-click>
 
-**官方资源**
-
-- 📖 [官方文档](https://primevue.org/) —— 英文为主
-- 💻 [GitHub](https://github.com/primefaces/primevue) —— 14K+ star
-- 🎮 [StackBlitz 在线编辑](https://primevue.org/) —— 每个组件 demo 可在线编辑
-- 🎨 [Theme Designer](https://designer.primevue.org/) —— 可视化主题编辑器
+**官方资源** —— [官方文档](https://primevue.org/) / [GitHub 14K+ star](https://github.com/primefaces/primevue) / [StackBlitz 在线编辑](https://primevue.org/) / [Theme Designer 可视化](https://designer.primevue.org/)
 
 </v-click>
 
@@ -3429,21 +3081,15 @@ transition: fade-out
 **生态项目**
 
 - [Volt UI](https://volt.primevue.org/) —— PrimeVue Unstyled + Tailwind v4 衍生库
-- [tailwindcss-primeui](https://www.npmjs.com/package/tailwindcss-primeui) —— Tailwind 集成插件
+- [tailwindcss-primeui](https://www.npmjs.com/package/tailwindcss-primeui) —— Tailwind 集成
 - [@primevue/nuxt-module](https://github.com/primefaces/primevue/tree/master/packages/nuxt-module) —— Nuxt 3 官方模块
-- [PrimeBlocks](https://blocks.primevue.org/) —— 商业 UI 块（付费）
-- [sakai-vue](https://github.com/primefaces/sakai-vue) —— 免费后台模板
+- [PrimeBlocks](https://blocks.primevue.org/) 付费 / [sakai-vue](https://github.com/primefaces/sakai-vue) 免费后台模板
 
 </v-click>
 
 <v-click>
 
-**配套技术栈**
-
-- Vue Router 4 + Pinia + Vite + Tailwind v4 = 黄金组合
-- VueUse + axios + Zod + @primevue/forms = 实用四件套
-- ECharts / Chart.js（PrimeVue 内置）= 图表选择
-- @primevue/themes + tailwindcss-primeui = 主题双引擎
+**配套技术栈** —— Vue Router + Pinia + Vite + Tailwind v4 黄金组合；VueUse + axios + Zod + @primevue/forms；ECharts / Chart.js；@primevue/themes + tailwindcss-primeui 主题双引擎。
 
 </v-click>
 
@@ -3531,17 +3177,15 @@ transition: fade
 
 PrimeVue — Most Complete UI Component Library for Vue
 
-<div class="mt-8 text-lg">
+<div class="mt-6 text-lg">
 
 **核心心智**
 
-- 4 个内置主题预设（Aura / Material / Lara / Nora）切换即换皮
+- 4 个内置主题预设（Aura / Material / Lara / Nora）+ definePreset 微调
 - 设计 token 三层架构（Primitive / Semantic / Component）现代化
-- Styled / Unstyled 双模式，一个库满足两种工作流
-- pt（PassThrough）API 直达组件内部 DOM
+- Styled / Unstyled 双模式 + pt（PassThrough）API 直达 DOM
 - 服务 + 模板 + Composable 三件套（Toast / Confirm / Dialog）
-- @primevue/forms 拥抱 Zod / Yup / Valibot 校验生态
-- tailwindcss-primeui + cssLayer 解决 Tailwind 共存优先级
+- @primevue/forms + tailwindcss-primeui + cssLayer 现代化技术栈
 
 </div>
 

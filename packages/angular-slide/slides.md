@@ -112,20 +112,15 @@ transition: slide-up
 
 | 版本 | 时间 | 关键变化 |
 |---|---|---|
-| **2** | 2016.9 | 完全重写为 TypeScript，与 AngularJS 决裂 |
-| **9** | 2020.2 | **Ivy 渲染器默认** |
-| **14** | 2022.6 | Typed Forms、`inject()` 函数、Standalone preview |
-| **15** | 2022.11 | **Standalone 稳定**、`provideRouter` / `provideHttpClient` |
-| **16** | 2023.5 | **Signals preview**、`DestroyRef` / `takeUntilDestroyed`、esbuild dev |
-| **17** | 2023.11 | **`@if` / `@for` / `@switch` / `@defer`**、Signals stable、Standalone 默认 |
-| **18** | 2024.5 | 控制流稳定、Zoneless 实验、`@let` 模板变量、Material 3 |
-| **19** | 2024.11 | `linkedSignal` 稳定、`resource` 实验、Incremental Hydration 实验 |
-| **20** | 2025.5 | Signal Forms 实验、Incremental Hydration 稳定、Zoneless 稳定 |
-| **21** | 2026.5 | **Zoneless 默认**、`@angular/build:application` 默认 builder |
+| **2** / **9** | 2016.9 / 2020.2 | 重写为 TypeScript / **Ivy 默认** |
+| **14** / **15** | 2022 | `inject()` / **Standalone 稳定** + `provideRouter` |
+| **16** / **17** | 2023 | **Signals** + `DestroyRef` / **`@if` `@for` `@defer`** |
+| **18** / **19** | 2024 | 控制流稳定 + `@let` / `linkedSignal` + `resource` |
+| **20** / **21** | 2025 / 2026.5 | Zoneless 稳定 / **Zoneless 默认** + 新 builder |
 
 <v-click>
 
-**今天默认讲 v21**。如果你看到老资料讲 `*ngIf` / `NgModule` / `Module Federation 老语法`，那是 v15 之前的内容，可读但不是主流写法。
+**今天默认讲 v21**。看到老资料讲 `*ngIf` / `NgModule` 是 v15 之前的写法，可读但不主流。
 
 </v-click>
 
@@ -138,16 +133,14 @@ transition: slide-up
 | 维度 | AngularJS（v1.x） | Angular（v2+） |
 |------|------------------|---------------|
 | 语言 | JavaScript ES5 | TypeScript |
-| 模板 | HTML + 自定义指令（`ng-*`） | 强类型模板编译 |
-| 模块化 | `angular.module()` | NgModule（v15-）/ Standalone（v15+） |
-| 数据绑定 | scope + `$digest` 脏检查 | Zone.js 检测 / Signals（v17+） |
-| 移动端 | Ionic + Cordova | Ionic + Capacitor |
-| 状态 | scope / 全局服务 | RxJS / Signals + 服务，或 NgRx |
-| 当前状态 | EOL（2022.1） | LTS 半年大版本，2026 已到 v21 |
+| 模板 | HTML + `ng-*` 指令 | 强类型模板编译 |
+| 数据绑定 | scope + `$digest` 脏检查 | Zone.js / Signals（v17+） |
+| 模块化 | `angular.module()` | NgModule / Standalone |
+| 当前状态 | EOL（2022.1） | LTS 半年大版本，2026 已 v21 |
 
 <v-click>
 
-> AngularJS 1.x 已于 2022.1 停止维护。所有现代「Angular」资料默认指 Angular 2+ 系列——2016 年用 TypeScript 完全重写的新框架，不是 v1 的升级版。
+> AngularJS 1.x 已于 2022.1 EOL。现代「Angular」资料默认指 v2+——2016 年 TS 重写的新框架，不是 v1 升级版。
 
 </v-click>
 
@@ -160,13 +153,8 @@ transition: slide-up
 **编译时把模板转成强类型实例化函数，运行时按 Signal / Zone 驱动局部更新**
 
 ```
-*.ts (装饰器 + class) + *.html (模板)
-  ↓ Angular CLI / Ivy 编译器
-  ├ @Component 元数据  → ComponentDef
-  ├ template          → render function（LView + TView）
-  └ styles            → Emulated ViewEncapsulation
-  ↓
-最终产物：强类型 vnode + DI 树 + Signal 反应图
+*.ts + *.html → Ivy 编译器 → ComponentDef + render function（LView/TView）
+              → 强类型 vnode + DI 树 + Signal 反应图
 ```
 
 <v-click>
@@ -176,8 +164,8 @@ transition: slide-up
 | 维度 | Angular 21 | Vue 3 | React 19 |
 |---|---|---|---|
 | 模板 | 编译期 + 强类型 | 编译期 + patchFlag | JSX 全运行时 |
-| 响应式 | Signal + Zone（可选） | Proxy 自动追踪 | useState + 手动依赖 |
-| DI | Hierarchical Injector（强类型） | provide / inject | Context |
+| 响应式 | Signal + Zone | Proxy 自动追踪 | useState + 手动 |
+| DI | Hierarchical（强类型） | provide / inject | Context |
 | 范式 | OOP + 装饰器 | SFC + Composition | FP + Hooks |
 
 </v-click>
@@ -191,28 +179,15 @@ transition: slide-up
 ```bash
 # 推荐：Angular CLI（交互式询问 SCSS / SSR / AI tools）
 pnpm dlx @angular/cli@latest new my-app --package-manager=pnpm
-
-# 或装到本地
-pnpm add -g @angular/cli
-ng new my-app --package-manager=pnpm
-
-cd my-app && pnpm start  # 浏览器 http://localhost:4200
+cd my-app && pnpm start    # 浏览器 http://localhost:4200
 ```
 
 <v-click>
 
 ```
 my-app/
-├── src/
-│   ├── app/
-│   │   ├── app.config.ts       # 应用级 providers（路由、HTTP、动画）
-│   │   ├── app.routes.ts       # 路由表
-│   │   ├── app.ts              # 根组件 class（v20+ 去掉 .component 中缀）
-│   │   ├── app.html            # 根组件模板
-│   │   └── app.scss            # 根组件样式
-│   ├── main.ts                 # 入口（bootstrapApplication）
-│   ├── styles.scss             # 全局样式
-│   └── index.html              # SPA 入口
+├── src/app/{app.config.ts, app.routes.ts, app.ts, app.html, app.scss}
+├── src/{main.ts, styles.scss, index.html}
 ├── public/                     # 不经构建的静态资源（v17+）
 ├── angular.json                # CLI 工作空间配置
 └── package.json
@@ -222,7 +197,7 @@ my-app/
 
 <v-click>
 
-要求 Node 20.19+ / 22.12+（与 Vite 7 / Nx 一致）。HMR 默认开启，保存即热更。
+要求 Node 20.19+ / 22.12+。HMR 默认开启，保存即热更。
 
 </v-click>
 
@@ -234,21 +209,16 @@ transition: slide-up
 
 | 标志 | 用途 |
 |------|------|
-| `--standalone` | （默认 true）使用 standalone API，不生成 AppModule |
-| `--ssr` / `--no-ssr` | 启用 / 关闭 SSR（默认询问） |
-| `--routing` | 启用路由（默认 true） |
-| `--style=scss \| sass \| less \| css` | 样式语言 |
-| `--package-manager=pnpm` | 包管理器（CLI 默认 npm） |
-| `--strict` | TypeScript 严格模式（默认 true） |
-| `--inline-template` | 模板写在 `template:` 字段而非独立文件 |
-| `--minimal` | 最小骨架（不带 testing） |
-| `--skip-git` | 不初始化 Git 仓库 |
+| `--standalone` / `--routing` / `--strict` | standalone / 路由 / 严格模式（默认 true） |
+| `--ssr` / `--no-ssr` | 启用 / 关闭 SSR |
+| `--style=scss\|sass\|less\|css` | 样式语言 |
+| `--package-manager=pnpm` | 包管理器 |
+| `--inline-template` / `--minimal` / `--skip-git` | 内联模板 / 最小骨架 / 不初始化 Git |
 
 <v-click>
 
 ```bash
-# 强制 CLI 默认 pnpm
-ng config -g cli.packageManager pnpm
+ng config -g cli.packageManager pnpm    # 强制 CLI 默认 pnpm
 ```
 
 </v-click>
@@ -269,20 +239,12 @@ import { Component, input, output, signal } from '@angular/core'
       {{ label() }} ({{ count() }})
     </button>
   `,
-  styles: `
-    button {
-      padding: 8px 16px;
-      background: #dd0031;
-      color: white;
-      border-radius: 4px;
-    }
-  `,
+  styles: `button { padding: 8px 16px; background: #dd0031; color: white; }`,
 })
 export class HelloButton {
   label = input.required<string>()             // Signal-based 输入
   disabled = input(false)
   clicked = output<{ ts: number }>()           // Signal-based 输出
-
   count = signal(0)
 
   handleClick() {
@@ -299,12 +261,6 @@ transition: slide-up
 # Standalone：v15+ 引入 / v17 默认 / v20+ 唯一
 
 ```ts
-import { Component } from '@angular/core'
-import { CommonModule } from '@angular/common'
-import { FormsModule } from '@angular/forms'
-import { RouterLink } from '@angular/router'
-import { UserCard } from './user-card'
-
 @Component({
   selector: 'app-user-page',
   imports: [UserCard, RouterLink, FormsModule, CommonModule],   // 显式列出依赖
@@ -319,18 +275,13 @@ export class UserPage {}
 
 <v-click>
 
-**没有 NgModule**——模板里用到的组件 / 指令 / 管道 / RouterLink / FormsModule 全部在 `imports` 中显式声明。未导入直接用 → 编译错误 `NG8001: 'app-user-card' is not a known element`。
+**没有 NgModule**：组件 / 指令 / 管道 / RouterLink / FormsModule 全部在 `imports` 中显式声明。未导入 → `NG8001: 'app-user-card' is not a known element`。
 
 </v-click>
 
 <v-click>
 
-> 💡 **迁移工具**
->
-> ```bash
-> ng generate @angular/core:standalone
-> ```
-> 交互式询问：把组件转 standalone / 删除 NgModule / `main.ts` 切换 `bootstrapApplication`。
+> 💡 迁移工具：`ng generate @angular/core:standalone` 自动把组件转 standalone / 删 NgModule。
 
 </v-click>
 
@@ -340,24 +291,17 @@ transition: slide-up
 
 # @Component 装饰器选项
 
-| 选项 | 类型 | 用途 |
-|------|------|------|
-| `selector` | string | CSS 选择器（标签 / 属性 / 类） |
-| `template` / `templateUrl` | string | 模板内联 / 外部 |
-| `styles` / `styleUrl` / `styleUrls` | string / string[] | 样式（**v17+ `styleUrl` 单数**） |
-| `imports` | `(Component \| Directive \| Pipe \| NgModule)[]` | 模板中使用的依赖 |
-| `providers` | `Provider[]` | 组件级 DI |
-| `host` | object | 宿主元素属性 / 事件绑定（取代 `@HostBinding` / `@HostListener`） |
-| `changeDetection` | `ChangeDetectionStrategy` | `Default` / `OnPush`（推荐） |
-| `encapsulation` | `ViewEncapsulation` | `Emulated`（默认）/ `None` / `ShadowDom` |
+| 选项 | 用途 |
+|------|------|
+| `selector` / `template` / `styles` | 选择器 / 模板 / 样式（v17+ `styleUrl` 单数） |
+| `imports` / `host` | 依赖 / 宿主属性 + 事件（取代 `@HostBinding` / `@HostListener`） |
+| `changeDetection` / `encapsulation` | `OnPush`（推荐）/ `Emulated`/`None`/`ShadowDom` |
 
 <v-click>
 
 ```ts
-// 选择器形式
 @Component({ selector: 'app-user-card' })          // 标签
 @Component({ selector: '[appHighlight]' })          // 属性
-@Component({ selector: '.app-toolbar' })            // 类
 @Component({ selector: 'button[appConfirm]' })      // 组合
 ```
 
@@ -400,16 +344,9 @@ transition: slide-up
 # 双向绑定
 
 ```ts
-import { Component, signal } from '@angular/core'
-import { FormsModule } from '@angular/forms'
-
 @Component({
-  selector: 'app-form',
   imports: [FormsModule],
-  template: `
-    <input [(ngModel)]="name" />
-    <p>Hello, {{ name() }}!</p>
-  `,
+  template: `<input [(ngModel)]="name" /><p>Hello, {{ name() }}!</p>`,
 })
 export class FormCmp {
   name = signal('')
@@ -418,7 +355,7 @@ export class FormCmp {
 
 <v-click>
 
-**`[(value)]` 语法糖**：等价于 `[value]="x" (valueChange)="x.set($event)"`。和 Vue 的 `v-model` 是相同的模式，但 Angular 是显式的「属性 + 事件」组合。
+**`[(value)]` 语法糖**：等价于 `[value]="x" (valueChange)="x.set($event)"`。和 Vue `v-model` 模式相同，但 Angular 是显式「属性 + 事件」组合。
 
 </v-click>
 
@@ -426,11 +363,9 @@ export class FormCmp {
 
 ```ts
 // 自定义 model（v17.2+，推荐）
-@Component({ /* ... */ })
 export class Toggle {
   checked = model(false)                    // 创建双向 Signal
 }
-
 // 父组件 <app-toggle [(checked)]="isOn" />
 ```
 
@@ -641,35 +576,24 @@ transition: slide-up
 
 ```ts
 @Component({
-  selector: 'app-counter',
-  template: `
-    <p>Count: {{ count() }}</p>
-    <p>Doubled: {{ doubled() }}</p>
-    <button (click)="increment()">+1</button>
-  `,
+  template: `<p>{{ count() }} / doubled: {{ doubled() }}</p>
+             <button (click)="increment()">+1</button>`,
 })
 export class Counter {
   count = signal(0)
   doubled = computed(() => this.count() * 2)
-
-  increment() {
-    this.count.update(c => c + 1)
-  }
+  increment() { this.count.update(c => c + 1) }
 
   constructor() {
-    // effect 必须在 injection context（构造函数 / inject 调用点）内创建
-    effect(() => {
-      console.log('count changed:', this.count())
-    })
+    // effect 必须在 injection context（构造函数）内创建
+    effect(() => console.log('count:', this.count()))
   }
 }
 ```
 
 <v-click>
 
-> 💡 **`effect` 内不能写 signal**
->
-> 默认情况下 `effect` 内 `signal.set()` 会抛 `NG0600`。需要时显式 `effect(fn, { allowSignalWrites: true })`，但通常意味着设计有问题。
+> 💡 `effect` 内不能写 signal：默认 `signal.set()` 会抛 `NG0600`。需要时显式 `{ allowSignalWrites: true }`，但通常意味设计有问题。
 
 </v-click>
 
@@ -680,15 +604,12 @@ transition: slide-up
 # untracked 与 effect 调试
 
 ```ts
-import { effect, signal, untracked } from '@angular/core'
-
 const count = signal(0)
 const log = signal<string[]>([])
 
 effect(() => {
   const c = count()
-  // 在 effect 里读 log 但不希望 log 变化触发本 effect
-  const old = untracked(log)
+  const old = untracked(log)    // 读 log 但不订阅其变化
   log.set([...old, `count=${c}`])
 })
 ```
@@ -697,7 +618,7 @@ effect(() => {
 
 **调度细节**：
 
-- Effect 不是同步执行——默认在**下一个 microtask** 集中跑
+- Effect 非同步——默认在**下一个 microtask** 集中跑
 - 连续修改同一 signal 只触发一次 effect
 - 组件销毁时自动停止；也可手动 `effectRef.destroy()`
 
@@ -719,12 +640,8 @@ transition: slide-up
 「与其它 signal 相关联但可被手动覆盖」的 signal：
 
 ```ts
-import { linkedSignal, signal } from '@angular/core'
-
 const shippingOptions = signal(['Standard', 'Express'])
-
-// 跟随第一个选项
-const selected = linkedSignal(() => shippingOptions()[0])
+const selected = linkedSignal(() => shippingOptions()[0])   // 跟随第一个
 
 selected()                        // 'Standard'
 selected.set('Express')           // 用户手动改
@@ -733,16 +650,12 @@ shippingOptions.set(['A', 'B'])   // 选项变了，selected 重置为 'A'
 
 <v-click>
 
-完整 API：可访问 `previous` 值
-
 ```ts
-const selectedWithMemory = linkedSignal<string[], string>({
+// 完整 API：可访问 previous
+const sel = linkedSignal<string[], string>({
   source: shippingOptions,
-  computation: (newOptions, previous) => {
-    // 若上次选的还在新列表里，保留它
-    if (previous && newOptions.includes(previous.value)) return previous.value
-    return newOptions[0]
-  },
+  computation: (next, previous) =>
+    previous && next.includes(previous.value) ? previous.value : next[0],
 })
 ```
 
@@ -750,7 +663,7 @@ const selectedWithMemory = linkedSignal<string[], string>({
 
 <v-click>
 
-**应用场景**：表单初始值跟随 props、tab 跟随路由、列表选中项跟随数据。
+**应用场景**：表单初始值跟随 props / tab 跟随路由 / 列表选中项跟随数据。
 
 </v-click>
 
@@ -763,8 +676,6 @@ transition: slide-up
 异步数据流的 signal 化：
 
 ```ts
-import { resource, signal } from '@angular/core'
-
 const userId = signal<string | undefined>(undefined)
 
 const userResource = resource({
@@ -779,25 +690,17 @@ const userResource = resource({
 
 <v-click>
 
-模板中：
-
 ```html
-@if (userResource.isLoading()) {
-  <spinner />
-} @else if (userResource.error()) {
-  <p>Error: {{ userResource.error()?.message }}</p>
-} @else if (userResource.value(); as data) {
-  <p>{{ data.name }}</p>
-}
+@if (userResource.isLoading()) { <spinner /> }
+@else if (userResource.error()) { <p>{{ userResource.error()?.message }}</p> }
+@else if (userResource.value(); as data) { <p>{{ data.name }}</p> }
 ```
 
 </v-click>
 
 <v-click>
 
-> 💡 **experimental 标注**
->
-> v21 时 `resource` 仍标记为 experimental，API 可能调整。`abortSignal` 会在新参数到来时自动 abort 上一次请求——天然防竞态。生产可用但要锁版本。
+> 💡 v21 仍 experimental。`abortSignal` 会在新参数到来时自动 abort 上一次请求——天然防竞态。
 
 </v-click>
 
@@ -808,36 +711,20 @@ transition: slide-up
 # input() 全部用法
 
 ```ts
-import { Component, input, booleanAttribute, numberAttribute } from '@angular/core'
+import { input, booleanAttribute, numberAttribute } from '@angular/core'
 
-@Component({ selector: 'app-slider' })
 export class Slider {
-  // 1. 可选 + 默认值（类型推断）
-  value = input(0)                                       // InputSignal<number>
-
-  // 2. 必填（无默认）
-  label = input.required<string>()                       // 无 undefined
-
-  // 3. 仅显式类型
-  step = input<number>()                                 // InputSignal<number | undefined>
-
-  // 4. 透明转换：HTML 字符串 → number
-  size = input(10, { transform: numberAttribute })
-
-  // 5. 布尔属性：'' / 'true' / true → true
-  disabled = input(false, { transform: booleanAttribute })
-
-  // 6. 自定义转换
-  tag = input('', { transform: (v: string) => v.trim().toLowerCase() })
-
-  // 7. 别名（HTML 名 / class 名解耦）
-  internalName = input('', { alias: 'name' })
+  value = input(0)                                          // 可选 + 默认值
+  label = input.required<string>()                          // 必填（无默认）
+  step = input<number>()                                    // 仅类型（| undefined）
+  size = input(10, { transform: numberAttribute })          // 字符串 → number
+  disabled = input(false, { transform: booleanAttribute })  // 布尔属性
+  tag = input('', { transform: (v: string) => v.toLowerCase() })   // 自定义转换
+  internalName = input('', { alias: 'name' })               // 别名
 }
 ```
 
 <v-click>
-
-模板使用：
 
 ```html
 <app-slider [value]="50" label="Volume" step="5" size="20" disabled name="vol" />
@@ -852,28 +739,19 @@ transition: slide-up
 # output() 与 RxJS 互通
 
 ```ts
-import { Component, output } from '@angular/core'
-
 @Component({
-  selector: 'app-form',
-  template: `
-    <button (click)="submit()">Submit</button>
-    <button (click)="cancel()">Cancel</button>
-  `,
+  template: `<button (click)="submit()">Submit</button>`,
 })
 export class FormCmp {
   saved = output<{ id: number; name: string }>()
   closed = output<void>()
-
   submit() { this.saved.emit({ id: 1, name: 'Alice' }) }
-  cancel() { this.closed.emit() }
 }
 ```
 
 <v-click>
 
 ```ts
-// 与 RxJS 互通
 import { outputFromObservable, outputToObservable } from '@angular/core/rxjs-interop'
 
 // Observable → output
@@ -882,9 +760,8 @@ class Cmp {
   clicked = outputFromObservable(this.clicks$)
 }
 
-// output → Observable（父组件 / 测试中）
+// output → Observable
 const obs$ = outputToObservable(comp.clicked)
-obs$.subscribe(e => console.log(e))
 ```
 
 </v-click>
@@ -896,30 +773,17 @@ transition: slide-up
 # viewChild() / contentChild()
 
 ```ts
-import { Component, viewChild, viewChildren, ElementRef, effect } from '@angular/core'
-
 @Component({
-  template: `
-    <input #search />
-    <button #btn>One</button>
-    <button #btn>Two</button>
-  `,
+  template: `<input #search /><button #btn>One</button><button #btn>Two</button>`,
 })
 export class Stage {
-  // 单元素，可能 undefined
-  search = viewChild<ElementRef<HTMLInputElement>>('search')
-
-  // 单元素必填
-  searchRequired = viewChild.required<ElementRef<HTMLInputElement>>('search')
-
-  // 多元素
-  buttons = viewChildren<ElementRef<HTMLButtonElement>>('btn')
+  search = viewChild<ElementRef<HTMLInputElement>>('search')           // 可选
+  searchRequired = viewChild.required<ElementRef<HTMLInputElement>>('search')  // 必填
+  buttons = viewChildren<ElementRef<HTMLButtonElement>>('btn')         // 多元素
 
   constructor() {
     effect(() => {
-      // Signal-based —— DOM 变化自动响应
-      const input = this.search()
-      console.log('input element:', input?.nativeElement)
+      console.log('input:', this.search()?.nativeElement)             // 自动响应
     })
   }
 }
@@ -927,11 +791,7 @@ export class Stage {
 
 <v-click>
 
-**vs 旧 `@ViewChild`**：
-
-- 老 `@ViewChild('search') searchEl?: ElementRef` 需要 `AfterViewInit` 才能拿到值
-- 新 `viewChild()` 返回 Signal，模板挂载后自动有值
-- 不再需要生命周期接口绑定
+**vs 旧 `@ViewChild`**：旧 API 需 `AfterViewInit` 才能拿值；新 `viewChild()` 返回 Signal，模板挂载后自动有值，不再需要生命周期接口。
 
 </v-click>
 
@@ -944,13 +804,9 @@ transition: slide-up
 「Content」是父组件投影到 `<ng-content>` 中的节点：
 
 ```ts
-@Component({
-  selector: 'app-tab-group',
-  template: `<ng-content />`,
-})
+@Component({ selector: 'app-tab-group', template: `<ng-content />` })
 export class TabGroup {
-  // 查询父组件投影进来的 <app-tab>
-  tabs = contentChildren(Tab)
+  tabs = contentChildren(Tab)        // 查询父组件投影进来的 <app-tab>
 }
 
 @Component({ selector: 'app-tab', template: `...` })
@@ -989,24 +845,16 @@ transition: slide-up
 
 | 函数 | 用途 | 替代旧 API |
 |---|---|---|
-| `signal<T>()` | 可写信号 | `BehaviorSubject` / 普通字段 |
-| `computed<T>()` | 派生只读 | `combineLatest` + `map` |
-| `effect()` | 副作用 | `ngOnChanges` / `subscribe` |
-| `linkedSignal<T>()` | 可手动覆盖的派生 | （无） |
-| `resource<T>()` | 异步资源 | `HttpClient` + `tap` 套路 |
-| `input<T>()` | 输入 | `@Input()` |
-| `output<T>()` | 输出 | `@Output() new EventEmitter` |
-| `model<T>()` | 双向 | `@Input + @Output` 组合 |
-| `viewChild<T>()` | 视图查询 | `@ViewChild` |
-| `contentChild<T>()` | 内容查询 | `@ContentChild` |
-| `toSignal()` | RxJS → Signal | （新增） |
-| `toObservable()` | Signal → RxJS | （新增） |
+| `signal` / `computed` / `effect` | 状态 / 派生 / 副作用 | `BehaviorSubject` / `subscribe` |
+| `linkedSignal` | 可手动覆盖的派生 | （无） |
+| `resource` / `httpResource` | 异步资源 | `HttpClient` + `tap` |
+| `input` / `output` / `model` | 输入 / 输出 / 双向 | `@Input` / `@Output` |
+| `viewChild` / `contentChild` | 视图 / 内容查询 | `@ViewChild` / `@ContentChild` |
+| `toSignal` / `toObservable` | RxJS ↔ Signal 互通 | （新增） |
 
 <v-click>
 
-> 💡 **核心理念**
->
-> 旧装饰器（`@Input` / `@Output` / `@ViewChild`）仍兼容，但新代码应全面切换到函数式 API——类型推断更稳、不依赖 metadata、与 Signal 反应图天然集成。
+> 💡 旧装饰器仍兼容，但新代码应全面切换到函数式 API——类型推断更稳、与 Signal 反应图天然集成。
 
 </v-click>
 
@@ -1062,20 +910,13 @@ transition: slide-up
 ```ts
 @Component({
   selector: 'app-card',
-  template: `
-    <div class="card">
-      <ng-content />                              <!-- 默认 slot -->
-    </div>
-  `,
+  template: `<div class="card"><ng-content /></div>`,
 })
 export class Card {}
 ```
 
 ```html
-<app-card>
-  <h2>Title</h2>
-  <p>Body</p>
-</app-card>
+<app-card><h2>Title</h2><p>Body</p></app-card>
 ```
 
 <v-click>
@@ -1084,19 +925,15 @@ export class Card {}
 
 ```ts
 @Component({
-  selector: 'app-page',
-  template: `
-    <header><ng-content select="[slot=header]" /></header>
-    <main><ng-content /></main>                   <!-- 兜底 -->
-    <footer><ng-content select="[slot=footer]" /></footer>
-  `,
+  template: `<header><ng-content select="[slot=header]" /></header>
+             <main><ng-content /></main>
+             <footer><ng-content select="[slot=footer]" /></footer>`,
 })
 ```
 
 ```html
 <app-page>
   <h1 slot="header">Welcome</h1>
-  <p>Main content</p>
   <small slot="footer">© 2026</small>
 </app-page>
 ```
@@ -1111,23 +948,17 @@ transition: slide-up
 
 | Hook | 时机 |
 |------|------|
-| `ngOnChanges(changes)` | 输入属性变化时（每次） |
-| `ngOnInit()` | 首次输入初始化后（一次） |
-| `ngDoCheck()` | 每次变更检测前（性能敏感） |
-| `ngAfterContentInit()` | 内容投影初始化后（一次） |
-| `ngAfterContentChecked()` | 内容投影变更检测后（每次） |
-| `ngAfterViewInit()` | 视图初始化后（一次） |
-| `ngAfterViewChecked()` | 视图变更检测后（每次） |
-| `ngOnDestroy()` | 销毁前（一次） |
+| `ngOnChanges` / `ngOnInit` | 输入变化（每次）/ 首次初始化（一次） |
+| `ngDoCheck` | 每次变更检测前（性能敏感） |
+| `ngAfterContentInit` / `Checked` | 内容投影初始化 / 检测后 |
+| `ngAfterViewInit` / `Checked` | 视图初始化 / 检测后 |
+| `ngOnDestroy` | 销毁前（一次） |
 
 <v-click>
 
 ```ts
-@Component({ /* ... */ })
-export class Demo implements OnInit, OnChanges, OnDestroy {
+export class Demo implements OnInit, OnDestroy {
   id = input.required<string>()
-
-  ngOnChanges(changes: SimpleChanges) { console.log('changes:', changes) }
   ngOnInit() { console.log('init, id =', this.id()) }
   ngOnDestroy() { console.log('destroy') }
 }
@@ -1141,22 +972,13 @@ transition: slide-up
 
 # afterNextRender / DestroyRef
 
-新的渲染回调（v16+，**不在 SSR 服务端运行**，仅浏览器）：
+新的渲染回调（v16+，**不在 SSR 服务端运行**）：
 
 ```ts
-import { Component, afterNextRender, afterEveryRender } from '@angular/core'
-
-@Component({ /* ... */ })
 export class Cmp {
   constructor() {
-    afterNextRender(() => {
-      // 一次，组件首次渲染到 DOM 后
-      console.log('First paint done')
-    })
-
-    afterEveryRender(() => {
-      // 每次渲染后（取代 ngAfterViewChecked，更轻量）
-    })
+    afterNextRender(() => console.log('First paint done'))      // 首次渲染（一次）
+    afterEveryRender(() => { /* 取代 ngAfterViewChecked */ })   // 每次渲染
   }
 }
 ```
@@ -1166,14 +988,10 @@ export class Cmp {
 `DestroyRef`（v16+）替代 `OnDestroy` 接口：
 
 ```ts
-import { Component, DestroyRef, inject } from '@angular/core'
-
-@Component({ /* ... */ })
 export class Cmp {
   private destroyRef = inject(DestroyRef)
-
   constructor() {
-    const sub = someObservable$.subscribe(/* ... */)
+    const sub = someObservable$.subscribe()
     this.destroyRef.onDestroy(() => sub.unsubscribe())
   }
 }
@@ -1188,15 +1006,9 @@ transition: slide-up
 # 依赖注入（DI）：核心抽象
 
 ```ts
-import { Injectable } from '@angular/core'
-
-@Injectable({
-  providedIn: 'root',       // 全局单例（推荐）
-})
+@Injectable({ providedIn: 'root' })   // 全局单例（推荐）
 export class UserService {
-  getCurrent() {
-    return { name: 'Alice' }
-  }
+  getCurrent() { return { name: 'Alice' } }
 }
 ```
 
@@ -1207,20 +1019,17 @@ export class UserService {
 | 值 | 含义 |
 |----|------|
 | `'root'` | 全局单例（懒加载也共用） |
-| `'platform'` | 多 Angular 应用之间共享（很少用） |
+| `'platform'` | 多 Angular 应用之间共享 |
 | `'any'` | 每个懒加载模块独立实例 |
-| 具体 `@NgModule` 引用 | 仅在该模块下提供（旧风格） |
 
 </v-click>
 
 <v-click>
 
-不传 `providedIn`，必须显式注册到组件 / 模块 / app 的 `providers`：
+不传 `providedIn`，必须显式注册到组件 / app 的 `providers`：
 
 ```ts
-@Component({
-  providers: [UserService],   // 仅此组件树共享一个实例
-})
+@Component({ providers: [UserService] })   // 仅此组件树共享一个实例
 ```
 
 </v-click>
@@ -1232,14 +1041,8 @@ transition: slide-up
 # inject() 函数（v14+ 推荐）
 
 ```ts
-import { Component, inject } from '@angular/core'
-import { UserService } from './user'
-
-@Component({ /* ... */ })
 export class Profile {
-  // 字段初始化时即注入，类型自动推断
-  private user = inject(UserService)
-
+  private user = inject(UserService)    // 字段初始化时即注入，类型自动推断
   current = this.user.getCurrent()
 }
 ```
@@ -1249,7 +1052,6 @@ export class Profile {
 vs 旧 constructor 注入：
 
 ```ts
-@Component({ /* ... */ })
 export class Profile {
   constructor(private user: UserService) {}
 }
@@ -1259,12 +1061,7 @@ export class Profile {
 
 <v-click>
 
-**`inject()` 的优势**：
-
-- 不需要 constructor 签名，减少样板
-- 可在工厂函数 / `provideXxx` 内使用
-- 类型推断更稳，不会和泛型组件起冲突
-- 推荐在新代码全面切换
+**优势**：不需要 constructor 样板 / 可在工厂函数 / `provideXxx` 内使用 / 类型推断更稳 / 推荐在新代码全面切换。
 
 </v-click>
 
@@ -1277,23 +1074,14 @@ transition: slide-up
 非 class 类型（接口、字面量、配置对象）注入：
 
 ```ts
-import { InjectionToken } from '@angular/core'
-
-export interface AppConfig {
-  apiUrl: string
-  debug: boolean
-}
+export interface AppConfig { apiUrl: string; debug: boolean }
 
 export const APP_CONFIG = new InjectionToken<AppConfig>('APP_CONFIG', {
   providedIn: 'root',
   factory: () => ({ apiUrl: '/api', debug: false }),
 })
 
-// 使用
-@Injectable({ providedIn: 'root' })
-export class Api {
-  private config = inject(APP_CONFIG)
-}
+// 使用：private config = inject(APP_CONFIG)
 ```
 
 <v-click>
@@ -1302,12 +1090,11 @@ export class Api {
 
 ```ts
 providers: [
-  UserService,                                            // 1. useClass 简写
-  { provide: UserService, useClass: MockUserService },    //    显式形式
-  { provide: API_URL, useValue: '/api/v2' },              // 2. useValue
-  { provide: TIMER, useFactory: () => new Timer() },      // 3. useFactory
-  { provide: ILogger, useExisting: ConsoleLogger },       // 4. useExisting（别名）
-  { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },  // 5. multi
+  UserService,                                          // useClass 简写
+  { provide: API_URL, useValue: '/api/v2' },            // useValue
+  { provide: TIMER, useFactory: () => new Timer() },    // useFactory
+  { provide: ILogger, useExisting: ConsoleLogger },     // useExisting（别名）
+  { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },  // multi
 ]
 ```
 
@@ -1320,20 +1107,11 @@ transition: slide-up
 # inject() 配置选项
 
 ```ts
-import { inject } from '@angular/core'
-
 class Cmp {
-  // 可选注入（无 provider 时返回 null）
-  optional = inject(MaybeMissingService, { optional: true })
-
-  // 跳过当前 injector，从父查
-  parent = inject(ParentService, { skipSelf: true })
-
-  // 仅当前 injector
-  self = inject(SelfService, { self: true })
-
-  // 只在 host injector 找（指令注入宿主组件）
-  host = inject(HostService, { host: true })
+  optional = inject(MaybeMissingService, { optional: true })    // 无 provider → null
+  parent = inject(ParentService, { skipSelf: true })            // 跳过当前 injector
+  self = inject(SelfService, { self: true })                    // 仅当前 injector
+  host = inject(HostService, { host: true })                    // 指令注入宿主组件
 }
 ```
 
@@ -1344,12 +1122,10 @@ class Cmp {
 ```
 Root Injector (providedIn: 'root')
   ├─ Lazy Module Injector
-  ├─ Component Injector (component's providers)
-  │    └─ Sub-component Injector
-  └─ ...
+  └─ Component Injector → Sub-component Injector
 ```
 
-子组件 `inject(X)`：先查自己 `providers` → 向上查父 → 祖先 → root → 都没有抛 `NullInjectorError`。
+子组件 `inject(X)`：自己 `providers` → 父 → 祖先 → root → `NullInjectorError`。
 
 </v-click>
 
@@ -1361,15 +1137,11 @@ transition: slide-up
 
 ```ts
 @Component({
-  selector: 'app-form-wizard',
   providers: [WizardState],   // 每个 wizard 实例独立 state
-  template: `
-    <step-one /> <step-two /> <step-three />
-  `,
+  template: `<step-one /> <step-two /> <step-three />`,
 })
 export class FormWizard {}
-
-// step-one / step-two / step-three 通过 inject(WizardState) 拿同一实例
+// step-one/two/three 通过 inject(WizardState) 拿同一实例
 ```
 
 <v-click>
@@ -1378,10 +1150,9 @@ export class FormWizard {}
 
 | 维度 | Angular DI | React Context | Vue provide-inject |
 |---|---|---|---|
-| 类型推导 | 强（基于 token） | 中（Provider 类型） | 中（InjectionKey） |
-| 跨层级共享 | ✅ Hierarchical | ✅ | ✅ |
-| 自动单例 | ✅ | ❌ 需手动 | ❌ |
-| Tree-shaking | ✅（providedIn: 'root'） | ❌ | ❌ |
+| 类型推导 | 强 | 中 | 中 |
+| 自动单例 | ✅ | 需手动 | 需手动 |
+| Tree-shaking | ✅（`providedIn: 'root'`） | ❌ | ❌ |
 | 测试替换 | ✅ override providers | ⚠️ | ⚠️ |
 
 </v-click>
@@ -1426,32 +1197,21 @@ transition: slide-up
 # 路由：导航与链接
 
 ```html
-<!-- 模板 -->
 <a routerLink="/users">Users</a>
 <a [routerLink]="['/users', userId]" [queryParams]="{ page: 2 }">User</a>
-
-<!-- 当前激活样式 -->
-<a routerLink="/home" routerLinkActive="active">Home</a>
-
-<!-- 精确匹配 -->
+<a routerLink="/home" routerLinkActive="active">Home</a>            <!-- 当前激活 -->
 <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Root</a>
 
-<!-- 路由出口 -->
-<router-outlet />
-
-<!-- 多 outlet（secondary） -->
-<router-outlet name="sidebar" />
+<router-outlet />                          <!-- 路由出口 -->
+<router-outlet name="sidebar" />           <!-- 多 outlet -->
 ```
 
 <v-click>
 
 ```ts
 // 编程式
-import { Router } from '@angular/router'
-
 class Cmp {
   private router = inject(Router)
-
   goUser(id: number) {
     this.router.navigate(['/users', id], { queryParams: { tab: 'info' } })
   }
@@ -1469,36 +1229,24 @@ transition: slide-up
 路由参数自动绑定到 `input()`，**取代手动订阅 ActivatedRoute**：
 
 ```ts
-// app.config.ts
 provideRouter(routes, withComponentInputBinding())
 
-// pages/user.ts
-@Component({ /* ... */ })
 export class UserPage {
-  // 路径参数 :id 自动绑定到 input id（同名）
-  id = input<string>()
-
-  // queryParam ?tab=info 自动绑定到 input tab
-  tab = input<string>()
-
-  // 路由 data 也可
-  // { path: 'admin', data: { role: 'admin' }, ... }
-  role = input<string>()
+  id = input<string>()      // 路径参数 :id 自动绑定（同名）
+  tab = input<string>()     // queryParam ?tab=info 自动绑定
+  role = input<string>()    // 路由 data 也可
 }
 ```
 
 <v-click>
 
-**vs 旧写法**：
-
 ```ts
-// ❌ 老 ActivatedRoute 订阅样板
+// ❌ 旧 ActivatedRoute 订阅样板
 export class UserPage {
   private route = inject(ActivatedRoute)
   id$ = this.route.paramMap.pipe(map(p => p.get('id')))
   id = toSignal(this.id$, { initialValue: null })
 }
-
 // ✅ 新写法一行 input()
 ```
 
@@ -1511,15 +1259,9 @@ transition: slide-up
 # 路由守卫（函数式，v15+）
 
 ```ts
-// guards/auth.guard.ts
-import { CanActivateFn, Router } from '@angular/router'
-import { inject } from '@angular/core'
-import { AuthService } from '../services/auth'
-
 export const authGuard: CanActivateFn = (route, state) => {
   const auth = inject(AuthService)
   const router = inject(Router)
-
   if (auth.isLoggedIn()) return true
   return router.createUrlTree(['/login'], { queryParams: { from: state.url } })
 }
@@ -1527,25 +1269,18 @@ export const authGuard: CanActivateFn = (route, state) => {
 
 <v-click>
 
-各种守卫：
-
 | 守卫 | 用途 |
 |------|------|
-| `CanActivateFn` | 能否激活路由 |
-| `CanActivateChildFn` | 能否激活子路由 |
+| `CanActivateFn` / `CanActivateChildFn` | 能否激活路由 / 子路由 |
 | `CanDeactivateFn<Cmp>` | 能否离开（脏表单提示） |
-| `CanMatchFn` | 是否匹配此路由（更早） |
-| `ResolveFn<T>` | 进入前预取数据 |
+| `CanMatchFn` / `ResolveFn<T>` | 是否匹配 / 进入前预取数据 |
 
 </v-click>
 
 <v-click>
 
 ```ts
-// 使用
-export const routes: Routes = [
-  { path: 'profile', canActivate: [authGuard], loadComponent: () => import('./profile') },
-]
+{ path: 'profile', canActivate: [authGuard], loadComponent: () => import('./profile') }
 ```
 
 </v-click>
@@ -1557,10 +1292,8 @@ transition: slide-up
 # 路由：懒加载与 Resolve
 
 ```ts
-// 组件懒加载（v14+，推荐）
+// 组件 / 子路由懒加载（v14+ 推荐）
 { path: 'admin', loadComponent: () => import('./pages/admin').then(m => m.Admin) }
-
-// 一段子路由懒加载
 { path: 'admin', loadChildren: () => import('./admin/routes').then(m => m.adminRoutes) }
 ```
 
@@ -1569,14 +1302,9 @@ transition: slide-up
 **Resolve 示例**：
 
 ```ts
-import { ResolveFn } from '@angular/router'
+export const userResolver: ResolveFn<User> = (route) =>
+  inject(ApiService).getUser(route.paramMap.get('id')!)
 
-export const userResolver: ResolveFn<User> = (route) => {
-  const api = inject(ApiService)
-  return api.getUser(route.paramMap.get('id')!)
-}
-
-// 使用
 {
   path: 'users/:id',
   resolve: { user: userResolver },
@@ -1584,7 +1312,6 @@ export const userResolver: ResolveFn<User> = (route) => {
 }
 
 // 组件内（配合 withComponentInputBinding）
-@Component({ /* ... */ })
 export class User {
   user = input.required<User>()    // 自动从 resolve 数据注入
 }
@@ -1643,16 +1370,10 @@ transition: slide-up
 
 ```ts
 // app.config.ts
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http'
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideHttpClient(
-      withFetch(),                          // 用 fetch API 代替 XHR（v17+）
-      withInterceptors([authInterceptor]),  // 函数式拦截器
-    ),
-  ],
-}
+provideHttpClient(
+  withFetch(),                          // 用 fetch API 代替 XHR（v17+）
+  withInterceptors([authInterceptor]),  // 函数式拦截器
+)
 ```
 
 <v-click>
@@ -1664,7 +1385,6 @@ export const appConfig: ApplicationConfig = {
 export class UserService {
   private http = inject(HttpClient)
   private base = '/api/users'
-
   list() { return this.http.get<User[]>(this.base) }
   get(id: number) { return this.http.get<User>(`${this.base}/${id}`) }
   create(data: Omit<User, 'id'>) { return this.http.post<User>(this.base, data) }
@@ -1682,16 +1402,11 @@ transition: slide-up
 # 函数式拦截器（v15+）
 
 ```ts
-// interceptors/auth.ts
-import { HttpInterceptorFn } from '@angular/common/http'
-import { inject } from '@angular/core'
-
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = inject(AuthService).token()
   const authReq = token
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
     : req
-
   return next(authReq)
 }
 ```
@@ -1699,18 +1414,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 <v-click>
 
 ```ts
-// interceptors/logging.ts
-import { tap } from 'rxjs'
-
 export const loggingInterceptor: HttpInterceptorFn = (req, next) => {
   const t0 = performance.now()
-  console.log('→', req.method, req.url)
-
   return next(req).pipe(
     tap(event => {
-      if (event.type === 4 /* Response */) {
-        console.log('←', req.method, req.url, (performance.now() - t0).toFixed(0) + 'ms')
-      }
+      if (event.type === 4) console.log('←', req.url, performance.now() - t0)
     }),
   )
 }
@@ -1721,8 +1429,7 @@ export const loggingInterceptor: HttpInterceptorFn = (req, next) => {
 <v-click>
 
 ```ts
-// 注册（顺序即执行顺序）
-provideHttpClient(withInterceptors([loggingInterceptor, authInterceptor]))
+provideHttpClient(withInterceptors([loggingInterceptor, authInterceptor]))   // 顺序即执行顺序
 ```
 
 </v-click>
@@ -1734,15 +1441,9 @@ transition: slide-up
 # 错误处理 + 全局错误拦截器
 
 ```ts
-import { HttpErrorResponse } from '@angular/common/http'
-import { catchError, throwError, of } from 'rxjs'
-
 this.http.get<User>(`/api/users/${id}`).pipe(
   catchError((err: HttpErrorResponse) => {
-    if (err.status === 404) {
-      console.warn('Not found')
-      return of(null)
-    }
+    if (err.status === 404) return of(null)
     return throwError(() => err)
   }),
 )
@@ -1756,14 +1457,10 @@ this.http.get<User>(`/api/users/${id}`).pipe(
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const toast = inject(ToastService)
   const router = inject(Router)
-
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
-      if (err.status === 401) {
-        router.navigate(['/login'])
-      } else {
-        toast.error(err.message)
-      }
+      if (err.status === 401) router.navigate(['/login'])
+      else toast.error(err.message)
       return throwError(() => err)
     }),
   )
@@ -1781,12 +1478,8 @@ transition: slide-up
 把 HTTP 请求直接转 signal resource：
 
 ```ts
-import { httpResource } from '@angular/common/http'
-
-@Component({ /* ... */ })
 export class UserView {
   userId = input.required<string>()
-
   user = httpResource<User>(() => `/api/users/${this.userId()}`)
   // user.value() / user.isLoading() / user.error() / user.reload()
 }
@@ -1794,30 +1487,21 @@ export class UserView {
 
 <v-click>
 
-模板：
-
 ```html
-@if (user.isLoading()) {
-  <spinner />
-} @else if (user.error()) {
-  <p>Error: {{ user.error()?.message }}</p>
-} @else if (user.value(); as data) {
-  <p>{{ data.name }}</p>
-}
+@if (user.isLoading()) { <spinner /> }
+@else if (user.error()) { <p>{{ user.error()?.message }}</p> }
+@else if (user.value(); as data) { <p>{{ data.name }}</p> }
 ```
 
 </v-click>
 
 <v-click>
 
-完整请求配置：
-
 ```ts
+// 完整请求配置
 user = httpResource<User>(() => ({
-  url: `/api/users/${this.userId()}`,
-  method: 'GET',
-  headers: { 'X-Trace': '1' },
-  params: { include: 'profile' },
+  url: `/api/users/${this.userId()}`, method: 'GET',
+  headers: { 'X-Trace': '1' }, params: { include: 'profile' },
 }))
 ```
 
@@ -1832,34 +1516,24 @@ transition: slide-up
 适合简单表单（注册 / 登录）：
 
 ```ts
-import { FormsModule } from '@angular/forms'
-
 @Component({
   imports: [FormsModule],
   template: `
     <form #f="ngForm" (ngSubmit)="onSubmit(f)">
-      <input
-        name="email"
-        type="email"
-        [(ngModel)]="email"
-        required
-        email
-        #emailRef="ngModel"
-      />
+      <input name="email" type="email" [(ngModel)]="email" required email
+             #emailRef="ngModel" />
       @if (emailRef.invalid && emailRef.touched) {
         <p class="error">
           @if (emailRef.errors?.['required']) { Email is required }
           @if (emailRef.errors?.['email']) { Invalid email }
         </p>
       }
-
       <button [disabled]="f.invalid">Sign Up</button>
     </form>
   `,
 })
 export class Signup {
   email = signal('')
-
   onSubmit(f: NgForm) { console.log(f.value) }
 }
 ```
@@ -1873,42 +1547,23 @@ transition: slide-up
 适合复杂表单 / 动态字段 / 大量校验：
 
 ```ts
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms'
-
 @Component({
   imports: [ReactiveFormsModule],
   template: `
     <form [formGroup]="form" (ngSubmit)="save()">
-      <input formControlName="name" placeholder="Name" />
-      @if (form.controls.name.invalid && form.controls.name.touched) {
-        <p class="error">Name is required</p>
-      }
-      <input formControlName="email" placeholder="Email" />
-
-      <div formArrayName="phones">
-        @for (phone of phones.controls; track $index) {
-          <input [formControlName]="$index" placeholder="Phone" />
-          <button type="button" (click)="removePhone($index)">×</button>
-        }
-        <button type="button" (click)="addPhone()">+ Add Phone</button>
-      </div>
-
+      <input formControlName="name" />
+      <input formControlName="email" />
       <button [disabled]="form.invalid">Save</button>
     </form>
   `,
 })
 export class Profile {
   private fb = inject(FormBuilder)
-
   form = this.fb.nonNullable.group({
     name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     phones: this.fb.nonNullable.array<string>([]),
   })
-
-  get phones() { return this.form.controls.phones }
-  addPhone() { this.phones.push(this.fb.nonNullable.control('')) }
-  removePhone(i: number) { this.phones.removeAt(i) }
   save() { console.log(this.form.value) }
 }
 ```
@@ -1922,29 +1577,20 @@ transition: slide-up
 `FormControl<T>` / `FormGroup<T>` 全程类型安全：
 
 ```ts
-import { FormControl, FormGroup, Validators } from '@angular/forms'
-
-// 显式
-const email = new FormControl<string | null>('', Validators.required)
-// 推断为 FormControl<string | null>
-
-// 非 null
-const name = new FormControl('', { nonNullable: true, validators: Validators.required })
-// 推断为 FormControl<string>（reset 回初始值而非 null）
+// 显式 / 非 null
+const email = new FormControl<string | null>('', Validators.required)  // FormControl<string | null>
+const name = new FormControl('', { nonNullable: true, validators: Validators.required })  // FormControl<string>
 
 // FormGroup 类型化
 interface ProfileForm {
   name: FormControl<string>
   age: FormControl<number | null>
 }
-
 const form = new FormGroup<ProfileForm>({
   name: new FormControl('', { nonNullable: true }),
   age: new FormControl<number | null>(null),
 })
-
 form.controls.name.value   // string
-form.value                 // Partial<{ name: string; age: number | null }>
 form.getRawValue()         // { name: string; age: number | null }
 ```
 
@@ -1955,35 +1601,29 @@ transition: slide-up
 # 自定义校验器
 
 ```ts
-import { AbstractControl, ValidationErrors, ValidatorFn, AsyncValidatorFn } from '@angular/forms'
-
 // 同步
-export function noSpaces(control: AbstractControl): ValidationErrors | null {
-  return /\s/.test(control.value) ? { noSpaces: true } : null
+export function noSpaces(c: AbstractControl): ValidationErrors | null {
+  return /\s/.test(c.value) ? { noSpaces: true } : null
 }
 
 // 带参数
 export function minWords(min: number): ValidatorFn {
-  return (control: AbstractControl) => {
-    const words = (control.value || '').trim().split(/\s+/)
+  return (c) => {
+    const words = (c.value || '').trim().split(/\s+/)
     return words.length < min ? { minWords: { min, actual: words.length } } : null
   }
 }
 
 // 异步
 export function uniqueUsername(api: ApiService): AsyncValidatorFn {
-  return (control: AbstractControl) =>
-    api.checkUsername(control.value).pipe(
-      map(exists => exists ? { taken: true } : null),
-    )
+  return (c) => api.checkUsername(c.value).pipe(map(exists => exists ? { taken: true } : null))
 }
 ```
 
 <v-click>
 
 ```ts
-// 使用
-const form = fb.nonNullable.group({
+fb.nonNullable.group({
   username: ['', [Validators.required, noSpaces], [uniqueUsername(api)]],
   bio: ['', minWords(3)],
 })
@@ -1997,39 +1637,28 @@ transition: slide-up
 
 # Signal Forms（v20 实验 / v21 developer preview）
 
-Angular v21 推出基于 Signals 的全新表单 API（`@angular/forms/signals`）：
+基于 Signals 的全新表单 API（`@angular/forms/signals`）：
 
 ```ts
-import { signal } from '@angular/core'
 import { form, required, email } from '@angular/forms/signals'
 
 const userModel = signal({ name: '', email: '' })
-
 const f = form(userModel, {
   name: { validators: [required()] },
   email: { validators: [required(), email()] },
 })
-
-// 模板访问：
-// f().valid / f().touched
-// f.name().value / f.name().errors
+// 模板：f().valid / f.name().value / f.name().errors
 ```
 
 <v-click>
 
-> 💡 **状态标注**
->
-> Signal Forms 在 v20 是 experimental，v21 升级为 developer preview。API 仍可能调整，**生产慎用**。但方向是清晰的——把表单完全建在 Signal 之上，告别 RxJS-based Reactive Forms 的样板。
+> 💡 v21 升级为 developer preview，API 仍可能调整，**生产慎用**。方向：表单完全建在 Signal 之上，告别 RxJS-based Reactive Forms 样板。
 
 </v-click>
 
 <v-click>
 
-**对比 Reactive Forms**：
-
-- 不需要 `FormBuilder` / `FormGroup` / `FormControl` 三层封装
-- 直接基于 model signal，类型自然推导
-- valid / touched / dirty 都是 Signal
+**对比 Reactive Forms**：不需要 `FormBuilder` / `FormGroup` / `FormControl` 三层封装；直接基于 model signal，valid / touched / dirty 都是 Signal。
 
 </v-click>
 
@@ -2042,34 +1671,27 @@ transition: slide-up
 ```ts
 import { toSignal, toObservable } from '@angular/core/rxjs-interop'
 
-@Component({ /* ... */ })
 export class Cmp {
-  // Observable → Signal
   user$ = this.api.getUser()
-  user = toSignal(this.user$, { initialValue: null })   // Signal<User | null>
+  user = toSignal(this.user$, { initialValue: null })          // Observable → Signal
+  userSync = toSignal(this.user$, { requireSync: true })       // 要求 sync 发射
 
-  // 必须有初始值或要求 sync 发射
-  userRequired = toSignal(this.user$, { requireSync: true })
-
-  // Signal → Observable
   count = signal(0)
-  count$ = toObservable(this.count)
+  count$ = toObservable(this.count)                            // Signal → Observable
 }
 ```
 
 <v-click>
 
-`toSignal` 自动处理订阅 + 在 DestroyRef 销毁时退订——这是 RxJS 接入 Signal 反应图的官方桥梁。
+`toSignal` 自动订阅 + 在 DestroyRef 销毁时退订——RxJS 接入 Signal 反应图的官方桥梁。
 
 </v-click>
 
 <v-click>
 
-**rxResource（v19+）**：把 Observable 包成 resource
+**rxResource（v19+）**：
 
 ```ts
-import { rxResource } from '@angular/core/rxjs-interop'
-
 userResource = rxResource({
   params: () => ({ id: this.userId() }),
   stream: ({ params }) => this.api.user$(params.id),
@@ -2089,21 +1711,13 @@ transition: slide-up
 ```ts
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 
-@Component({ /* ... */ })
 export class Cmp {
-  constructor() {
-    interval(1000)
-      .pipe(takeUntilDestroyed())   // 自动绑当前 DestroyRef
-      .subscribe(t => console.log(t))
-  }
-
-  // 在其它方法内：显式 DestroyRef
   private destroyRef = inject(DestroyRef)
-
+  constructor() {
+    interval(1000).pipe(takeUntilDestroyed()).subscribe()   // 自动绑当前 DestroyRef
+  }
   start() {
-    interval(1000)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe()
+    interval(1000).pipe(takeUntilDestroyed(this.destroyRef)).subscribe()
   }
 }
 ```
@@ -2130,22 +1744,10 @@ transition: slide-up
 # 典型 RxJS 模式：debounced 搜索
 
 ```ts
-import { Subject, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs'
-import { toSignal } from '@angular/core/rxjs-interop'
+import { debounceTime, distinctUntilChanged, switchMap, of, Subject } from 'rxjs'
 
-@Component({
-  selector: 'app-search',
-  template: `
-    <input [(ngModel)]="query" (ngModelChange)="onChange($event)" />
-    @for (item of results(); track item.id) {
-      <li>{{ item.name }}</li>
-    }
-  `,
-})
 export class Search {
   private api = inject(ApiService)
-  query = signal('')
-
   private query$ = new Subject<string>()
   onChange(v: string) { this.query$.next(v) }
 
@@ -2206,18 +1808,11 @@ transition: slide-up
 ```ts
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <p>Count: {{ count() }}</p>
-    <button (click)="increment()">+1</button>
-  `,
+  template: `<p>Count: {{ count() }}</p><button (click)="inc()">+1</button>`,
 })
 export class Counter {
-  count = signal(0)
-  // signal 变化自动触发当前组件的 CD（不需手动 markForCheck）
-
-  increment() {
-    this.count.update(c => c + 1)
-  }
+  count = signal(0)                       // signal 变化自动触发 CD，不需 markForCheck
+  inc() { this.count.update(c => c + 1) }
 }
 ```
 
@@ -2226,18 +1821,11 @@ export class Counter {
 **手动控制 CD**：
 
 ```ts
-import { ChangeDetectorRef, inject } from '@angular/core'
-
 class Cmp {
   private cdr = inject(ChangeDetectorRef)
-
   triggerCheck() { this.cdr.detectChanges() }   // 立刻同步检测
   markForCheck() { this.cdr.markForCheck() }    // 标记后下次 tick 检测
-
-  detach() {
-    this.cdr.detach()          // 暂停 CD（极少用，性能优化）
-    this.cdr.reattach()
-  }
+  detach() { this.cdr.detach(); this.cdr.reattach() }   // 暂停 / 恢复 CD
 }
 ```
 
@@ -2317,16 +1905,11 @@ transition: slide-up
 
 # Zoneless 模式（v21 默认）
 
-**Zone.js 是什么**：通过 monkey-patch 浏览器的 `setTimeout` / `Promise` / `XHR` / DOM 事件等所有异步入口，给 Angular 一个挂钩，让用户的任何异步操作完成时 → 自动跑变更检测。
+**Zone.js**：monkey-patch 浏览器异步入口（`setTimeout` / `Promise` / `XHR` / DOM 事件），让 Angular 在异步完成时自动跑变更检测。
 
 <v-click>
 
-**代价**：
-
-- bundle 多 ~30KB（gzip）
-- 每个浏览器 API 入口都被劫持，调试栈混乱
-- 第三方库（Web Components / WebRTC / 新 API）经常忘记 patch，CD 不触发
-- 严重影响 Core Web Vitals（INP / TBT）
+**代价**：bundle 多 ~30KB / 调试栈混乱 / 第三方库忘 patch 导致 CD 失效 / 严重影响 Core Web Vitals（INP / TBT）。
 
 </v-click>
 
@@ -2335,19 +1918,11 @@ transition: slide-up
 **Zoneless**：去掉 Zone.js，改用 Signal 驱动 CD
 
 ```ts
-// app.config.ts（v20 写法，v21 默认即此）
-import { provideZonelessChangeDetection } from '@angular/core'
-
+// app.config.ts（v20 写法，v21 默认）
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideZonelessChangeDetection(),
-    // 其它 provider
-  ],
+  providers: [provideZonelessChangeDetection()],
 }
-
-// main.ts 需要去掉 Zone.js polyfill
-// 删除 (或在 angular.json polyfills 中移除)：
-// import 'zone.js'
+// main.ts 删除 import 'zone.js'
 ```
 
 </v-click>
@@ -2360,38 +1935,23 @@ transition: slide-up
 
 去掉 Zone.js 后，Angular 不再监听异步事件，而是：
 
-- Signal 变化 → 关联组件 / `effect` 被标记 dirty
+- Signal 变化 → 关联组件 / `effect` 标记 dirty
 - 模板事件（`(click)`）→ 当前组件标记 dirty
-- 路由 / HTTP 完成 → 内部使用 Signal-based scheduler
-- 时间到 → tick
+- 路由 / HTTP 完成 → 内部 Signal-based scheduler
 
 <v-click>
 
-适配 Zoneless 的代码：
-
 ```ts
-// ✅ 信号驱动（自然 Zoneless 友好）
-class Cmp {
-  count = signal(0)
-  inc() { this.count.update(c => c + 1) }
-}
-
 // ❌ 在 setTimeout / Promise 里改普通字段（不触发 CD）
 class Cmp {
   data: any = null
-  load() {
-    fetch('/api').then(r => r.json()).then(d => {
-      this.data = d            // Zoneless 下不触发 CD！
-    })
-  }
+  load() { fetch('/api').then(r => r.json()).then(d => this.data = d) }
 }
 
 // ✅ 改用 signal
 class Cmp {
   data = signal<any>(null)
-  load() {
-    fetch('/api').then(r => r.json()).then(d => this.data.set(d))
-  }
+  load() { fetch('/api').then(r => r.json()).then(d => this.data.set(d)) }
 }
 ```
 
@@ -2476,17 +2036,9 @@ transition: slide-up
 
 ```ts
 // app.config.server.ts
-import { mergeApplicationConfig } from '@angular/core'
-import { provideServerRendering, withRoutes } from '@angular/ssr'
-import { appConfig } from './app.config'
-import { serverRoutes } from './app.routes.server'
-
 const serverConfig: ApplicationConfig = {
-  providers: [
-    provideServerRendering(withRoutes(serverRoutes)),
-  ],
+  providers: [provideServerRendering(withRoutes(serverRoutes))],
 }
-
 export const config = mergeApplicationConfig(appConfig, serverConfig)
 ```
 
@@ -2494,21 +2046,15 @@ export const config = mergeApplicationConfig(appConfig, serverConfig)
 
 ```ts
 // app.routes.server.ts —— 每条路由的渲染模式
-import { RenderMode, ServerRoute } from '@angular/ssr'
-
 export const serverRoutes: ServerRoute[] = [
-  { path: '', renderMode: RenderMode.Server },        // SSR
-  { path: 'dashboard', renderMode: RenderMode.Client }, // CSR（仅发空壳 HTML）
-  { path: 'about', renderMode: RenderMode.Prerender },  // SSG（构建时预渲染）
-
-  // 动态预渲染
+  { path: '', renderMode: RenderMode.Server },              // SSR
+  { path: 'dashboard', renderMode: RenderMode.Client },     // CSR
+  { path: 'about', renderMode: RenderMode.Prerender },      // SSG
   {
     path: 'posts/:id',
     renderMode: RenderMode.Prerender,
-    getPrerenderParams: async () => {
-      const posts = await fetch('/api/posts').then(r => r.json())
-      return posts.map((p: any) => ({ id: p.id }))
-    },
+    getPrerenderParams: async () =>
+      (await fetch('/api/posts').then(r => r.json())).map((p: any) => ({ id: p.id })),
   },
 ]
 ```
@@ -2525,17 +2071,10 @@ transition: slide-up
 
 ```ts
 // app.config.ts
-import { provideClientHydration, withIncrementalHydration } from '@angular/platform-browser'
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideClientHydration(withIncrementalHydration()),
-  ],
-}
+provideClientHydration(withIncrementalHydration())
 ```
 
 ```html
-<!-- 模板 -->
 @defer (hydrate on viewport) {
   <heavy-chart [data]="data" />
 } @placeholder {
@@ -2545,17 +2084,7 @@ export const appConfig: ApplicationConfig = {
 
 <v-click>
 
-`hydrate on` 触发器：
-
-| 触发器 | 行为 |
-|--------|------|
-| `hydrate on idle` | 浏览器空闲 |
-| `hydrate on viewport` | 进入视口 |
-| `hydrate on interaction` | 用户交互 |
-| `hydrate on hover` | 悬停 |
-| `hydrate on immediate` | 立即（仅延迟下载） |
-| `hydrate on timer(500ms)` | 计时器 |
-| `hydrate when expr` | 表达式真 |
+`hydrate on` 触发器：`idle` / `viewport` / `interaction` / `hover` / `immediate` / `timer(500ms)` / `when expr`。
 
 </v-click>
 
@@ -2574,33 +2103,22 @@ transition: slide-up
 服务端没有 `window` / `document`——直接访问会崩。两种方案：
 
 ```ts
-import { afterNextRender, inject, PLATFORM_ID } from '@angular/core'
-import { isPlatformBrowser } from '@angular/common'
-
-@Component({ /* ... */ })
 export class Cmp {
   private platformId = inject(PLATFORM_ID)
 
   constructor() {
-    // 方案 1：仅浏览器执行
-    if (isPlatformBrowser(this.platformId)) {
-      console.log(window.innerWidth)
-    }
+    // 方案 1：守卫判断
+    if (isPlatformBrowser(this.platformId)) console.log(window.innerWidth)
 
-    // 方案 2（推荐）：用 afterNextRender，本身不在 SSR 跑
-    afterNextRender(() => {
-      const w = window.innerWidth
-      // ...
-    })
+    // 方案 2（推荐）：afterNextRender 本身不在 SSR 跑
+    afterNextRender(() => { const w = window.innerWidth })
   }
 }
 ```
 
 <v-click>
 
-> 💡 **常见踩坑**
->
-> 第三方库（Chart.js / Quill / Echarts）在 SSR 时报 `window is not defined`。统一规则：**任何访问 DOM / `window` / `document` 的代码必须放在 `afterNextRender` 内**。
+> 💡 第三方库（Chart.js / Quill / Echarts）SSR 时常报 `window is not defined`。规则：**任何 DOM / `window` / `document` 访问必须放在 `afterNextRender` 内**。
 
 </v-click>
 
@@ -2613,16 +2131,13 @@ transition: slide-up
 最轻量方案，适合中小项目：
 
 ```ts
-// services/cart.ts
 @Injectable({ providedIn: 'root' })
 export class CartService {
   private _items = signal<Item[]>([])
 
   readonly items = this._items.asReadonly()
-  readonly total = computed(() =>
-    this._items().reduce((s, i) => s + i.price * i.qty, 0))
-  readonly count = computed(() =>
-    this._items().reduce((n, i) => n + i.qty, 0))
+  readonly total = computed(() => this._items().reduce((s, i) => s + i.price * i.qty, 0))
+  readonly count = computed(() => this._items().reduce((n, i) => n + i.qty, 0))
 
   add(item: Item) {
     this._items.update(list => {
@@ -2633,10 +2148,7 @@ export class CartService {
       return next
     })
   }
-
-  remove(id: string) {
-    this._items.update(list => list.filter(i => i.id !== id))
-  }
+  remove(id: string) { this._items.update(list => list.filter(i => i.id !== id)) }
 }
 ```
 
@@ -2651,30 +2163,22 @@ pnpm add @ngrx/store @ngrx/effects @ngrx/entity
 ```
 
 ```ts
-// state/counter.actions.ts
-import { createActionGroup, emptyProps, props } from '@ngrx/store'
-
+// actions
 export const CounterActions = createActionGroup({
   source: 'Counter',
-  events: {
-    Increment: emptyProps(),
-    Decrement: emptyProps(),
-    Set: props<{ value: number }>(),
-  },
+  events: { Increment: emptyProps(), Decrement: emptyProps(), Set: props<{ value: number }>() },
 })
 
-// state/counter.reducer.ts
+// reducer
 export const counterReducer = createReducer(
   { count: 0 },
   on(CounterActions.increment, s => ({ ...s, count: s.count + 1 })),
-  on(CounterActions.decrement, s => ({ ...s, count: s.count - 1 })),
   on(CounterActions.set, (s, { value }) => ({ ...s, count: value })),
 )
 
-// state/counter.selectors.ts
+// selector
 export const selectCount = createSelector(
-  createFeatureSelector<{ count: number }>('counter'),
-  s => s.count,
+  createFeatureSelector<{ count: number }>('counter'), s => s.count,
 )
 ```
 
@@ -2723,22 +2227,15 @@ transition: slide-up
 
 # NgRx Signals（新 API）
 
-NgRx Signal Store 完全基于 Signal，无 Action / Reducer 的开销：
-
-```bash
-pnpm add @ngrx/signals
-```
+NgRx Signal Store 完全基于 Signal，无 Action / Reducer 开销：
 
 ```ts
 import { signalStore, withState, withComputed, withMethods, patchState } from '@ngrx/signals'
-import { computed } from '@angular/core'
 
 export const CounterStore = signalStore(
   { providedIn: 'root' },
   withState({ count: 0 }),
-  withComputed(({ count }) => ({
-    doubled: computed(() => count() * 2),
-  })),
+  withComputed(({ count }) => ({ doubled: computed(() => count() * 2) })),
   withMethods(store => ({
     increment: () => patchState(store, { count: store.count() + 1 }),
     reset: () => patchState(store, { count: 0 }),
@@ -2750,7 +2247,6 @@ export const CounterStore = signalStore(
 
 ```ts
 // 组件
-@Component({ /* ... */ })
 export class Cmp {
   store = inject(CounterStore)
   // store.count(), store.doubled(), store.increment()
@@ -2765,29 +2261,22 @@ transition: slide-up
 
 # 状态管理选型
 
-| 方案 | 适合 | 心智模型 |
-|---|---|---|
-| **Service + Signals** | 中小项目 / 简单状态 | 类 + signal + computed |
-| **Component Store** | 页面级局部 store | RxJS-based ComponentStore |
-| **NgRx Store** | 企业级 / Redux 风格 | Action / Reducer / Selector / Effect |
-| **NgRx Signals** | Signal 时代企业级 | signalStore + withState + withMethods |
-| **Akita / NGXS** | 历史项目 | OOP store |
+| 方案 | 适合 |
+|---|---|
+| **Service + Signals** | 中小项目 / 简单状态 |
+| **NgRx Store** | 企业级 Redux 风格（Action / Reducer / Selector） |
+| **NgRx Signals** | Signal 时代企业级（signalStore） |
+| **Component Store** / Akita / NGXS | 局部 store / 历史项目 |
 
 <v-click>
 
-**经验**：
-
-- 新项目 / Signal 友好 → **Service + Signals** 或 **NgRx Signals**
-- 重 Redux 习惯 / 已有 NgRx 经验 → **NgRx Store + toSignal**
-- 老项目 RxJS-heavy → **Component Store**
+**经验**：新项目 → Service + Signals 或 NgRx Signals；重 Redux 习惯 → NgRx Store + `toSignal`；老项目 RxJS-heavy → Component Store。
 
 </v-click>
 
 <v-click>
 
-> 💡 **不要过度设计**
->
-> 80% 的 Angular 项目用 Service + Signals 完全够用。引入 NgRx 之前问问自己：「真有跨多个组件 / 路由的复杂状态吗？」
+> 💡 不要过度设计：80% Angular 项目用 Service + Signals 够用。引入 NgRx 前问问「真有跨组件 / 路由的复杂状态吗？」
 
 </v-click>
 
@@ -2801,33 +2290,20 @@ transition: slide-up
 @Injectable({ providedIn: 'root' })
 export class ProductsStore {
   private http = inject(HttpClient)
-
-  private state = signal({
-    items: [] as Product[],
-    loading: false,
-    error: null as string | null,
-    filter: '',
-  })
+  private state = signal({ items: [] as Product[], loading: false, filter: '' })
 
   readonly items = computed(() => this.state().items)
   readonly loading = computed(() => this.state().loading)
-  readonly error = computed(() => this.state().error)
-
   readonly filtered = computed(() => {
     const q = this.state().filter.toLowerCase()
-    return q
-      ? this.items().filter(p => p.name.toLowerCase().includes(q))
-      : this.items()
+    return q ? this.items().filter(p => p.name.toLowerCase().includes(q)) : this.items()
   })
 
-  setFilter(filter: string) {
-    this.state.update(s => ({ ...s, filter }))
-  }
+  setFilter(filter: string) { this.state.update(s => ({ ...s, filter })) }
 
   load() {
-    this.state.update(s => ({ ...s, loading: true, error: null }))
+    this.state.update(s => ({ ...s, loading: true }))
     this.http.get<Product[]>('/api/products').pipe(
-      catchError(err => { this.state.update(s => ({ ...s, error: err.message })); return of([]) }),
       finalize(() => this.state.update(s => ({ ...s, loading: false }))),
       takeUntilDestroyed(),
     ).subscribe(items => this.state.update(s => ({ ...s, items })))
@@ -2844,30 +2320,19 @@ transition: slide-up
 | 管道 | 用途 |
 |------|------|
 | `async` | 自动订阅 / 退订 Observable / Promise |
-| `date` | 格式化日期 |
-| `currency` | 格式化货币（ISO 4217） |
-| `decimal` (`number`) | 格式化数值（小数位数 / 千分位） |
-| `percent` | 格式化百分比 |
-| `json` | 对象序列化（调试用） |
-| `slice` | 数组 / 字符串切片 |
-| `keyvalue` | 把对象 / Map 转 `[{key, value}]` 数组 |
+| `date` / `currency` / `number` / `percent` | 格式化日期 / 货币 / 数值 / 百分比 |
+| `json` / `slice` / `keyvalue` | 序列化 / 切片 / 对象转数组 |
 | `uppercase` / `lowercase` / `titlecase` | 字符串大小写 |
 
 ```html
-<p>{{ user$ | async }}</p>
 <p>{{ date | date:'yyyy-MM-dd' }}</p>
 <p>{{ price | currency:'USD':'symbol':'1.2-2' }}</p>
-<p>{{ pi | number:'1.2-4' }}</p>
 <p>{{ rate | percent:'1.0-2' }}</p>
-<pre>{{ obj | json }}</pre>
-<p>{{ list | slice:0:3 }}</p>
 ```
 
 <v-click>
 
-> 💡 **Signal 时代不太需要 AsyncPipe**
->
-> 直接 `toSignal(obs$)` 然后 <span v-pre>`{{ data() }}`</span>。`AsyncPipe` 仍是 RxJS 直读的便利方式。
+> 💡 Signal 时代不太需要 AsyncPipe：直接 `toSignal(obs$)` 然后 <span v-pre>`{{ data() }}`</span>。
 
 </v-click>
 
@@ -2878,11 +2343,7 @@ transition: slide-up
 # 自定义 Pipe
 
 ```ts
-import { Pipe, PipeTransform } from '@angular/core'
-
-@Pipe({
-  name: 'truncate',
-})
+@Pipe({ name: 'truncate' })
 export class TruncatePipe implements PipeTransform {
   transform(value: string, maxLength = 20, suffix = '...'): string {
     if (!value || value.length <= maxLength) return value
@@ -2900,16 +2361,7 @@ export class TruncatePipe implements PipeTransform {
 
 <v-click>
 
-**Pure vs Impure**：
-
-```ts
-@Pipe({
-  name: 'filter',
-  pure: false,    // 默认 true，false 每次变更检测都重算
-})
-```
-
-`pure: false` 会显著影响性能（每次 CD 都跑 transform），尽量避免。
+**Pure vs Impure**：`@Pipe({ name: 'filter', pure: false })` 默认 true；false 每次 CD 都重算，性能差，尽量避免。
 
 </v-click>
 
@@ -2922,8 +2374,6 @@ transition: slide-up
 加在元素上改变行为：
 
 ```ts
-import { Directive, ElementRef, inject, input } from '@angular/core'
-
 @Directive({
   selector: '[appHighlight]',
   host: {
@@ -2934,9 +2384,7 @@ import { Directive, ElementRef, inject, input } from '@angular/core'
 })
 export class HighlightDirective {
   private el = inject(ElementRef<HTMLElement>)
-
   color = input<string>('yellow')
-
   onEnter() { this.el.nativeElement.style.outline = '2px solid red' }
   onLeave() { this.el.nativeElement.style.outline = '' }
 }
@@ -2952,9 +2400,7 @@ export class HighlightDirective {
 
 <v-click>
 
-> 💡 **v17+ 推荐 `host` 字段**
->
-> 取代 `@HostBinding` / `@HostListener`，更简洁，统一在 metadata 中可见。
+> 💡 v17+ 推荐 `host` 字段：取代 `@HostBinding` / `@HostListener`，更简洁，metadata 可见。
 
 </v-click>
 
@@ -2965,23 +2411,16 @@ transition: slide-up
 # 指令：结构指令（自定义）
 
 ```ts
-import { Directive, TemplateRef, ViewContainerRef, inject, input, effect } from '@angular/core'
-
-@Directive({
-  selector: '[appUnless]',
-})
+@Directive({ selector: '[appUnless]' })
 export class UnlessDirective {
   private tpl = inject(TemplateRef<unknown>)
   private vc = inject(ViewContainerRef)
-
   appUnless = input.required<boolean>()
 
   constructor() {
     effect(() => {
       this.vc.clear()
-      if (!this.appUnless()) {
-        this.vc.createEmbeddedView(this.tpl)
-      }
+      if (!this.appUnless()) this.vc.createEmbeddedView(this.tpl)
     })
   }
 }
@@ -2993,9 +2432,7 @@ export class UnlessDirective {
 
 <v-click>
 
-> 💡 **新代码优先用 `@if`**
->
-> 自定义结构指令在 v17+ 已经不太需要——绝大多数场景 `@if` / `@for` 配合 signal 就能搞定。
+> 💡 新代码优先用 `@if`：v17+ 自定义结构指令不太需要——`@if` / `@for` 配合 signal 就能搞定。
 
 </v-click>
 
@@ -3006,15 +2443,9 @@ transition: slide-up
 # 测试：Karma + Jasmine（默认）
 
 ```ts
-// counter.spec.ts
-import { TestBed } from '@angular/core/testing'
-import { Counter } from './counter'
-
 describe('Counter', () => {
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [Counter],
-    }).compileComponents()
+    await TestBed.configureTestingModule({ imports: [Counter] }).compileComponents()
   })
 
   it('renders count', () => {
@@ -3026,8 +2457,7 @@ describe('Counter', () => {
   it('increments on click', () => {
     const fixture = TestBed.createComponent(Counter)
     fixture.detectChanges()
-    const btn = fixture.nativeElement.querySelector('button')
-    btn.click()
+    fixture.nativeElement.querySelector('button').click()
     fixture.detectChanges()
     expect(fixture.nativeElement.textContent).toContain('Count: 1')
   })
@@ -3036,9 +2466,7 @@ describe('Counter', () => {
 
 <v-click>
 
-> ⚠️ **Karma 已 deprecated**
->
-> Karma 自 2023 年起官方建议迁移到 Web Test Runner / Vitest / Jest。新项目（v17+）`ng new` 默认仍是 Karma + Jasmine，但官方计划在未来版本中切换默认 runner。
+> ⚠️ Karma 自 2023 起 deprecated，官方建议迁移到 Web Test Runner / Vitest / Jest。`ng new` 默认仍是 Karma，但未来版本会切换。
 
 </v-click>
 
@@ -3092,8 +2520,6 @@ transition: slide-up
 # 测试：HttpClientTestingModule
 
 ```ts
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing'
-
 beforeEach(() => {
   TestBed.configureTestingModule({
     imports: [HttpClientTestingModule],
@@ -3113,7 +2539,7 @@ it('loads users', () => {
   req.flush([{ id: 1, name: 'Alice' }])
 
   expect(result).toEqual([{ id: 1, name: 'Alice' }])
-  http.verify()         // 确保所有请求都被消费
+  http.verify()       // 确保所有请求都被消费
 })
 ```
 
@@ -3129,16 +2555,11 @@ transition: slide-up
 
 # 测试：Cypress / Playwright
 
-```bash
-ng add @cypress/schematic
-```
-
 ```ts
-// cypress/e2e/home.cy.ts
+// Cypress：ng add @cypress/schematic
 describe('Home', () => {
   it('shows welcome', () => {
     cy.visit('/')
-    cy.contains('Welcome')
     cy.get('button').contains('+1').click()
     cy.contains('Count: 1')
   })
@@ -3147,15 +2568,10 @@ describe('Home', () => {
 
 <v-click>
 
-**Playwright**：
-
 ```ts
-// e2e/home.spec.ts
-import { test, expect } from '@playwright/test'
-
+// Playwright
 test('shows counter', async ({ page }) => {
   await page.goto('http://localhost:4200/')
-  await expect(page.getByText('Count: 0')).toBeVisible()
   await page.getByRole('button', { name: '+1' }).click()
   await expect(page.getByText('Count: 1')).toBeVisible()
 })
@@ -3165,7 +2581,7 @@ test('shows counter', async ({ page }) => {
 
 <v-click>
 
-Playwright 速度 / 跨浏览器 / Debug 体验都比 Cypress 好，社区采用率快速上升。
+Playwright 速度 / 跨浏览器 / Debug 都比 Cypress 好，社区采用率快速上升。
 
 </v-click>
 
@@ -3218,31 +2634,21 @@ transition: slide-up
 
 <v-clicks>
 
-- **OnPush + Signal** → 默认基线（Zoneless 模式下零成本）
+- **OnPush + Signal** → 默认基线（Zoneless 模式零成本）
 - **`@for` 用合适的 `track`** → 唯一 ID > 引用 > $index
-- **`runOutsideAngular`** → 高频任务跳出 Zone（兼容 Zoned 模式）
-- **`@defer`** → 非首屏组件延迟下载
-- **`loadComponent`** → 路由级懒加载（首屏 bundle 缩小）
-- **`prefetch on idle`** → 预下载但不渲染
+- **`@defer` / `loadComponent` / `prefetch on idle`** → 延迟下载 / 路由懒加载 / 预下载
 - **`NgOptimizedImage`** → 图像优化（自动 srcset / lazy / priority）
-- **Service Worker** → `@angular/pwa` 离线 + 缓存
-- **SSR + Prerender** → 静态内容首屏 < 100ms
+- **Service Worker + SSR + Prerender** → 离线缓存 / 首屏 < 100ms
 
 </v-clicks>
 
 ```ts
-// runOutsideAngular 例子
-import { NgZone, inject } from '@angular/core'
-
+// runOutsideAngular：高频任务跳出 Zone
 class Cmp {
   private zone = inject(NgZone)
-
   startAnimation() {
     this.zone.runOutsideAngular(() => {
-      const loop = () => {
-        // 高频任务（rAF / mousemove）在 zone 外执行
-        requestAnimationFrame(loop)
-      }
+      const loop = () => requestAnimationFrame(loop)
       loop()
     })
   }
@@ -3258,7 +2664,6 @@ transition: slide-up
 Ivy（v9+ 默认）把模板编译为**针对该组件的独立 instance closure**：
 
 ```html
-<!-- 模板 -->
 <div>{{ name }}</div>
 <button (click)="onClick()">Click</button>
 ```
@@ -3267,25 +2672,19 @@ Ivy（v9+ 默认）把模板编译为**针对该组件的独立 instance closure
 
 ```js
 function MyCmp_Template(rf, ctx) {
-  if (rf & 1) {           // create mode
-    ɵɵelementStart(0, 'div')
-    ɵɵtext(1)
-    ɵɵelementEnd()
+  if (rf & 1) {           // create
+    ɵɵelementStart(0, 'div'); ɵɵtext(1); ɵɵelementEnd()
     ɵɵelementStart(2, 'button')
     ɵɵlistener('click', () => ctx.onClick())
-    ɵɵtext(3, 'Click')
-    ɵɵelementEnd()
+    ɵɵtext(3, 'Click'); ɵɵelementEnd()
   }
-  if (rf & 2) {           // update mode
-    ɵɵadvance()
-    ɵɵtextInterpolate(ctx.name)
-  }
+  if (rf & 2) { ɵɵadvance(); ɵɵtextInterpolate(ctx.name) }   // update
 }
 ```
 
 <v-click>
 
-每个组件的模板 → 独立函数 → **tree-shake 友好**（未用的组件代码不打进 bundle）。
+每个组件的模板 → 独立函数 → **tree-shake 友好**（未用代码不进 bundle）。
 
 </v-click>
 
@@ -3297,27 +2696,19 @@ transition: slide-up
 
 | 维度 | Angular Ivy | React Fiber |
 |------|------------|-------------|
-| 编译 | 模板编译为 instance closure | JSX 编译为 `React.createElement` 调用 |
-| 节点结构 | LView + TView 数组结构 | Fiber 链表（child / sibling / return） |
-| 调度 | 同步（OnPush）/ Zone 通知 / Signal 驱动 | concurrent mode（time-slicing） |
-| 局部性 | 模板代码与组件强绑定 | 组件代码与运行时通用化 |
+| 编译 | 模板编译为 instance closure | JSX → `React.createElement` |
+| 节点结构 | LView + TView 数组结构 | Fiber 链表（child / sibling） |
+| 调度 | OnPush / Zone / Signal 驱动 | concurrent mode（time-slicing） |
 
 <v-click>
 
-**bundle 优势**：
-
-- Ivy 编译输出强绑组件 → 未引用的代码 100% 不进 bundle
-- React 的 runtime 通用化 → 整个 React 运行时打入 bundle
+**bundle**：Ivy 编译强绑组件 → 未引用代码 100% 不进 bundle；React runtime 通用化 → 整个运行时打入 bundle。
 
 </v-click>
 
 <v-click>
 
-**性能差异**：
-
-- React 重渲染：整个组件函数重跑（cheap reconciler）
-- Angular OnPush + Signal：仅 dirty 组件检查（局部精确）
-- Zoneless 后 Angular 接近 Solid 的细粒度更新
+**性能**：React 整组件函数重跑 vs Angular OnPush + Signal 局部精确；Zoneless 后接近 Solid 细粒度更新。
 
 </v-click>
 
@@ -3356,35 +2747,26 @@ transition: slide-up
 # 微前端：加载远程组件
 
 ```ts
-// shell 加载 remote 组件
 import { loadRemoteModule } from '@angular-architects/native-federation'
 
-const Cmp = await loadRemoteModule({
-  remoteName: 'mfe1',
-  exposedModule: './FlightsCmp',
-}).then(m => m.FlightsCmp)
-```
+const Cmp = await loadRemoteModule({ remoteName: 'mfe1', exposedModule: './FlightsCmp' })
+  .then(m => m.FlightsCmp)
 
-<v-click>
-
-```ts
 // 路由内懒加载远程
 {
   path: 'flights',
-  loadComponent: () =>
-    loadRemoteModule({ remoteName: 'mfe1', exposedModule: './FlightsCmp' })
-      .then(m => m.FlightsCmp),
+  loadComponent: () => loadRemoteModule({
+    remoteName: 'mfe1', exposedModule: './FlightsCmp',
+  }).then(m => m.FlightsCmp),
 }
 ```
-
-</v-click>
 
 <v-click>
 
 | 方案 | 隔离原理 | 适合 |
 |---|---|---|
 | **Native Federation** | Import Maps | Angular 全栈微前端 |
-| **single-spa-angular** | 各自隔离 | 跨框架（React + Vue + Angular） |
+| **single-spa-angular** | 各自隔离 | 跨框架 |
 | **Angular Elements** | Web Component | 嵌入非 Angular 项目 |
 
 </v-click>
@@ -3397,25 +2779,18 @@ transition: slide-up
 
 把组件编译为 Custom Element，任意项目都能用：
 
-```bash
-pnpm add @angular/elements
-```
-
 ```ts
 import { createCustomElement } from '@angular/elements'
 
 @Injectable()
 export class App {
   constructor(injector: Injector) {
-    const el = createCustomElement(GreeterCmp, { injector })
-    customElements.define('my-greeter', el)
+    customElements.define('my-greeter', createCustomElement(GreeterCmp, { injector }))
   }
 }
 ```
 
 <v-click>
-
-打包后：
 
 ```html
 <!-- 在任意 HTML / React / Vue 项目都能用 -->
@@ -3426,11 +2801,7 @@ export class App {
 
 <v-click>
 
-**用途**：
-
-- 给非 Angular 项目嵌入 Angular 组件（旧 React / WordPress / 静态站）
-- 微前端共享组件（不用 Module Federation 的轻量方案）
-- Storybook / 设计系统跨框架共享
+**用途**：非 Angular 项目嵌入（旧 React / WordPress）/ 微前端共享 / Storybook 跨框架。
 
 </v-click>
 
@@ -3441,23 +2812,15 @@ transition: slide-up
 # Service Worker：@angular/pwa
 
 ```bash
-ng add @angular/pwa
+ng add @angular/pwa    # 自动配置 manifest / SW / 图标
 ```
-
-自动配置 `manifest.webmanifest`、Service Worker、图标。
 
 ```ts
 // app.config.ts（已自动加）
-import { provideServiceWorker } from '@angular/service-worker'
-
-export const appConfig: ApplicationConfig = {
-  providers: [
-    provideServiceWorker('ngsw-worker.js', {
-      enabled: !isDevMode(),
-      registrationStrategy: 'registerWhenStable:30000',
-    }),
-  ],
-}
+provideServiceWorker('ngsw-worker.js', {
+  enabled: !isDevMode(),
+  registrationStrategy: 'registerWhenStable:30000',
+})
 ```
 
 <v-click>
@@ -3465,21 +2828,12 @@ export const appConfig: ApplicationConfig = {
 **SwUpdate 检测新版本**：
 
 ```ts
-import { SwUpdate } from '@angular/service-worker'
-
-class Cmp {
-  private swUpdate = inject(SwUpdate)
-
-  constructor() {
-    if (this.swUpdate.isEnabled) {
-      this.swUpdate.versionUpdates.subscribe(evt => {
-        if (evt.type === 'VERSION_READY') {
-          if (confirm('New version available. Reload?')) location.reload()
-        }
-      })
-    }
+const swUpdate = inject(SwUpdate)
+swUpdate.versionUpdates.subscribe(evt => {
+  if (evt.type === 'VERSION_READY' && confirm('New version. Reload?')) {
+    location.reload()
   }
-}
+})
 ```
 
 </v-click>
@@ -3494,16 +2848,10 @@ transition: slide-up
 |------|------|------|
 | `ng new <name>` | - | 创建工作空间 |
 | `ng serve` | `ng s` | 启动开发服务器（4200） |
-| `ng build` | `ng b` | 构建到 `dist/` |
-| `ng test` | `ng t` | 运行单测 |
-| `ng e2e` | `ng e` | 运行 E2E |
-| `ng generate component <name>` | `ng g c` | 生成组件 |
-| `ng generate service <name>` | `ng g s` | 生成服务 |
-| `ng generate guard <name>` | `ng g g` | 生成守卫 |
-| `ng generate interceptor <name>` | `ng g i` | 生成拦截器 |
+| `ng build` / `ng test` / `ng e2e` | `ng b/t/e` | 构建 / 单测 / E2E |
+| `ng generate component/service/guard <name>` | `ng g c/s/g` | 生成代码 |
 | `ng add <package>` | - | 安装并配置 schematic |
-| `ng update` | - | 列出可升级依赖 |
-| `ng update @angular/core` | - | 升级并自动迁移 |
+| `ng update [@angular/core]` | - | 列出 / 升级并自动迁移 |
 | `ng lint` | - | 跑 ESLint |
 
 ---
@@ -3513,45 +2861,28 @@ transition: slide-up
 # ng update：自动迁移神器
 
 ```bash
-# 1. 升级 CLI 到最新
-pnpm add -g @angular/cli
-
-# 2. 项目内升级（自动迁移）
-ng update @angular/core @angular/cli
-
-# 3. 升级第三方
-ng update @angular/material
-ng update @ngrx/store
-
-# 4. 运行所有迁移 schematic
-ng update --create-commits
+pnpm add -g @angular/cli                          # 升级 CLI
+ng update @angular/core @angular/cli              # 自动迁移
+ng update @angular/material @ngrx/store           # 升级第三方
+ng update --create-commits                        # 运行所有 schematic
 ```
 
 <v-click>
 
-跨版本迁移工具：
+跨版本迁移 schematic：
 
 ```bash
-# 把 *ngIf / *ngFor 改写为 @if / @for
-ng g @angular/core:control-flow
-
-# 从 NgModule 转 Standalone
-ng g @angular/core:standalone
-
-# 把 constructor 注入改 inject() 函数
-ng g @angular/core:inject
-
-# 清理未用的 imports
-ng g @angular/core:cleanup-unused-imports
+ng g @angular/core:control-flow                   # *ngIf / *ngFor → @if / @for
+ng g @angular/core:standalone                     # NgModule → Standalone
+ng g @angular/core:inject                         # constructor → inject()
+ng g @angular/core:cleanup-unused-imports         # 清理未用 imports
 ```
 
 </v-click>
 
 <v-click>
 
-> 💡 **这是 React / Vue 都做不到的工业能力**
->
-> `ng update` 会读 `package.json` → 找到所有 Angular 包 → 按版本顺序应用 schematic（即「自动 codemod」），通常一条命令就能从 v14 升到 v21。
+> 💡 React / Vue 都做不到的工业能力：`ng update` 自动 codemod 通常一条命令就能从 v14 升到 v21。
 
 </v-click>
 
@@ -3563,26 +2894,13 @@ transition: slide-up
 
 | 起始版本 | 推荐路径 |
 |---------|---------|
-| v8 / v9 | 先升到 v12，启用 Ivy + 严格模式，再 → v15 → v17 → v21 |
-| v10 - v12 | 直升 v15，再 → v17 → v21 |
-| v13 - v14 | 直升 v17（享受 standalone + 控制流） |
-| v15 - v17 | 直升 v21 |
-| v18 - v20 | `ng update` 一步到位 |
+| v8 - v12 | 先升 v12 启用 Ivy，再 → v15 → v17 → v21 |
+| v13 - v14 | 直升 v17（享 standalone + 控制流）→ v21 |
+| v15 - v20 | `ng update` 一步到位 |
 
 <v-click>
 
-**关键 deprecation**：
-
-| 特性 | 弃用 | 移除 |
-|------|------|------|
-| `View Engine`（前 Ivy 渲染器） | v9 | v12 |
-| IE 11 | v12 | v13 |
-| `@angular/http` | v8 | v9 |
-| `*ngIf` / `*ngFor` | - | 仍兼容（v17 推 `@if` / `@for`） |
-| `NgModule` | - | 仍兼容（v17 标 standalone 默认） |
-| Zone.js | - | v21 默认 Zoneless |
-| `@angular/universal` | v17 | 用 `@angular/ssr` |
-| webpack builder | v17 | v21 deprecated |
+**关键 deprecation**：View Engine（v9 弃用/v12 移除）；`*ngIf` / `*ngFor` / `NgModule` 仍兼容；Zone.js（v21 默认 Zoneless）；`@angular/universal`（v17 弃用，改 `@angular/ssr`）。
 
 </v-click>
 
@@ -3593,32 +2911,20 @@ transition: slide-up
 # Angular Material（M3）
 
 ```bash
-ng add @angular/material
-# 交互式询问 Material 3 theme / typography / animations
+ng add @angular/material    # 交互式询问 M3 theme / typography / animations
 ```
 
 ```ts
-import { MatButtonModule } from '@angular/material/button'
-import { MatCardModule } from '@angular/material/card'
-import { MatInputModule } from '@angular/material/input'
-import { MatFormFieldModule } from '@angular/material/form-field'
-
 @Component({
-  imports: [MatButtonModule, MatCardModule, MatInputModule, MatFormFieldModule],
+  imports: [MatCardModule, MatInputModule, MatFormFieldModule, MatButtonModule],
   template: `
     <mat-card>
-      <mat-card-header>
-        <mat-card-title>Sign In</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <mat-form-field appearance="outline">
-          <mat-label>Email</mat-label>
-          <input matInput type="email" />
-        </mat-form-field>
-      </mat-card-content>
-      <mat-card-actions>
-        <button mat-flat-button color="primary">Login</button>
-      </mat-card-actions>
+      <mat-card-title>Sign In</mat-card-title>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" />
+      </mat-form-field>
+      <button mat-flat-button color="primary">Login</button>
     </mat-card>
   `,
 })
@@ -3631,32 +2937,23 @@ transition: slide-up
 
 # Angular CDK（无样式组件层）
 
-[Angular CDK](https://material.angular.io/cdk/categories) 提供大量「无样式行为模块」，是 React 生态 Radix UI / Headless UI 的对应物：
+[Angular CDK](https://material.angular.io/cdk/categories) 提供「无样式行为模块」，对标 Radix UI / Headless UI：
 
 | 模块 | 用途 |
 |---|---|
-| `@angular/cdk/overlay` | Portal / Overlay |
-| `@angular/cdk/drag-drop` | 拖拽 |
-| `@angular/cdk/scrolling` | 虚拟滚动 |
-| `@angular/cdk/a11y` | 可访问性（focus trap / aria-live） |
-| `@angular/cdk/clipboard` | 剪贴板 |
-| `@angular/cdk/dialog` | 对话框 |
-| `@angular/cdk/menu` | 菜单 |
-| `@angular/cdk/testing` | 测试 Harness |
+| `overlay` / `dialog` / `menu` | Portal / 对话框 / 菜单 |
+| `drag-drop` / `scrolling` | 拖拽 / 虚拟滚动 |
+| `a11y` / `clipboard` / `testing` | 可访问性 / 剪贴板 / 测试 Harness |
 
 <v-click>
 
 ```ts
 // 虚拟滚动示例
-import { ScrollingModule } from '@angular/cdk/scrolling'
-
 @Component({
   imports: [ScrollingModule],
   template: `
     <cdk-virtual-scroll-viewport itemSize="50" style="height: 500px">
-      @for (item of items; track item.id) {
-        <div class="item">{{ item.name }}</div>
-      }
+      @for (item of items; track item.id) { <div>{{ item.name }}</div> }
     </cdk-virtual-scroll-viewport>
   `,
 })
@@ -3672,21 +2969,14 @@ transition: slide-up
 
 | 库 | 风格 | 适合 |
 |---|---|---|
-| **Angular Material** | Material 3 | 跨设备 / Material 风格 / 官方 |
-| **PrimeNG** | 企业级（80+ 组件） | 大型管理系统 / 数据表格 / 图表 |
+| **Angular Material** | Material 3 | 跨设备 / 官方 |
+| **PrimeNG** | 企业级（80+ 组件） | 大型管理系统 / 数据表格 |
 | **NG-ZORRO** | Ant Design | 国内项目（阿里出品） |
-| **Clarity** | VMware 设计语言 | 企业级管理后台 |
-| **Taiga UI** | 现代 Tinkoff 银行风 | 金融 / 科技产品 |
 | **Spartan / shadcn-ng** | 抄写式 + Tailwind | 完全定制（新趋势） |
 
 <v-click>
 
-**经验**：
-
-- 跨设备 + Material → **Angular Material**
-- 大型企业后台 → **PrimeNG**（组件最全）
-- 国内项目 + Ant Design 风 → **NG-ZORRO**
-- Tailwind 完全定制 → **Spartan / 自建 CDK**
+**经验**：跨设备 → Material；大型后台 → PrimeNG（组件最全）；Ant Design 风 → NG-ZORRO；Tailwind 定制 → Spartan。
 
 </v-click>
 
@@ -3704,14 +2994,9 @@ pnpm dlx create-nx-workspace@latest my-org --preset=angular-monorepo
 
 ```
 my-org/
-├── apps/
-│   ├── web/                     # Angular 应用
-│   └── admin/                   # 另一个 Angular 应用
-├── libs/
-│   ├── ui/                      # 共享组件库
-│   ├── data-access/             # API services
-│   └── feature-auth/            # 业务模块
-├── nx.json                      # Nx 配置
+├── apps/{web, admin}/          # Angular 应用
+├── libs/{ui, data-access, feature-auth}/   # 共享库
+├── nx.json                     # Nx 配置
 └── package.json
 ```
 
@@ -3720,15 +3005,9 @@ my-org/
 **Nx 关键命令**：
 
 ```bash
-nx g @nx/angular:lib ui                  # 创建库
-nx g @nx/angular:component button --project=ui --standalone
-
-nx build web                              # 构建特定项目
-nx serve web                              # 启动特定项目
-
-nx affected:test                          # 只跑变更影响的项目
-nx affected:build
-
+nx g @nx/angular:lib ui                   # 创建库
+nx build web / nx serve web               # 构建 / 启动特定项目
+nx affected:test / nx affected:build      # 只跑变更影响的项目
 nx graph                                  # 可视化依赖图
 ```
 
@@ -3784,20 +3063,11 @@ transition: slide-up
 
 # Analog：Angular 的 Next.js
 
-[Analog](https://analogjs.org/) 是 Brandon Roberts（Angular GDE）做的 Angular 元框架，基于 Vite：
-
-```bash
-pnpm create analog@latest my-app
-```
+[Analog](https://analogjs.org/) 是 Brandon Roberts（Angular GDE）做的 Angular 元框架，基于 Vite：`pnpm create analog@latest my-app`
 
 <v-click>
 
-提供：
-
-- 文件路由（`src/app/pages/` 自动生成 routes）
-- API 路由（`src/server/routes/`）
-- Markdown SSG（适合写博客）
-- 内置 Vitest
+提供：文件路由（`src/app/pages/`）/ API 路由（`src/server/routes/`）/ Markdown SSG / 内置 Vitest。
 
 </v-click>
 
@@ -3805,11 +3075,7 @@ pnpm create analog@latest my-app
 
 ```ts
 // src/app/pages/users.[id].page.ts
-import { Component } from '@angular/core'
-
-@Component({
-  template: `<h1>User {{ id() }}</h1>`,
-})
+@Component({ template: `<h1>User {{ id() }}</h1>` })
 export default class UserPage {
   id = input.required<string>()
 }
@@ -3832,15 +3098,12 @@ transition: slide-up
 **Electron + Angular**：
 
 ```bash
-ng new desktop-app
-cd desktop-app
+ng new desktop-app && cd desktop-app
 pnpm add -D electron electron-builder
 ```
 
 ```js
 // electron/main.js
-const { app, BrowserWindow } = require('electron')
-
 app.whenReady().then(() => {
   const win = new BrowserWindow({ width: 1200, height: 800 })
   win.loadFile('dist/desktop-app/browser/index.html')
@@ -3849,26 +3112,16 @@ app.whenReady().then(() => {
 
 <v-click>
 
-**Tauri + Angular**（bundle 大小约 Electron 的 1/10）：
-
-```bash
-pnpm create tauri-app@latest my-app
-# 选择 Angular template
-```
+**Tauri + Angular**（bundle 约 Electron 1/10）：`pnpm create tauri-app@latest my-app`
 
 </v-click>
 
 <v-click>
 
-**浏览器扩展**：直接用 Angular CLI 输出静态文件，配 `manifest.json` 即可：
+**浏览器扩展**：直接用 Angular CLI 输出静态文件，配 `manifest.json`：
 
 ```json
-{
-  "manifest_version": 3,
-  "name": "My Ext",
-  "version": "1.0",
-  "action": { "default_popup": "index.html" }
-}
+{ "manifest_version": 3, "name": "My Ext", "action": { "default_popup": "index.html" } }
 ```
 
 </v-click>
@@ -3884,15 +3137,6 @@ pnpm add -D tailwindcss postcss autoprefixer
 pnpm dlx tailwindcss init
 ```
 
-```js
-// tailwind.config.js
-module.exports = {
-  content: ['./src/**/*.{html,ts}'],
-  theme: { extend: {} },
-  plugins: [],
-}
-```
-
 ```scss
 // src/styles.scss
 @tailwind base;
@@ -3905,12 +3149,8 @@ module.exports = {
 **Tailwind 4（CSS-first 配置）**：
 
 ```scss
-/* styles.css */
 @import "tailwindcss";
-
-@theme {
-  --color-primary: #dd0031;
-}
+@theme { --color-primary: #dd0031; }
 ```
 
 无需 `tailwind.config.js`。
@@ -3919,13 +3159,7 @@ module.exports = {
 
 <v-click>
 
-**UnoCSS**：
-
-```bash
-pnpm add -D unocss
-```
-
-需要让 Angular CLI 走 Vite（v17+ 默认）才能用 `virtual:uno.css`。
+**UnoCSS**：`pnpm add -D unocss`，需 Angular CLI 走 Vite（v17+ 默认）才能用 `virtual:uno.css`。
 
 </v-click>
 
@@ -3987,15 +3221,6 @@ transition: slide-up
 
 ```ts
 // src/main.ts
-import { bootstrapApplication } from '@angular/platform-browser'
-import { provideRouter, withComponentInputBinding } from '@angular/router'
-import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http'
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async'
-import { provideClientHydration, withIncrementalHydration } from '@angular/platform-browser'
-import { App } from './app/app'
-import { routes } from './app/app.routes'
-import { authInterceptor, errorInterceptor } from './app/interceptors'
-
 bootstrapApplication(App, {
   providers: [
     provideRouter(routes, withComponentInputBinding()),
@@ -4006,18 +3231,17 @@ bootstrapApplication(App, {
     provideAnimationsAsync(),
     provideClientHydration(withIncrementalHydration()),
   ],
-})
-.catch(err => console.error(err))
+}).catch(err => console.error(err))
 ```
 
 <v-click>
 
 **关键 provider 速记**：
 
-- `provideRouter` + `withComponentInputBinding()` —— 路由参数自动注入
-- `provideHttpClient` + `withFetch()` —— 用 fetch API 取代 XHR
-- `provideClientHydration` + `withIncrementalHydration()` —— SSR 增量水合
-- `provideAnimationsAsync()` —— 异步加载动画模块（替代 `provideAnimations()`）
+- `withComponentInputBinding()` —— 路由参数自动注入
+- `withFetch()` —— 用 fetch API 取代 XHR
+- `withIncrementalHydration()` —— SSR 增量水合
+- `provideAnimationsAsync()` —— 异步加载动画（替代 `provideAnimations()`）
 
 </v-click>
 
@@ -4034,20 +3258,12 @@ transition: slide-up
 | 响应式 | Signal + Zoneless | useState + 手动依赖 |
 | 更新粒度 | 局部脏检查 + Signal 推送 | 整组件函数重跑 |
 | TypeScript | 强制 + 模板类型检查 | 可选 |
-| 状态管理 | NgRx / Signals + Service | Zustand / Redux / Context |
-| 路由 | Angular Router（官方） | React Router / TanStack Router |
-| SSR | `@angular/ssr`（官方） | Next.js |
-| RSC | 暂无对应 | 有（实验性） |
-| 招聘市场 | 国际多企业级 / 国内一般 | 国际最大 |
+| 路由 / SSR | 官方 Router / `@angular/ssr` | React Router / Next.js |
+| RSC | 暂无 | 有（实验） |
 
 <v-click>
 
-**选 Angular 的场景**：
-
-- 大型企业应用（金融 / 电信 / 政府）
-- 后端 OOP 思维团队（Java / C# 迁移）
-- 强约定 / 强类型 / DI 需求
-- 长期维护（10+ 年的项目）
+**选 Angular**：大型企业应用 / 后端 OOP 团队 / 强约定 + 强类型需求 / 10+ 年长期维护。
 
 </v-click>
 
@@ -4059,27 +3275,16 @@ transition: slide-up
 
 | 维度 | Angular 21 | Vue 3.5 |
 |---|---|---|
-| 范式 | 严格（DI / RxJS / 装饰器） | 灵活（SFC + Composition） |
-| 模板 | 多变（结构指令 + 管道 + 控制流） | 简洁（v-* 指令） |
+| 范式 | 严格（DI / 装饰器） | 灵活（SFC + Composition） |
 | 响应式 | Signal + Zone（可选） | Proxy 自动追踪 |
-| TypeScript | 强制 | 可选（推荐） |
-| Bundle | 较大（~150KB gzip） | 小（~50KB） |
+| TypeScript | 强制 | 推荐 |
+| Bundle | ~150KB gzip | ~50KB |
 | 学习曲线 | 陡峭 | 平缓 |
-| 适合 | 大型企业级应用 | 中小项目 / 国内团队 |
+| 适合 | 大型企业级 | 中小项目 / 国内团队 |
 
 <v-click>
 
-**选 Angular 的理由**：
-
-- 项目周期长（5+ 年），需要强约定 + 类型安全
-- 团队偏后端 / OOP 思维
-- 已有 Angular 经验或企业内部技术栈
-
-**选 Vue 的理由**：
-
-- 项目偏中小型 / 快速迭代
-- 团队偏前端思维（HTML / CSS 占比高）
-- 国内招聘 + 生态
+**Angular**：长期项目 5+ 年 / 后端 OOP 团队 / 强约定 + 类型。**Vue**：快速迭代 / 前端思维 / 国内招聘。
 
 </v-click>
 
@@ -4091,31 +3296,21 @@ transition: slide-up
 
 | 维度 | Angular 21 | Svelte 5 | Solid |
 |---|---|---|---|
-| 编译策略 | 模板 → LView/TView | 编译消失 + 直接 DOM | JSX → 细粒度 signal |
+| 编译 | 模板 → LView/TView | 编译消失 + 直接 DOM | JSX → 细粒度 signal |
 | 响应式 | Signal（push-pull） | runes（`$state`） | Signal + tracking |
-| 运行时 | 中（DI / Router / HTTP 全套） | 极小（KB 级） | 中等 |
-| 心智模型 | OOP + 装饰器 + DI | 编译时魔法 | 信号 + JSX |
-| TypeScript | 强制 | 可选 | 推荐 |
+| 运行时 | 中（DI / Router 全套） | 极小（KB 级） | 中等 |
 | 元框架 | Analog（社区） | SvelteKit（官方） | SolidStart |
-| 生态 | 极大（企业级） | 中（创业团队多） | 小但增长 |
+| 生态 | 极大（企业级） | 中 | 小但增长 |
 
 <v-click>
 
-**选 Angular 的场景**：
-
-- 大型企业 / 强约定 / 强 DI
-- 已有 RxJS 资产
-- 招聘以 Java / C# 转岗为主
+**Angular**：大型企业 / 强约定 / 强 DI / RxJS 资产 / Java/C# 转岗团队。
 
 </v-click>
 
 <v-click>
 
-**选 Svelte / Solid 的场景**：
-
-- 创业项目 / bundle 敏感
-- 团队拥抱新范式 / DX 优先
-- 不需要 Angular 一体化的复杂场景
+**Svelte / Solid**：创业项目 / bundle 敏感 / 拥抱新范式 / DX 优先。
 
 </v-click>
 
@@ -4128,13 +3323,10 @@ transition: slide-up
 | 维度 | Angular 21 | Vue 3.5 | React 19 | Svelte 5 |
 |---|---|---|---|---|
 | 心智 | OOP + DI + Signal | SFC + Composition | FP + Hooks | 编译时 runes |
-| 编译期 | 重（Ivy + 类型） | 重（patchFlag） | 轻（JSX 直译） | 极重（编译消失） |
 | 响应式 | Signal（push-pull） | Proxy（自动） | useState（手动） | runes（编译） |
 | 类型 | 强制 + 模板检查 | 推断 + 编译宏 | 手动 | 部分 |
 | Bundle | 大 | 中 | 中 | 极小 |
 | 元框架 | `@angular/ssr` / Analog | Nuxt | Next.js | SvelteKit |
-| DI | Hierarchical（强） | provide/inject | Context | （无） |
-| CLI | 最全（含 update） | create-vue | CRA→Vite | SvelteKit CLI |
 | 大版本迁移 | `ng update` 自动 | 半自动 codemod | 手动 | 手动 |
 
 <v-click>
@@ -4244,39 +3436,30 @@ transition: slide-up
 # 完整示例（续）
 
 ```ts
-// pages/products.ts
 @Component({
   selector: 'app-products',
   imports: [FormsModule],
   template: `
-    <h1>Products</h1>
     <input [ngModel]="store.filter()" (ngModelChange)="store.setFilter($event)" />
-
-    @if (store.loading()) {
-      <p>Loading...</p>
-    } @else {
+    @if (store.loading()) { <p>Loading...</p> }
+    @else {
       <ul>
         @for (p of store.filtered(); track p.id) {
           <li>{{ p.name }} - {{ p.price | currency }}</li>
-        } @empty {
-          <li>No products</li>
-        }
+        } @empty { <li>No products</li> }
       </ul>
     }
   `,
 })
 export class Products {
   store = inject(ProductsStore)
-
-  constructor() {
-    this.store.load()
-  }
+  constructor() { this.store.load() }
 }
 ```
 
 <v-click>
 
-涵盖：Signal Store / computed 派生 / `@if` + `@for` 控制流 / Pipe / inject() 服务 / FormsModule 双向绑定。
+涵盖：Signal Store / computed / `@if`+`@for` / Pipe / inject() / FormsModule。
 
 </v-click>
 

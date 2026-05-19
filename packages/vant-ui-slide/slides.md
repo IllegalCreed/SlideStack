@@ -110,27 +110,16 @@ transition: fade-out
 
 <v-click>
 
-| 维度          | Vant 4           | NutUI 4          | Mint UI         | Vuetify (mobile) | Quasar           |
-| ------------- | ---------------- | ---------------- | --------------- | ---------------- | ---------------- |
-| 框架绑定      | **Vue 3**        | Vue 3            | Vue 2           | Vue 3            | Vue 3            |
-| 目标场景      | **移动端**       | 移动端           | 移动端          | 全端 Material    | 全端跨平台       |
-| 组件数量      | **80+**          | 90+              | 30+             | 80+              | 70+              |
-| 包体积        | **极小（1KB/组件）**| 小            | 小              | 偏大             | 中               |
-| TypeScript    | **原生**         | 原生             | 弱              | 原生             | 原生             |
-| 主题方案      | CSS Vars + Less  | SCSS Vars        | LESS Vars       | SCSS Theme       | SCSS + Quasar UI |
-| 暗色模式      | **内置**         | 内置             | 无              | 内置             | 内置             |
-| 国际化        | 30+ 语言         | 中文为主         | 中文为主        | 50+ 语言         | 50+ 语言         |
-| 主导团队      | **有赞**         | **京东**         | 饿了么          | Vuetify 团队     | Quasar 团队      |
-| 中国生态      | **极强**         | 强               | 弱（已停滞）    | 一般             | 一般             |
-| 大版本风险    | 低（v4 长期）    | 低               | 已停止维护      | 中               | 低               |
+| 维度     | Vant 4              | NutUI 4  | Vuetify mobile | Quasar     |
+| -------- | ------------------- | -------- | -------------- | ---------- |
+| 框架     | **Vue 3**           | Vue 3    | Vue 3          | Vue 3      |
+| 目标     | **移动端**          | 移动端   | 全端 Material  | 全端跨平台 |
+| 组件数   | **80+**             | 90+      | 80+            | 70+        |
+| 包体积   | **极小（1KB/组件）**| 小       | 偏大           | 中         |
+| 主导团队 | **有赞**            | **京东** | Vuetify        | Quasar     |
+| 中国生态 | **极强**            | 强       | 一般           | 一般       |
 
 </v-click>
-
-<div v-click text-xs text-right>
-
-_Read more about_ [_Mobile UI Comparisons_](https://vant-ui.github.io/vant/#/zh-CN/home)
-
-</div>
 
 <style>
 h1 {
@@ -469,25 +458,16 @@ transition: fade-out
 
 ```vue
 <script setup lang="ts">
-import { ref } from "vue";
-
 const loading = ref(false);
-
 async function handleSubmit() {
   loading.value = true;
-  try {
-    await fetch("/api/submit", { method: "POST" });
-  } finally {
-    loading.value = false;
-  }
+  try { await fetch("/api/submit", { method: "POST" }); }
+  finally { loading.value = false; }
 }
 </script>
 
 <template>
-  <van-button type="primary" :loading="loading" @click="handleSubmit">
-    提交订单
-  </van-button>
-  <van-button type="success">成功</van-button>
+  <van-button type="primary" :loading="loading" @click="handleSubmit">提交</van-button>
   <van-button type="warning" plain>警告</van-button>
   <van-button type="danger" round>危险</van-button>
   <van-button icon="plus" type="primary" />
@@ -498,13 +478,9 @@ async function handleSubmit() {
 
 <v-click>
 
-| Prop      | 取值                                   | 说明           |
-| --------- | -------------------------------------- | -------------- |
-| `type`    | primary / success / warning / danger / default | 颜色语义 |
-| `size`    | large / normal / small / mini          | 四档尺寸       |
-| `plain` `round` `square` | boolean              | 形态变体       |
-| `loading` `disabled`     | boolean              | 状态           |
-| `icon`    | 内置图标名 / 图片 URL                  | 前置图标       |
+- **type**：primary / success / warning / danger / default — 颜色语义
+- **size**：large / normal / small / mini — 四档尺寸
+- **plain** / **round** / **loading** / **disabled** — 形态与状态
 
 </v-click>
 
@@ -554,21 +530,20 @@ transition: fade-out
 
 <v-click>
 
-| 分组           | 代表组件                                                     |
-| -------------- | ------------------------------------------------------------ |
-| **基础**       | Button / Cell / Icon / Image / Layout / Popup / Style / Toast |
-| **表单**       | Form / Field / Checkbox / Radio / Switch / Slider / Stepper / Uploader |
-| **反馈**       | ActionSheet / Dialog / Notify / Loading / Overlay / PullRefresh / SwipeCell |
-| **展示**       | Badge / Card / Collapse / CountDown / Divider / ImagePreview / Lazyload / List / Tag |
-| **导航**       | Grid / IndexBar / NavBar / Pagination / Sidebar / Tab / Tabbar / TreeSelect |
-| **业务**       | AddressEdit / AddressList / Area / Card / ContactCard / Coupon / Sku |
-| **Picker 系列**| Picker / DatePicker / TimePicker / Calendar / Cascader / Search |
+| 分组       | 代表组件                                              |
+| ---------- | ----------------------------------------------------- |
+| **基础**   | Button / Cell / Icon / Image / Popup / Toast          |
+| **表单**   | Form / Field / Checkbox / Radio / Switch / Stepper    |
+| **反馈**   | ActionSheet / Dialog / Notify / Overlay / PullRefresh |
+| **展示**   | Badge / Card / CountDown / ImagePreview / List / Tag  |
+| **业务**   | NavBar / Tab / AddressEdit / Area / Coupon / Sku      |
+| **Picker** | Picker / DatePicker / Calendar / Cascader             |
 
 </v-click>
 
-<v-click text-xs class="mt-4">
+<v-click text-xs class="mt-2">
 
-> 💡 **设计原则**：基础组件（Button / Cell）API 极简，业务组件（AddressEdit / Sku）开箱即用电商场景。
+> 💡 基础组件 API 极简，业务组件（AddressEdit / Sku）开箱即用电商。
 
 </v-click>
 
@@ -619,44 +594,24 @@ van-form + van-field + rules
 
 ```vue
 <script setup lang="ts">
-import { ref } from "vue";
 import { showToast } from "vant";
-
 const username = ref("");
 const password = ref("");
 
-async function onSubmit(values: Record<string, any>) {
-  showToast(`提交成功，用户名 ${values.username}`);
-}
-
-async function onFailed(errorInfo: any) {
-  showToast({ message: "请填写完整信息", type: "fail" });
-  console.warn("校验失败", errorInfo);
+function onSubmit(values: Record<string, any>) {
+  showToast(`提交成功 ${values.username}`);
 }
 </script>
 
 <template>
-  <van-form @submit="onSubmit" @failed="onFailed">
+  <van-form @submit="onSubmit">
     <van-cell-group inset>
-      <van-field
-        v-model="username"
-        name="username"
-        label="用户名"
-        placeholder="请输入用户名"
-        :rules="[{ required: true, message: '用户名必填' }]"
-      />
-      <van-field
-        v-model="password"
-        type="password"
-        name="password"
-        label="密码"
-        placeholder="请输入密码"
-        :rules="[{ required: true, message: '密码必填' }]"
-      />
+      <van-field v-model="username" name="username" label="用户名"
+        :rules="[{ required: true, message: '用户名必填' }]" />
+      <van-field v-model="password" type="password" name="password" label="密码"
+        :rules="[{ required: true, message: '密码必填' }]" />
     </van-cell-group>
-    <div style="margin: 16px;">
-      <van-button block type="primary" native-type="submit">登录</van-button>
-    </div>
+    <van-button block type="primary" native-type="submit">登录</van-button>
   </van-form>
 </template>
 ```
@@ -713,10 +668,7 @@ transition: fade-out
 const usernameRules = [
   { required: true, message: "用户名必填" },
   { pattern: /^\w{3,16}$/, message: "用户名须 3-16 位字母数字" },
-  {
-    validator: (value: string) => !value.includes(" "),
-    message: "用户名不能包含空格",
-  },
+  { validator: (v: string) => !v.includes(" "), message: "不能包含空格" },
 ];
 ```
 
@@ -724,42 +676,18 @@ const usernameRules = [
 
 <v-click>
 
-**异步校验（Promise）**
-
-```ts
-const usernameAsyncRules = [
-  {
-    required: true,
-    message: "用户名必填",
-  },
-  {
-    validator: async (value: string) => {
-      const exists = await api.checkUserName(value);
-      return !exists;
-    },
-    message: "用户名已被占用",
-  },
-];
-```
-
-</v-click>
-
-<v-click>
-
-**手动 validate（不依赖 submit）**
+**异步校验（Promise）+ 手动 validate**
 
 ```ts
 import type { FormInstance } from "vant";
 
-const formRef = ref<FormInstance>();
+const rules = [{ validator: async (v: string) =>
+  !(await api.checkUserName(v)), message: "用户名已被占用" }];
 
+const formRef = ref<FormInstance>();
 async function manualValidate() {
-  try {
-    await formRef.value?.validate();
-    showToast("校验通过");
-  } catch (errors) {
-    console.warn(errors);
-  }
+  try { await formRef.value?.validate(); }
+  catch (errors) { console.warn(errors); }
 }
 ```
 
@@ -818,26 +746,13 @@ transition: fade-out
 
 ```vue
 <script setup lang="ts">
-import { ref } from "vue";
-
-const columns = [
-  { text: "杭州", value: "Hangzhou" },
-  { text: "宁波", value: "Ningbo" },
-  { text: "温州", value: "Wenzhou" },
-];
-const selected = ref("Hangzhou");
-
-function onConfirm({ selectedValues }: any) {
-  selected.value = selectedValues[0];
-}
+const columns = [{ text: "杭州", value: "HZ" }, { text: "宁波", value: "NB" }];
+const selected = ref("HZ");
+function onConfirm({ selectedValues }: any) { selected.value = selectedValues[0]; }
 </script>
 
 <template>
-  <van-picker
-    :columns="columns"
-    :model-value="[selected]"
-    @confirm="onConfirm"
-  />
+  <van-picker :columns="columns" :model-value="[selected]" @confirm="onConfirm" />
 </template>
 ```
 
@@ -845,31 +760,14 @@ function onConfirm({ selectedValues }: any) {
 
 <v-click>
 
-**日期选择 DatePicker**
+**日期 / 时间选择**
 
 ```vue
-<van-date-picker
-  v-model="currentDate"
-  title="选择日期"
-  :min-date="new Date(2020, 0, 1)"
-  :max-date="new Date(2030, 11, 31)"
-  @confirm="onDateConfirm"
-/>
-```
+<van-date-picker v-model="currentDate" title="选择日期"
+  :min-date="new Date(2020, 0, 1)" :max-date="new Date(2030, 11, 31)" />
 
-</v-click>
-
-<v-click>
-
-**时间选择 TimePicker**
-
-```vue
-<van-time-picker
-  v-model="currentTime"
-  title="选择时间"
-  :columns-type="['hour', 'minute']"
-  @confirm="onTimeConfirm"
-/>
+<van-time-picker v-model="currentTime" title="选择时间"
+  :columns-type="['hour', 'minute']" />
 ```
 
 </v-click>
@@ -927,36 +825,21 @@ transition: fade-out
 
 ```vue
 <script setup lang="ts">
-import { ref } from "vue";
-
 const list = ref<number[]>([]);
-const loading = ref(false);
-const finished = ref(false);
-const refreshing = ref(false);
+const loading = ref(false), finished = ref(false), refreshing = ref(false);
 
 async function onLoad() {
-  const newItems = await api.fetchList({ offset: list.value.length, limit: 10 });
-  list.value.push(...newItems);
+  const items = await api.fetchList({ offset: list.value.length });
+  list.value.push(...items);
   loading.value = false;
-  if (newItems.length < 10) finished.value = true;
+  if (items.length < 10) finished.value = true;
 }
-
-async function onRefresh() {
-  list.value = [];
-  finished.value = false;
-  await onLoad();
-  refreshing.value = false;
-}
+async function onRefresh() { list.value = []; finished.value = false; await onLoad(); refreshing.value = false; }
 </script>
 
 <template>
   <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-    <van-list
-      v-model:loading="loading"
-      :finished="finished"
-      finished-text="没有更多了"
-      @load="onLoad"
-    >
+    <van-list v-model:loading="loading" :finished="finished" @load="onLoad">
       <van-cell v-for="item in list" :key="item" :title="`商品 ${item}`" />
     </van-list>
   </van-pull-refresh>
@@ -1011,14 +894,12 @@ Toast / Dialog / Notify 函数式调用
 
 <v-click>
 
-**Toast（轻提示，居中短暂显示）**
+**Toast（轻提示）**
 
 ```ts
-import { showToast, showSuccessToast, showFailToast, showLoadingToast } from "vant";
-
+import { showToast, showSuccessToast, showLoadingToast } from "vant";
 showToast("保存成功");
 showSuccessToast("操作成功");
-showFailToast("网络异常");
 showLoadingToast({ message: "加载中...", forbidClick: true });
 ```
 
@@ -1029,22 +910,12 @@ showLoadingToast({ message: "加载中...", forbidClick: true });
 **Dialog（模态对话框）**
 
 ```ts
-import { showDialog, showConfirmDialog } from "vant";
-
-await showDialog({ title: "提示", message: "确认要删除吗？" });
-
+import { showConfirmDialog } from "vant";
 try {
-  await showConfirmDialog({
-    title: "危险操作",
-    message: "删除后不可恢复",
-    confirmButtonText: "删除",
-    confirmButtonColor: "#ee0a24",
-  });
+  await showConfirmDialog({ title: "危险操作", message: "删除后不可恢复",
+    confirmButtonText: "删除", confirmButtonColor: "#ee0a24" });
   await api.delete(id);
-  showSuccessToast("已删除");
-} catch {
-  // 用户取消
-}
+} catch { /* 用户取消 */ }
 ```
 
 </v-click>
@@ -1055,9 +926,7 @@ try {
 
 ```ts
 import { showNotify } from "vant";
-
 showNotify({ type: "primary", message: "您有 3 条新待办" });
-showNotify({ type: "success", message: "提交成功", duration: 2000 });
 ```
 
 </v-click>
@@ -1119,15 +988,8 @@ NavBar / Tab / Tabbar 构建移动 H5 骨架
 **NavBar（顶部导航栏）**
 
 ```vue
-<van-nav-bar
-  title="商品详情"
-  left-text="返回"
-  left-arrow
-  @click-left="$router.back()"
->
-  <template #right>
-    <van-icon name="share" size="18" />
-  </template>
+<van-nav-bar title="商品详情" left-text="返回" left-arrow @click-left="$router.back()">
+  <template #right><van-icon name="share" size="18" /></template>
 </van-nav-bar>
 ```
 
@@ -1140,8 +1002,6 @@ NavBar / Tab / Tabbar 构建移动 H5 骨架
 ```vue
 <van-tabs v-model:active="active" sticky>
   <van-tab title="全部"><div>所有订单</div></van-tab>
-  <van-tab title="待付款"><div>未付款订单</div></van-tab>
-  <van-tab title="已发货"><div>配送中订单</div></van-tab>
   <van-tab title="已完成"><div>历史订单</div></van-tab>
 </van-tabs>
 ```
@@ -1211,29 +1071,19 @@ transition: fade-out
 
 <v-click>
 
-**全局覆盖**
+**全局覆盖 + JS 动态修改**
 
 ```css
 :root {
   --van-primary-color: #ff6b35;
   --van-success-color: #28a745;
   --van-border-radius-md: 6px;
-  --van-button-default-height: 44px;
 }
 ```
 
-</v-click>
-
-<v-click>
-
-**JS 动态修改（运行时切换）**
-
 ```ts
-function applyTheme(primary: string) {
-  document.documentElement.style.setProperty("--van-primary-color", primary);
-}
-
-applyTheme("#ff6b35");   // 立即生效，无需刷新
+// 运行时切换
+document.documentElement.style.setProperty("--van-primary-color", "#ff6b35");
 ```
 
 </v-click>
@@ -1248,10 +1098,7 @@ applyTheme("#ff6b35");   // 立即生效，无需刷新
 </van-config-provider>
 
 <script setup>
-const themeVars = {
-  primaryColor: "#ff6b35",
-  borderRadiusMd: "6px",
-};
+const themeVars = { primaryColor: "#ff6b35", borderRadiusMd: "6px" };
 </script>
 ```
 
@@ -1318,11 +1165,9 @@ transition: fade-out
 **1. 创建主题入口 `styles/vant-theme.less`**
 
 ```less
-// 覆盖 Vant 默认 Less 变量
 @blue: #ff6b35;
 @green: #28a745;
 @border-radius-md: 6px;
-@button-default-height: 44px;
 ```
 
 </v-click>
@@ -1332,15 +1177,11 @@ transition: fade-out
 **2. 在 vite.config.ts 注入到所有 Less**
 
 ```ts
-import { defineConfig } from "vite";
-
 export default defineConfig({
   css: {
     preprocessorOptions: {
       less: {
-        modifyVars: {
-          hack: `true; @import "${path.resolve(__dirname, "src/styles/vant-theme.less")}";`,
-        },
+        modifyVars: { hack: `true; @import "${themePath}";` },
         javascriptEnabled: true,
       },
     },
@@ -1352,7 +1193,7 @@ export default defineConfig({
 
 <v-click>
 
-> 💡 **要点**：Vant 4 默认 CSS Vars 主题，Less Vars 主要用于「编译期固化品牌色」场景；通常 CSS Vars 已够用。
+> 💡 Vant 4 默认 CSS Vars，Less Vars 仅用于「编译期固化品牌色」场景。
 
 </v-click>
 
@@ -1407,42 +1248,20 @@ transition: fade-out
 
 <v-click>
 
-**全局暗色（ConfigProvider 包裹）**
-
-```vue
-<script setup lang="ts">
-import { useDark } from "@vueuse/core";
-
-const isDark = useDark();
-</script>
-
-<template>
-  <van-config-provider :theme="isDark ? 'dark' : 'light'">
-    <router-view />
-  </van-config-provider>
-</template>
-```
-
-</v-click>
-
-<v-click>
-
-**切换按钮（VueUse 协同）**
+**全局暗色 + VueUse 切换按钮**
 
 ```vue
 <script setup lang="ts">
 import { useDark, useToggle } from "@vueuse/core";
-
-const isDark = useDark();              // 自动同步 html.dark + localStorage
+const isDark = useDark();
 const toggleDark = useToggle(isDark);
 </script>
 
 <template>
-  <van-switch
-    :model-value="isDark"
-    @update:model-value="toggleDark"
-    active-color="#1989fa"
-  />
+  <van-config-provider :theme="isDark ? 'dark' : 'light'">
+    <van-switch :model-value="isDark" @update:model-value="toggleDark" />
+    <router-view />
+  </van-config-provider>
 </template>
 ```
 
@@ -1455,7 +1274,6 @@ const toggleDark = useToggle(isDark);
 ```css
 .van-theme-dark {
   --van-background: #1a1a1a;
-  --van-background-2: #2a2a2a;
   --van-text-color: #e0e0e0;
 }
 ```
@@ -1519,9 +1337,7 @@ transition: fade-out
 ```ts
 import { Locale } from "vant";
 import enUS from "vant/es/locale/lang/en-US";
-import zhCN from "vant/es/locale/lang/zh-CN";
-
-Locale.use("en-US", enUS);   // 默认是 zh-CN，可切到其它
+Locale.use("en-US", enUS);   // 默认 zh-CN
 ```
 
 </v-click>
@@ -1530,35 +1346,24 @@ Locale.use("en-US", enUS);   // 默认是 zh-CN，可切到其它
 
 **动态切换语言**
 
-```vue
-<script setup lang="ts">
-import { ref } from "vue";
+```ts
 import { Locale } from "vant";
 import enUS from "vant/es/locale/lang/en-US";
 import zhCN from "vant/es/locale/lang/zh-CN";
 
 const lang = ref<"zh" | "en">("zh");
-
 function switchLang() {
   lang.value = lang.value === "zh" ? "en" : "zh";
-  if (lang.value === "zh") Locale.use("zh-CN", zhCN);
-  else Locale.use("en-US", enUS);
+  Locale.use(lang.value === "zh" ? "zh-CN" : "en-US",
+             lang.value === "zh" ? zhCN : enUS);
 }
-</script>
-
-<template>
-  <van-button @click="switchLang">
-    切换语言 / Switch
-  </van-button>
-  <van-date-picker v-model="date" title="选日期" />
-</template>
 ```
 
 </v-click>
 
 <v-click>
 
-> 💡 Vant 提供 30+ 语言，与 vue-i18n 协同时把语言切换状态共享给 Locale.use 即可。
+> 💡 Vant 30+ 语言，与 vue-i18n 协同时共享 locale state 即可。
 
 </v-click>
 
@@ -1632,18 +1437,14 @@ import "amfe-flexible";   // 自动设置 html 根字号
 
 **2. 配置 postcss-pxtorem**
 
-```bash
-pnpm add -D postcss-pxtorem
-```
-
 ```js
-// postcss.config.js
+// postcss.config.js — pnpm add -D postcss-pxtorem
 export default {
   plugins: {
     "postcss-pxtorem": {
-      rootValue: 37.5,         // Vant 默认根字号
+      rootValue: 37.5,
       propList: ["*"],
-      selectorBlackList: [".van-"],  // 排除 Vant 自己的样式
+      selectorBlackList: [".van-"],
     },
   },
 };
@@ -1653,7 +1454,7 @@ export default {
 
 <v-click>
 
-> 💡 **Vant 设计稿基准**：375px 宽度。所以 rootValue=37.5（1rem = 37.5px）。如果是 750px 稿，rootValue=75。
+> 💡 Vant 设计稿基准 375px → rootValue=37.5（1rem = 37.5px）。750px 稿用 75。
 
 </v-click>
 
@@ -1720,14 +1521,10 @@ pnpm add -D postcss-px-to-viewport
 export default {
   plugins: {
     "postcss-px-to-viewport": {
-      viewportWidth: 375,         // Vant 设计稿基准
-      unitPrecision: 5,
-      propList: ["*"],
+      viewportWidth: 375,          // Vant 设计稿基准
       viewportUnit: "vw",
-      selectorBlackList: [],
-      minPixelValue: 1,
-      mediaQuery: false,
-      exclude: [/node_modules\/(?!vant)/],   // 转换 Vant 自己的样式
+      propList: ["*"],
+      exclude: [/node_modules\/(?!vant)/],
     },
   },
 };
@@ -1740,7 +1537,7 @@ export default {
 **HTML meta viewport（必须）**
 
 ```html
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
 ```
 
 </v-click>
@@ -1801,7 +1598,6 @@ transition: fade-out
 ```vue
 <script setup lang="ts">
 import { useMediaQuery } from "@vueuse/core";
-
 const isDesktop = useMediaQuery("(min-width: 768px)");
 </script>
 
@@ -1809,17 +1605,13 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
   <div :class="{ 'desktop-container': isDesktop }">
     <van-nav-bar title="商品详情" left-arrow />
     <router-view />
-    <van-tabbar v-model="active" route>...</van-tabbar>
   </div>
 </template>
 
 <style>
 .desktop-container {
-  max-width: 480px;
-  margin: 0 auto;
-  border-left: 1px solid var(--van-border-color);
-  border-right: 1px solid var(--van-border-color);
-  min-height: 100vh;
+  max-width: 480px; margin: 0 auto;
+  border: 1px solid var(--van-border-color);
 }
 </style>
 ```
@@ -1828,21 +1620,7 @@ const isDesktop = useMediaQuery("(min-width: 768px)");
 
 <v-click>
 
-**鼠标交互兼容**
-
-```ts
-// Vant 默认监听 touch 事件，桌面端鼠标不触发
-// 解决：开启 useDesktopMode（部分组件支持）
-import { showToast } from "vant";
-
-// 或在文档里配 enableMouseEvent: true
-```
-
-</v-click>
-
-<v-click>
-
-> 💡 **真实场景**：很多移动 H5 也会被桌面浏览器访问（运营预览、PC 微信扫码），适配桌面是加分项。
+> 💡 Vant 默认监听 touch，部分组件（Swipe / PullRefresh）需配 `enableMouseEvent` 支持鼠标拖拽。
 
 </v-click>
 
@@ -1901,15 +1679,10 @@ transition: fade-out
 **手动配 SSR（Vue 3 + 自定义 SSR）**
 
 ```ts
-// entry-server.ts
+// entry-server.ts — Vant 4 大部分组件 SSR-safe，无需特殊 provide
 import { createSSRApp } from "vue";
 import App from "./App.vue";
-
-export function createApp() {
-  const app = createSSRApp(App);
-  // Vant 4 大部分组件 SSR-safe，无需特殊 provide
-  return { app };
-}
+export const createApp = () => ({ app: createSSRApp(App) });
 ```
 
 </v-click>
@@ -1918,18 +1691,11 @@ export function createApp() {
 
 **Nuxt 项目：用 @vant/nuxt 模块（推荐）**
 
-```bash
-pnpm add @vant/nuxt
-```
-
 ```ts
-// nuxt.config.ts
+// nuxt.config.ts — pnpm add @vant/nuxt
 export default defineNuxtConfig({
   modules: ["@vant/nuxt"],
-  vant: {
-    lazyload: true,        // 自动启用 Lazyload 指令
-    importStyle: "css",    // 或 'less'
-  },
+  vant: { lazyload: true, importStyle: "css" },
 });
 ```
 
@@ -1937,7 +1703,7 @@ export default defineNuxtConfig({
 
 <v-click>
 
-> 💡 Vant 4 大部分组件原生 SSR-safe，弹层类组件（Popup / Toast / Dialog）走 Teleport，需要 `<ClientOnly>` 包裹。
+> 💡 弹层类组件（Popup / Toast / Dialog）走 Teleport，需要 `<ClientOnly>` 包裹。
 
 </v-click>
 
@@ -1998,25 +1764,17 @@ transition: fade-out
 **获取组件实例（调 validate / scrollTo）**
 
 ```ts
-import type {
-  FormInstance,
-  FieldInstance,
-  ListInstance,
-  PullRefreshInstance,
-} from "vant";
+import type { FormInstance, FieldInstance, ListInstance } from "vant";
 
 const formRef = ref<FormInstance>();
 const fieldRef = ref<FieldInstance>();
 const listRef = ref<ListInstance>();
 
 onMounted(() => {
-  fieldRef.value?.focus();                    // input 自动聚焦
-  listRef.value?.check();                     // 强制重新检查滚动加载
+  fieldRef.value?.focus();      // input 自动聚焦
+  listRef.value?.check();       // 强制重新检查滚动加载
 });
-
-async function submit() {
-  await formRef.value?.validate();
-}
+async function submit() { await formRef.value?.validate(); }
 ```
 
 </v-click>
@@ -2028,13 +1786,7 @@ async function submit() {
 ```ts
 import { showToast, type ToastOptions } from "vant";
 
-const opts: ToastOptions = {
-  message: "保存成功",
-  type: "success",
-  duration: 2000,
-  forbidClick: true,
-};
-
+const opts: ToastOptions = { message: "保存成功", type: "success", forbidClick: true };
 showToast(opts);
 ```
 
@@ -2101,23 +1853,20 @@ transition: fade-out
 
 <v-click>
 
-| 库                          | 作用                                     |
-| --------------------------- | ---------------------------------------- |
-| **@vant/auto-import-resolver** | unplugin-vue-components 的 Vant Resolver |
-| **@vant/nuxt**              | Nuxt 3 官方集成模块                      |
-| **@vant/use**               | Vant 抽取的 Vue 组合式工具函数库          |
-| **@vant/area-data**         | 中国行政区数据（省市区，配合 Area 组件）   |
-| **@vant/cli**               | 组件库构建工具（用于二次开发）           |
-| **vant-weapp**              | 微信小程序版（同 API）                   |
-| **react-vant**              | React 移植版（社区，非官方）             |
-| **vant-touch-emulator**     | 桌面浏览器触摸事件模拟器（调试用）       |
-| **vant-demo**               | 官方示例仓库（Rsbuild / Vite / Nuxt3）   |
+| 库                             | 作用                                |
+| ------------------------------ | ----------------------------------- |
+| **@vant/auto-import-resolver** | unplugin-vue-components 的 Resolver |
+| **@vant/nuxt**                 | Nuxt 3 官方集成模块                 |
+| **@vant/use**                  | Vant 抽取的 Vue 组合式工具          |
+| **@vant/area-data**            | 中国行政区数据（配 Area 组件）      |
+| **vant-weapp**                 | 微信小程序版（同 API）              |
+| **vant-touch-emulator**        | 桌面浏览器触摸模拟器（调试用）      |
 
 </v-click>
 
-<v-click text-xs class="mt-4">
+<v-click text-xs class="mt-2">
 
-> 💡 移动 H5 技术栈：Vue 3 + Vant + Vue Router + Pinia + Vite + postcss-px-to-viewport 是「黄金组合」。
+> 💡 黄金组合：Vue 3 + Vant + Vue Router + Pinia + Vite + postcss-px-to-viewport。
 
 </v-click>
 
@@ -2172,36 +1921,21 @@ transition: fade-out
 
 <v-click>
 
-**坑 1：Less 主题变量不生效**
-
-按需引入时 VantResolver 默认走 css，绕过 Less 编译，主题覆盖无效。
+**坑 1：Less 主题变量不生效** — VantResolver 默认走 css
 
 ```ts
-Components({
-  resolvers: [VantResolver({ importStyle: "less" })],   // 必须指定 less
-});
+Components({ resolvers: [VantResolver({ importStyle: "less" })] });
 ```
 
 </v-click>
 
 <v-click>
 
-**坑 2：showToast / showDialog 没有自动 import**
-
-`unplugin-vue-components` 只扫描模板 `<van-xxx>`，不会处理脚本里的函数式 API。
+**坑 2：showToast / showDialog 没自动 import** — 需配 AutoImport
 
 ```ts
-// vite.config.ts
-import AutoImport from "unplugin-auto-import/vite";
-
 AutoImport({
-  imports: [
-    "vue",
-    "vue-router",
-    {
-      vant: ["showToast", "showDialog", "showNotify", "showLoadingToast", "showConfirmDialog"],
-    },
-  ],
+  imports: [{ vant: ["showToast", "showDialog", "showNotify", "showConfirmDialog"] }],
 });
 ```
 
@@ -2211,12 +1945,9 @@ AutoImport({
 
 **坑 3：单独引入 Toast 样式丢失**
 
-手动 import showToast 时样式不会自动加载。
-
 ```ts
-// 必须配套 import 样式
 import { showToast } from "vant";
-import "vant/es/toast/style";
+import "vant/es/toast/style";   // 必须配套
 ```
 
 </v-click>
@@ -2283,36 +2014,20 @@ Picker 数据格式 / Tabbar 路由模式 / List 重复触发
 
 <v-click>
 
-**坑 4：Picker columns 结构不对**
-
-v3 用 `[[]]` 嵌套数组，v4 改成 `[{}]` 对象数组。
+**坑 4：Picker columns 结构** — v3 嵌套数组 → v4 对象数组
 
 ```ts
-// ❌ v3 风格
-const columns = [["杭州", "宁波", "温州"]];
-
-// ✅ v4 风格
-const columns = [
-  { text: "杭州", value: "Hangzhou" },
-  { text: "宁波", value: "Ningbo" },
-];
+// ❌ v3 风格        ✅ v4 风格
+[["杭州", "宁波"]]   [{ text: "杭州", value: "Hangzhou" }]
 ```
 
 </v-click>
 
 <v-click>
 
-**坑 5：Tabbar route 模式不生效**
-
-加 route 属性但没用 to 跳路由，仍按 active 索引切换。
+**坑 5：Tabbar route 模式** — 必须加 route + to
 
 ```vue
-<!-- ❌ active 模式 -->
-<van-tabbar v-model="active">
-  <van-tabbar-item icon="home-o">首页</van-tabbar-item>
-</van-tabbar>
-
-<!-- ✅ route 模式 -->
 <van-tabbar v-model="active" route>
   <van-tabbar-item to="/" icon="home-o">首页</van-tabbar-item>
 </van-tabbar>
@@ -2322,14 +2037,14 @@ const columns = [
 
 <v-click>
 
-**坑 6：List 加载完没设 finished 导致重复触发**
+**坑 6：List 重复触发** — 数据为空时必须设 finished
 
 ```ts
 async function onLoad() {
   const items = await api.fetchList();
   list.value.push(...items);
   loading.value = false;
-  if (items.length === 0) finished.value = true;  // 关键
+  if (items.length === 0) finished.value = true;
 }
 ```
 
@@ -2407,10 +2122,8 @@ transition: fade-out
 
 **项目初始化**
 
-- 必用按需引入 + VantResolver，bundle 减半
+- 按需引入 + VantResolver，bundle 减半
 - 函数式 API 配 unplugin-auto-import 集中注入
-- viewport 方案优于 rem，新项目首选 postcss-px-to-viewport
-- tsconfig 加 Vant 类型导入，让 Volar 识别全局组件
 
 </v-click>
 
@@ -2418,10 +2131,8 @@ transition: fade-out
 
 **表单 + 列表**
 
-- Form 用 van-cell-group inset 包裹，iOS 风格分组
-- Field 校验 trigger 用 onBlur，避免输入过程频繁红框
-- List + PullRefresh 组合时记得在 refresh 后重置 finished
-- 大列表配合 v-lazy 指令 + 虚拟滚动（自行实现 / 第三方）
+- Form 用 van-cell-group inset 包裹，iOS 风格
+- Field 校验 trigger 用 onBlur，避免频繁红框
 
 </v-click>
 
@@ -2429,10 +2140,8 @@ transition: fade-out
 
 **主题与暗色**
 
-- 优先 CSS Variables（v4 推荐），Less Vars 仅用于编译期固化
-- ConfigProvider 全局配 theme="dark" 切换暗色
-- VueUse useDark 一行实现暗色切换，不用造轮子
-- 桌面端访问加 max-width 容器，提升 PC 端体验
+- 优先 CSS Variables，VueUse useDark 切换
+- 桌面端访问加 max-width 容器
 
 </v-click>
 
@@ -2490,20 +2199,17 @@ transition: fade-out
 **优点**
 
 - 80+ 组件覆盖移动端几乎所有场景，开箱即用
-- 单组件 ~1KB，零三方依赖，移动端弱网环境优势巨大
-- 中文社区资源极其丰富，文档 / issue / 教程 / 模板海量
-- 主题系统双层（CSS Vars + Less Vars）满足运行时 + 编译期双需求
-- TypeScript 原生支持，Volar 体验一流
-- v4 自 2022 年发布至今稳定，企业选型放心
-- Nuxt / SSR 官方支持，全栈场景可用
-- 业务组件（AddressEdit / Sku / Coupon）开箱即用电商场景
+- 单组件 ~1KB，零三方依赖，移动端弱网优势巨大
+- 中文社区资源极其丰富，文档 / 教程 / 模板海量
+- 主题双层（CSS Vars + Less Vars），TypeScript 原生
+- 业务组件（AddressEdit / Sku / Coupon）开箱即用电商
 
 **缺点**
 
-- 桌面端体验较弱，max-width 容器是凑合不是优化
-- 鼠标交互在部分组件支持不全（Swipe / PullRefresh 需配 enableMouseEvent）
-- 设计语言偏中国电商风（橙红色调），海外项目可能水土不服
-- 业务组件耦合有赞商城逻辑，深度定制时不如基础组件灵活
+- 桌面端体验较弱，max-width 容器只是凑合
+- 鼠标交互不全（Swipe / PullRefresh 需配 enableMouseEvent）
+- 设计偏中国电商风（橙红色调），海外项目可能水土不服
+- 业务组件耦合有赞商城逻辑，深度定制不如基础组件灵活
 - i18n 仅 30+ 语言，少于 Element Plus 的 66+
 
 </v-clicks>
@@ -2566,7 +2272,6 @@ transition: fade-out
 **第 1 周：核心组件熟练**
 
 - 通读官方文档 基础 + 表单 + 反馈 三大分组
-- 跟着官方 Playground 改例子（最快入门方式）
 - 写一个 CRUD 页面（List + Form + Dialog 三件套）
 
 </v-click>
@@ -2575,8 +2280,7 @@ transition: fade-out
 
 **第 2 周：移动适配 + 交互精进**
 
-- 跑通 viewport 适配 + 不同屏幕预览
-- 实现下拉刷新 + 上拉加载 + 触摸滑动
+- 跑通 viewport 适配，实现下拉刷新 + 上拉加载
 - 实现暗色模式 + 国际化切换
 
 </v-click>
@@ -2586,17 +2290,13 @@ transition: fade-out
 **第 3-4 周：企业级整合**
 
 - 接入 Vue Router + Pinia + Vite + dayjs
-- 实现登录 / 首页 / 列表 / 详情 / 个人中心五件套
-- 接 ECharts mobile / vchart 等移动端图表
+- 实现登录 / 首页 / 列表 / 详情 / 个人中心
 
 </v-click>
 
 <v-click>
 
-**长期：源码 + 跨端**
-
-- 阅读 List / PullRefresh / Picker 等核心组件源码
-- 探索 Vant Weapp（小程序版）/ React Vant 跨端方案
+**长期：源码 + 跨端** — 读 List / PullRefresh / Picker 源码，探索 Weapp / React Vant
 
 </v-click>
 
@@ -2655,10 +2355,9 @@ transition: fade-out
 
 **官方资源**
 
-- [官方文档](https://vant-ui.github.io/vant/) —— 中英双语，质量第一档
-- [Playground](https://vant-ui.github.io/vant-playground/) —— 在线编辑测试
-- [GitHub](https://github.com/youzan/vant) —— 23K+ star
-- [vant-demo](https://github.com/youzan/vant-demo) —— 多框架示例仓库
+- [官方文档](https://vant-ui.github.io/vant/) —— 中英双语
+- [Playground](https://vant-ui.github.io/vant-playground/) —— 在线编辑
+- [GitHub](https://github.com/youzan/vant) / [vant-demo](https://github.com/youzan/vant-demo)
 
 </v-click>
 
@@ -2666,9 +2365,8 @@ transition: fade-out
 
 **移动 H5 模板**
 
-- [vue-vant-mobile](https://github.com/easy-temps/vue-vant-mobile) —— 现代化移动模板
-- [vue3-h5-template](https://github.com/yulimchen/vue3-h5-template) —— 简洁实用
-- [vant-demo Vite + TS](https://github.com/youzan/vant-demo/tree/main/vant/vue3-ts) —— 官方推荐起点
+- [vue-vant-mobile](https://github.com/easy-temps/vue-vant-mobile)
+- [vue3-h5-template](https://github.com/yulimchen/vue3-h5-template)
 
 </v-click>
 
@@ -2676,8 +2374,7 @@ transition: fade-out
 
 **配套技术栈**
 
-- Vue Router 4 + Pinia + Vite + postcss-px-to-viewport = 黄金组合
-- VueUse + dayjs + ECharts mobile = 实用三件套
+- Vue Router 4 + Pinia + Vite + postcss-px-to-viewport
 - @vant/nuxt + Nuxt 3 = SSR 移动 H5 终极方案
 
 </v-click>

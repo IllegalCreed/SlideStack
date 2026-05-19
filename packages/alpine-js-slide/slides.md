@@ -86,24 +86,20 @@ level: 2
 
 # 评价
 
-包体极小、零构建可用，但不是 SPA 框架
-
 <v-clicks>
 
 **优点**
 - 包体 ~7KB（gzip），首屏几乎零开销
-- 零构建工具：CDN 一行就用，不需要 webpack / Vite
+- 零构建：CDN 一行就用，不需要 webpack / Vite
 - 学习曲线极平缓，15 指令 + 9 magic 看一遍就会
 - 与后端框架完美配合（Laravel / Rails / Django）
-- 响应式底层用 Vue 3 reactivity，体验可靠
-- 9 个官方插件覆盖常见 SPA 交互
+- 响应式底层用 Vue 3 reactivity，9 个官方插件覆盖常见交互
 
 **缺点**
-- 不适合 SPA（没有路由 / SSR / 数据流方案）
+- 不适合 SPA（无路由 / SSR / 数据流方案）
 - HTML 模板能力有限，复杂表达式难读
-- 无 SFC / 无 props 类型推导，TS 支持是编辑器插件级
-- 调试体验弱，没有 Vue DevTools 那样的专属工具
-- 性能边界：1000+ 列表 + 频繁更新场景吃力
+- 无 SFC / 无 props 类型推导，TS 支持仅编辑器插件级
+- 性能边界：1000+ 列表 + 频繁更新吃力
 - 生态规模远小于 React / Vue
 
 </v-clicks>
@@ -114,15 +110,12 @@ transition: slide-up
 
 # Caleb Porzio 与 Laravel 生态
 
-Alpine + Livewire 同一作者，TALL Stack 创立者
-
 <v-click>
 
 - **Caleb Porzio**：Laravel 社区知名开发者，前 Tighten 工程师
 - **2019.11**：发布 Alpine 1.0，对标「HTML 友好版 Vue」
 - **2020.7**：Alpine 2.0 + Livewire 1.0 双双发布
-- **2021.5**：Alpine 3.0 重写为 ESM 架构
-- **2024.1**：Alpine 3.14，当前主流稳定版
+- **2021.5 / 2024.1**：Alpine 3.0 重写 ESM 架构 / 3.14 主流稳定版
 
 </v-click>
 
@@ -130,12 +123,10 @@ Alpine + Livewire 同一作者，TALL Stack 创立者
 
 **TALL Stack** = **T**ailwind + **A**lpine + **L**aravel + **L**ivewire
 
-| 角色 | 工具 |
-|---|---|
-| 样式 | Tailwind CSS |
-| 前端交互 | Alpine.js |
-| 后端 | Laravel |
-| 实时 UI | Livewire |
+| 角色 | 工具 | 角色 | 工具 |
+|---|---|---|---|
+| 样式 | Tailwind CSS | 后端 | Laravel |
+| 前端交互 | Alpine.js | 实时 UI | Livewire |
 
 </v-click>
 
@@ -150,9 +141,7 @@ transition: slide-up
 | **1.0** | 2019.11 | Caleb Porzio 首次发布；10 个指令 |
 | **2.0** | 2020.7 | `$store` 引入；性能优化 |
 | **3.0** | 2021.5 | 重写 ESM 架构；魔术属性 / 插件系统 |
-| **3.4** | 2021.10 | x-modelable / x-teleport |
 | **3.10** | 2022.5 | x-effect / Morph 改进 |
-| **3.13** | 2023.10 | Sort 插件 / Anchor 插件 |
 | **3.14** | 2024.1 | Morph 算法 / x-bind 性能提升 |
 
 <v-click>
@@ -167,26 +156,17 @@ transition: slide-up
 
 # Alpine vs Vue vs jQuery vs HTMX
 
-定位差异决定选型
-
 | 维度 | Alpine 3 | Vue 3 | jQuery | HTMX |
 |---|---|---|---|---|
 | 自我定位 | Sprinkle JS | UI 框架 | DOM 库 | HATEOAS |
 | 适合场景 | SSR 加交互 | SPA / SFC | 老网页 | 后端换片段 |
 | 包体（gzip） | **~7KB** | ~25KB | ~30KB | ~10KB |
 | 响应式 | **有** | 有 | 无 | 无 |
-| 模板系统 | HTML 属性 | SFC | 字符串 | 服务端模板 |
 | 构建工具 | **不需要** | Vite | 不需要 | 不需要 |
-| SPA 路由 | 无 | Vue Router | 无 | 无 |
 
 <v-click>
 
-**经验**：
-
-- 新项目纯前端 SPA → Vue / React / Solid
-- 后端框架 + 想加点客户端交互 → **Alpine.js**
-- Rails 7 默认栈 / Hotwire → Stimulus
-- HTMX 项目 → Alpine.js（互补搭档）
+**经验**：纯 SPA 选 Vue / React；SSR + 轻交互选 **Alpine**；Rails 7 选 Stimulus；HTMX 项目用 Alpine 搭配。
 
 </v-click>
 
@@ -440,25 +420,16 @@ transition: slide-up
 <!-- 复选框：布尔 / 数组 -->
 <input type="checkbox" x-model="agreed">
 <input type="checkbox" value="apple" x-model="fruits">
-<input type="checkbox" value="banana" x-model="fruits">
 
-<!-- select 单选 / 多选 -->
+<!-- select 单选 / 多选 / range（带数字转换） -->
 <select x-model="country">...</select>
 <select multiple x-model="tags">...</select>
-
-<!-- range（带数字转换） -->
 <input type="range" min="0" max="100" x-model.number="volume">
 ```
 
 <v-click>
 
-**修饰符**：
-
-- `.lazy` —— change 而非 input
-- `.number` —— 转数字
-- `.boolean` —— 转布尔
-- `.debounce.500ms` / `.throttle.500ms`
-- `.fill` —— 用 value 属性回填空 state
+**修饰符**：`.lazy`（change 而非 input）/ `.number` / `.boolean` / `.debounce.500ms` / `.throttle.500ms` / `.fill`（用 value 属性回填空 state）
 
 </v-click>
 
@@ -476,28 +447,17 @@ transition: slide-up
 
 <!-- 带索引 -->
 <template x-for="(item, index) in items" :key="item.id">
-  <li>
-    <span x-text="index + 1"></span>. <span x-text="item.name"></span>
-  </li>
+  <li><span x-text="index + 1"></span>. <span x-text="item.name"></span></li>
 </template>
 
-<!-- 对象 -->
-<template x-for="(value, key) in user" :key="key">
-  <li><b x-text="key"></b>: <span x-text="value"></span></li>
-</template>
-
-<!-- 范围 -->
-<template x-for="i in 10">
-  <span x-text="i"></span>
-</template>
+<!-- 对象 / 范围 -->
+<template x-for="(value, key) in user" :key="key">...</template>
+<template x-for="i in 10"><span x-text="i"></span></template>
 ```
 
 <v-click>
 
-**两条铁律**：
-
-- 必须用 `<template>` 包裹
-- 内部只能有**一个根元素**
+**两条铁律**：必须用 `<template>` 包裹；内部只能有**一个根元素**。
 
 </v-click>
 
@@ -512,9 +472,7 @@ transition: slide-up
 <div x-show="open">Content</div>
 
 <!-- x-if：DOM 增删（必须 template） -->
-<template x-if="open">
-  <div>Content</div>
-</template>
+<template x-if="open"><div>Content</div></template>
 ```
 
 <v-click>
@@ -522,7 +480,6 @@ transition: slide-up
 | 维度 | `x-show` | `x-if` |
 |---|---|---|
 | 实现 | `display: none` | DOM 增删 |
-| 元素存在 | 始终在 DOM | 切换新建/移除 |
 | 性能 | 切换快 | 销毁重建有成本 |
 | 适合 | 频繁切换 | 不常切换 / 重内容 |
 | 容器要求 | 任意 | 必须 `<template>` |
@@ -545,18 +502,14 @@ transition: slide-up
 <!-- 默认（fade + scale） -->
 <div x-show="open" x-transition>Content</div>
 
-<!-- 时长 -->
+<!-- 时长 / 分别控制 enter / leave -->
 <div x-show="open" x-transition.duration.500ms>...</div>
-
-<!-- 分别控制 enter / leave -->
 <div x-show="open"
   x-transition:enter.duration.500ms
   x-transition:leave.duration.300ms>...</div>
 
-<!-- 仅淡入淡出 -->
+<!-- 仅淡入淡出 / 自定义 scale -->
 <div x-show="open" x-transition.opacity>...</div>
-
-<!-- 自定义 scale -->
 <div x-show="open" x-transition.scale.80>...</div>
 ```
 
@@ -568,11 +521,7 @@ transition: slide-up
   x-transition:enter="transition ease-out duration-300"
   x-transition:enter-start="opacity-0 scale-90"
   x-transition:enter-end="opacity-100 scale-100"
-  x-transition:leave="transition ease-in duration-200"
-  x-transition:leave-start="opacity-100 scale-100"
-  x-transition:leave-end="opacity-0 scale-90">
-  ...
-</div>
+  x-transition:leave-end="opacity-0 scale-90">...</div>
 ```
 
 </v-click>
@@ -584,31 +533,19 @@ transition: slide-up
 # x-effect vs $watch
 
 ```html
-<!-- x-effect：自动追踪表达式中的依赖 -->
-<div x-data="{ a: 1, b: 2 }"
-     x-effect="document.title = `${a} + ${b} = ${a + b}`">
+<!-- x-effect：自动追踪表达式依赖 -->
+<div x-data="{ a: 1, b: 2 }" x-effect="document.title = `${a + b}`">
   <button @click="a++">a++</button>
-  <button @click="b++">b++</button>
 </div>
-```
 
-<v-click>
-
-```html
 <!-- $watch：显式指定属性 + 拿新旧值 -->
 <div x-data="{
   search: '',
-  init() {
-    this.$watch('search', (value, oldValue) => {
-      console.log(`${oldValue} → ${value}`)
-    })
-  }
+  init() { this.$watch('search', (v, old) => console.log(`${old} → ${v}`)) }
 }">
   <input x-model="search">
 </div>
 ```
-
-</v-click>
 
 <v-click>
 
@@ -741,26 +678,20 @@ transition: slide-up
 
 # 9 个魔术属性
 
-| Magic | 用途 |
-|---|---|
-| `$el` | 当前 DOM 元素 |
-| `$refs` | `x-ref` 集合 |
-| `$store` | 全局 store |
-| `$watch` | 监听属性 |
-| `$dispatch` | 派发事件 |
-| `$nextTick` | 等 DOM 更新完 |
-| `$root` | 最近 x-data 根 |
-| `$data` | 当前 scope 整体 |
-| `$id` | 生成唯一 ID |
+| Magic | 用途 | Magic | 用途 |
+|---|---|---|---|
+| `$el` | 当前 DOM 元素 | `$nextTick` | 等 DOM 更新完 |
+| `$refs` | `x-ref` 集合 | `$root` | 最近 x-data 根 |
+| `$store` | 全局 store | `$data` | 当前 scope 整体 |
+| `$watch` | 监听属性 | `$id` | 生成唯一 ID |
+| `$dispatch` | 派发事件 | | |
 
 <v-click>
 
 ```html
 <div x-data="{ count: 0 }">
   <button @click="$dispatch('counter-changed', { count })">+1</button>
-  <span x-ref="display" x-text="count"></span>
   <span x-text="$store.cart.total"></span>
-  <label :for="$id('input')">...</label>
 </div>
 ```
 
@@ -803,20 +734,11 @@ transition: slide-up
 document.addEventListener('alpine:init', () => {
   Alpine.data('dropdown', () => ({
     open: false,
-
-    init() {
-      // 自动调用（替代 x-init）
+    init() {                                    // 自动调用（替代 x-init）
       this.$watch('open', v => console.log('open =', v))
     },
-
-    toggle() {
-      this.open = !this.open
-    },
-
-    destroy() {
-      // 元素移除时自动调用
-      console.log('cleanup')
-    },
+    toggle() { this.open = !this.open },
+    destroy() { console.log('cleanup') },       // 元素移除时自动调用
   }))
 })
 ```
@@ -898,14 +820,12 @@ transition: slide-up
 | 插件 | 主要 API | 场景 |
 |---|---|---|
 | **Persist** | `$persist(value)` | 状态持久化（localStorage） |
-| **Intersect** | `x-intersect` | 视口检测（无限滚动 / 懒加载） |
+| **Intersect** | `x-intersect` | 视口检测 / 无限滚动 |
 | **Mask** | `x-mask` | 输入掩码（电话 / 卡号 / 日期） |
 | **Morph** | `Alpine.morph()` | DOM 差量更新（Livewire 核心） |
 | **Focus** | `x-trap` / `$focus` | 焦点陷阱（modal） |
-| **Collapse** | `x-collapse` | 折叠动画 |
 | **Anchor** | `x-anchor` | 浮动定位（Floating UI 内核） |
-| **Sort** | `x-sort` | 拖拽排序（SortableJS） |
-| **Resize** | `x-resize` | 尺寸监听（ResizeObserver） |
+| **Sort** / **Collapse** / **Resize** | — | 拖拽 / 折叠 / 尺寸监听 |
 
 ---
 transition: slide-up
@@ -1183,11 +1103,7 @@ class Counter extends Component
 
 <v-click>
 
-**协作机制**：
-
-- `wire:click` → 发请求到 PHP `increment()` 方法
-- Livewire 拿到新 HTML，用 **Morph 算法**替换 DOM
-- Morph 时保留所有 Alpine state（`animating` 不丢）
+**协作机制**：`wire:click` → PHP `increment()`；Livewire 用 **Morph 算法**替换 DOM；保留所有 Alpine state（`animating` 不丢）
 
 </v-click>
 
@@ -1369,21 +1285,14 @@ transition: slide-up
 
 | 维度 | Alpine 3 | Vue 3 | Stimulus 3 |
 |---|---|---|---|
-| 创作者 | Caleb Porzio | Evan You | Basecamp / DHH |
 | 包体（gzip） | ~7KB | ~25KB | ~10KB |
-| 模板 | HTML 属性 | SFC / `<template>` | HTML data 属性 |
+| 模板 | HTML 属性 | SFC | HTML data 属性 |
 | 响应式 | `@vue/reactivity` | Proxy | 无（手动） |
-| 状态 | x-data / store | ref / Pinia | controller properties |
 | 适合 | SSR + 轻交互 | SPA / 全栈 | Rails Hotwire |
-| 学习曲线 | 极平缓 | 中等 | 平缓 |
 
 <v-click>
 
-**经验**：
-
-- 新项目 SPA → Vue / React / Solid
-- Laravel / Rails / Django + 加交互 → **Alpine**
-- Rails 7 默认栈 → Stimulus
+**经验**：新项目 SPA → Vue / React；Laravel / Rails / Django + 加交互 → **Alpine**；Rails 7 默认栈 → Stimulus。
 
 </v-click>
 
@@ -1397,11 +1306,9 @@ transition: slide-up
 |---|---|
 | `$('.x').on('click', ...)` | `@click="..."` |
 | `$('.x').toggle()` | `x-show="state"` |
-| `$('.x').html(...)` | `x-html="..."` |
 | `$('.x').addClass('a')` | `:class="{ a: cond }"` |
 | `$('.x').val(v)` | `x-model="value"` |
 | `$('form').submit(e => e.preventDefault())` | `@submit.prevent="..."` |
-| `$.ajax(...)` | `fetch(...)` |
 | `$(window).on('resize', ...)` | `@resize.window="..."` |
 
 <v-click>
@@ -1448,25 +1355,16 @@ document.addEventListener('alpine:init', () => {
   Alpine.data('todoApp', () => ({
     todos: Alpine.$persist([]).as('todos'),   // localStorage
     newTodo: '',
-
-    get remaining() {
-      return this.todos.filter(t => !t.done).length
-    },
+    get remaining() { return this.todos.filter(t => !t.done).length },
 
     add() {
       if (!this.newTodo.trim()) return
-      this.todos.push({
-        id: crypto.randomUUID(),
-        text: this.newTodo.trim(),
-        done: false,
-      })
+      this.todos.push({ id: crypto.randomUUID(), text: this.newTodo.trim(), done: false })
       this.newTodo = ''
       this.$refs.input.focus()
     },
 
-    remove(id) {
-      this.todos = this.todos.filter(t => t.id !== id)
-    },
+    remove(id) { this.todos = this.todos.filter(t => t.id !== id) },
   }))
 })
 ```

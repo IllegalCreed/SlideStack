@@ -113,7 +113,7 @@ layoutClass: gap-x-16
 pnpm create slidev
 ```
 
-会询问项目名、主题、模板，然后写出 `slides.md` 与 `package.json`。
+询问项目名 / 主题 / 模板后生成项目。
 
 **启动开发服务器**
 
@@ -137,13 +137,9 @@ theme: seriph
 
 # Hello
 
-第一页内容
-
 ---
 
 # 第二页
-
-按 Space 切换
 ```
 
 `---` 分隔幻灯片；头部 frontmatter（headmatter）控制整个 deck。

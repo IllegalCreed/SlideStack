@@ -97,19 +97,17 @@ level: 2
 
 **优点**
 - 类型推导业界顶配：路径 / search / loader / server fn 全链路编译期校验
-- TanStack Router 内核成熟，路由配置 API 干净直观
-- Vite 构建，开发体验快，无 Webpack/Turbopack 历史包袱
-- Server Functions 范式与 React Server Actions 心智近，但更通用
-- 中间件可组合 + 工厂模式，权限 / 日志 / 限流容易抽象
-- 部署平台无锁定，Cloudflare / Vercel / Netlify / Node 同源
-- 与 TanStack Query 双层缓存协作天然，工程化标准答案
+- Vite 构建快，Router 内核成熟，无 Webpack/Turbopack 历史包袱
+- Server Functions 心智近 React Server Actions，但更通用
+- 中间件可组合 + 工厂模式，权限 / 日志 / 限流好抽象
+- 部署无锁定（Cloudflare / Vercel / Netlify / Node 同源）
+- 与 TanStack Query 双层缓存协作天然
 
 **缺点**
 - RC 阶段（2026 仍未 v1），API freeze 但偶有边角变动
 - 文档体量 vs Next.js 仍小，深度场景需读源码 / Discord
-- 招聘候选人少，主要靠从 React Router / Next.js 迁移
-- 类型推导编译开销大，超大项目需关注 IDE 响应
-- 文件路由生成 `routeTree.gen.ts` 偶尔失同步
+- 招聘候选人少，主要靠 React Router / Next.js 迁移
+- 类型推导编译开销大，超大项目 IDE 响应吃力
 
 </v-clicks>
 
@@ -251,19 +249,14 @@ my-app/
 │   ├── routes/                # 文件路由根
 │   │   ├── __root.tsx         # 根布局（含 HeadContent / Scripts）
 │   │   ├── index.tsx          # /
-│   │   ├── about.tsx          # /about
 │   │   ├── posts/
 │   │   │   ├── index.tsx      # /posts
 │   │   │   └── $postId.tsx    # /posts/:postId
-│   │   └── api/
-│   │       └── users.ts       # /api/users (server route)
+│   │   └── api/users.ts       # /api/users (server route)
 │   ├── routeTree.gen.ts       # ← 自动生成，勿手改
 │   ├── router.tsx             # createRouter()
-│   ├── start.ts               # 全局 middleware 注册（可选）
-│   └── components/
-├── public/
-├── vite.config.ts             # tanstackStart() + viteReact() 插件
-├── tsconfig.json
+│   └── start.ts               # 全局 middleware 注册（可选）
+├── vite.config.ts             # tanstackStart() + viteReact()
 └── package.json
 ```
 
@@ -271,9 +264,9 @@ my-app/
 
 **关键点**：
 
-- `__root.tsx` 必须导出含 `<HeadContent />` + `<Scripts />` 的根布局
-- `routeTree.gen.ts` 由 Vite 插件**自动生成**——添加到 `.gitignore`，勿手改
-- `start.ts` 是新版全局配置入口（注册 middleware / 默认 SSR 等）
+- `__root.tsx` 必须含 `<HeadContent />` + `<Scripts />`
+- `routeTree.gen.ts` 由 Vite 插件自动生成，加 `.gitignore`
+- `start.ts` 全局配置入口（middleware / 默认 SSR）
 
 </v-click>
 
@@ -290,17 +283,10 @@ import viteReact from '@vitejs/plugin-react'
 
 export default defineConfig({
   server: { port: 3000 },
-  resolve: { tsconfigPaths: true },
   plugins: [
     tanstackStart({
-      // SPA 模式
-      // spa: { enabled: true },
-
-      // 静态预渲染（SSG）
-      // prerender: {
-      //   enabled: true,
-      //   crawlLinks: true,
-      // },
+      // spa: { enabled: true },                    // SPA 模式
+      // prerender: { enabled: true, crawlLinks: true },  // SSG
     }),
     viteReact(),
   ],
@@ -312,9 +298,8 @@ export default defineConfig({
 **`tanstackStart()` 做了什么**：
 
 - 读 `src/routes/` 生成 `routeTree.gen.ts`
-- 注入 client / server 双 entry
-- 调度 SSR pipeline + 流式 renderer
-- 编译 `createServerFn` 函数为客户端 fetch stub
+- 注入 client / server 双 entry + SSR pipeline
+- 编译 `createServerFn` 为客户端 fetch stub
 - 桥接部署 adapter（Nitro / 平台 plugin）
 
 </v-click>
@@ -336,22 +321,17 @@ export function getRouter() {
     scrollRestoration: true,
     defaultPreload: 'intent',     // 链接 hover 预加载
     defaultErrorComponent: ErrorFallback,
-    defaultNotFoundComponent: NotFoundPage,
   })
 }
 
 // 类型注册（端到端推导依赖）
 declare module '@tanstack/react-router' {
-  interface Register {
-    router: ReturnType<typeof getRouter>
-  }
+  interface Register { router: ReturnType<typeof getRouter> }
 }
 ```
 
 ```ts
 // src/start.ts（可选 — 全局中间件）
-import { createStart } from '@tanstack/react-start'
-
 export const startInstance = createStart(() => ({
   requestMiddleware: [globalLogging],
   functionMiddleware: [globalAuth],
@@ -379,13 +359,8 @@ export const Route = createRootRoute({
   }),
   component: () => (
     <html>
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <Outlet />
-        <Scripts />
-      </body>
+      <head><HeadContent /></head>
+      <body><Outlet /><Scripts /></body>
     </html>
   ),
 })
@@ -393,7 +368,7 @@ export const Route = createRootRoute({
 
 <v-click>
 
-**核心组件**：`<HeadContent />` 渲染所有匹配路由的 `head` 输出；`<Scripts />` 注入 hydration 脚本；`<Outlet />` 渲染子路由。
+**核心**：`<HeadContent />` 渲染匹配路由的 `head`；`<Scripts />` 注入 hydration；`<Outlet />` 渲染子路由。
 
 </v-click>
 
@@ -407,29 +382,18 @@ transition: slide-up
 src/routes/
 ├── __root.tsx                # 根布局（特殊）
 ├── index.tsx                 # /
-├── about.tsx                 # /about
 ├── posts.tsx                 # /posts 父布局
-├── posts/
-│   ├── index.tsx             # /posts
-│   ├── $postId.tsx           # /posts/:postId
-│   └── new.tsx               # /posts/new
-├── _auth.tsx                 # 路由分组（不影响 URL）
-├── _auth/
-│   ├── login.tsx             # /login
-│   └── signup.tsx            # /signup
-└── rest/
-    └── $.tsx                 # /rest/* (catch-all)
+├── posts/$postId.tsx         # /posts/:postId
+├── _auth/login.tsx           # /login（分组不影响 URL）
+└── rest/$.tsx                # /rest/* (catch-all)
 ```
 
 <v-click>
 
 | 文件名 | 含义 |
 |---|---|
-| `index.tsx` | 当前目录的根路径 |
-| `$param.tsx` | 动态参数（`params.param`） |
-| `$.tsx` | catch-all 通配 |
-| `_layout.tsx` 前缀 | 分组布局，URL 不含 |
-| `__root.tsx` | 应用根，每项目唯一 |
+| `index.tsx` / `$param.tsx` / `$.tsx` | 根路径 / 动态参数 / catch-all |
+| `_xx.tsx` 前缀 / `__root.tsx` | 分组布局（URL 不含）/ 应用根（唯一） |
 
 </v-click>
 
@@ -444,12 +408,8 @@ transition: slide-up
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/posts/$postId')({
-  // 路由匹配前跑（权限校验、redirect）
-  beforeLoad: async ({ params }) => {
-    return { breadcrumb: `Post ${params.postId}` }
-  },
+  beforeLoad: async ({ params }) => ({ breadcrumb: `Post ${params.postId}` }),
 
-  // 数据加载
   loader: async ({ params }) => {
     const post = await fetchPost(params.postId)
     if (!post) throw notFound()
@@ -462,14 +422,13 @@ export const Route = createFileRoute('/posts/$postId')({
 function PostComponent() {
   const post = Route.useLoaderData()    // ← 类型自动推导为 Post
   const { postId } = Route.useParams()  // ← postId: string
-
   return <h1>{post.title}</h1>
 }
 ```
 
 <v-click>
 
-`/posts/$postId` 字符串由 Vite 插件**自动写入**，开发者只关心组件逻辑——类型推导端到端贯穿。
+`/posts/$postId` 字符串由 Vite 插件自动写入，开发者只关心组件——类型推导端到端贯穿。
 
 </v-click>
 
@@ -481,7 +440,6 @@ transition: slide-up
 
 ```tsx
 // src/routes/posts/index.tsx
-import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 
 const searchSchema = z.object({
@@ -491,26 +449,16 @@ const searchSchema = z.object({
 })
 
 export const Route = createFileRoute('/posts/')({
-  // 校验 + 转换 URL search params
-  validateSearch: searchSchema,
-
-  // search 变化触发 loader 重跑
+  validateSearch: searchSchema,                                  // URL 校验 + 转换
   loaderDeps: ({ search }) => ({ page: search.page, tag: search.tag }),
-
-  loader: async ({ deps }) => fetchPosts(deps),
-
+  loader: async ({ deps }) => fetchPosts(deps),                  // search 变化重跑
   component: PostsList,
 })
 
 function PostsList() {
-  const search = Route.useSearch()      // ← 类型: { page, tag?, sort }
+  const search = Route.useSearch()      // ← { page, tag?, sort }
   const navigate = Route.useNavigate()
-
-  return (
-    <button onClick={() => navigate({ search: (s) => ({ ...s, page: s.page + 1 }) })}>
-      Next page
-    </button>
-  )
+  return <button onClick={() => navigate({ search: (s) => ({ ...s, page: s.page + 1 }) })}>Next</button>
 }
 ```
 
@@ -522,26 +470,16 @@ transition: slide-up
 
 ```tsx
 // src/routes/dashboard.tsx
-import { createFileRoute, redirect } from '@tanstack/react-router'
-
 export const Route = createFileRoute('/dashboard')({
-  // 父级 beforeLoad（权限拦截）
   beforeLoad: async ({ context, location }) => {
     if (!context.user) {
-      throw redirect({
-        to: '/login',
-        search: { redirect: location.href },
-      })
+      throw redirect({ to: '/login', search: { redirect: location.href } })
     }
-    // 返回值进入子路由 context
-    return { user: context.user }
+    return { user: context.user }                       // 返回值进入子 context
   },
-
-  // 父级 loader
   loader: async ({ context }) => ({
     stats: await fetchStats(context.user.id),
   }),
-
   component: DashboardLayout,
 })
 ```
@@ -550,8 +488,8 @@ export const Route = createFileRoute('/dashboard')({
 
 **层级关系**：
 
-- `beforeLoad` 自上而下串行，可 `throw redirect()` / `throw notFound()` 拦截
-- `loader` 默认**并行**（父子同时跑），子可读父的 `context`
+- `beforeLoad` 自上而下串行，可 `throw redirect()` / `notFound()` 拦截
+- `loader` 默认并行（父子同时跑），子可读父 `context`
 - 任何一层抛错 → 最近的 `errorComponent` 兜底
 
 </v-click>
@@ -570,7 +508,6 @@ import { z } from 'zod'
 export const getPost = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ id: z.string() }))
   .handler(async ({ data }) => {
-    // 仅服务端执行
     const post = await db.posts.findUnique({ where: { id: data.id } })
     if (!post) throw notFound()
     return post
@@ -578,18 +515,12 @@ export const getPost = createServerFn({ method: 'GET' })
 
 export const createPost = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ title: z.string().min(2) }))
-  .handler(async ({ data }) => {
-    return db.posts.create({ data })
-  })
+  .handler(async ({ data }) => db.posts.create({ data }))
 ```
 
 <v-click>
 
-**核心特性**：
-
-- 函数体只进**服务端 bundle**，客户端调用编译为 `fetch` POST stub
-- 端到端类型推导，无需手写 API contract
-- `inputValidator` 支持 Zod / Yup / 自定义函数
+**核心特性**：函数体只进服务端 bundle，客户端调用编译为 `fetch` POST stub；端到端类型推导，无需手写 API contract；`inputValidator` 支持 Zod / Yup / 自定义。
 
 </v-click>
 
@@ -606,39 +537,18 @@ export const Route = createFileRoute('/posts/$id')({
   component: PostView,
 })
 
-function PostView() {
-  const post = Route.useLoaderData()
-  return <h1>{post.title}</h1>
-}
-```
-
-```tsx
 // 方式 B：在组件中用 useServerFn 直接调
-import { useServerFn } from '@tanstack/react-start'
-
 function CreateButton() {
   const create = useServerFn(createPost)
-
-  return (
-    <button onClick={() => create({ data: { title: 'New' } })}>
-      Create
-    </button>
-  )
+  return <button onClick={() => create({ data: { title: 'New' } })}>Create</button>
 }
-```
 
-<v-click>
-
-**还有方式 C**：配合 TanStack Query
-
-```tsx
+// 方式 C：配合 TanStack Query
 const { data } = useQuery({
   queryKey: ['post', id],
   queryFn: () => getPost({ data: { id } }),
 })
 ```
-
-</v-click>
 
 ---
 transition: slide-up
@@ -647,15 +557,11 @@ transition: slide-up
 # Server Function：错误与重定向
 
 ```ts
-import { createServerFn } from '@tanstack/react-start'
 import { redirect, notFound } from '@tanstack/react-router'
 
 export const requireAuth = createServerFn().handler(async () => {
   const user = await getCurrentUser()
-  if (!user) {
-    // 客户端调用会自动跟随 redirect
-    throw redirect({ to: '/login' })
-  }
+  if (!user) throw redirect({ to: '/login' })  // 客户端自动跟随
   return user
 })
 
@@ -674,9 +580,7 @@ export const riskyOp = createServerFn().handler(async () => {
 
 <v-click>
 
-> 💡 **可序列化要求**
->
-> 返回值必须 JSON 可序列化（含 Date / Map / Set / Promise）。函数 / class instance 会丢失——与 React Server Actions 同源约束。
+> 💡 **可序列化要求**：返回值必须 JSON 可序列化（含 Date / Map / Set / Promise）。函数 / class instance 会丢失。
 
 </v-click>
 
@@ -702,17 +606,13 @@ const auth = createMiddleware({ type: 'function' })
   .server(async ({ next }) => {
     const user = await getCurrentUser()
     if (!user) throw new Error('Unauthorized')
-    // 把 user 注入下游 context
-    return next({ context: { user } })
+    return next({ context: { user } })   // 注入下游 context
   })
 ```
 
 <v-click>
 
-**两种类型**：
-
-- `createMiddleware()` → request 级，包整个 HTTP 请求（路由 + server fn）
-- `createMiddleware({ type: 'function' })` → 只包 `createServerFn` 调用
+**两种类型**：`createMiddleware()` 包整个 HTTP 请求；`createMiddleware({ type: 'function' })` 只包 server fn 调用。
 
 </v-click>
 
@@ -727,9 +627,7 @@ transition: slide-up
 const adminOnly = createMiddleware({ type: 'function' })
   .middleware([auth])                             // ← 依赖 auth
   .server(async ({ next, context }) => {
-    if (context.user.role !== 'admin') {
-      throw new Error('Forbidden')
-    }
+    if (context.user.role !== 'admin') throw new Error('Forbidden')
     return next()
   })
 
@@ -751,7 +649,7 @@ const deleteUser = createServerFn({ method: 'POST' })
 
 <v-click>
 
-> 💡 **关键**：`next({ context: {...} })` 注入下游，下游 `context.xxx` 类型自动可见——这是中间件组合的核心机制。
+> 💡 `next({ context: {...} })` 注入下游，下游 `context.xxx` 类型自动可见——中间件组合的核心机制。
 
 </v-click>
 
@@ -764,16 +662,11 @@ transition: slide-up
 ```ts
 // vite.config.ts
 tanstackStart({
-  // 1. SSR（默认）—— 无需配置
-
-  // 2. SPA（无 SSR，纯客户端）
-  // spa: { enabled: true },
-
-  // 3. SSG（构建时预渲染）
-  // prerender: {
+  // SSR（默认）—— 无需配置
+  // spa: { enabled: true },                          // SPA 纯客户端
+  // prerender: {                                     // SSG 预渲染
   //   enabled: true,
-  //   crawlLinks: true,                  // 自动爬站内链接
-  //   concurrency: 14,
+  //   crawlLinks: true,
   //   pages: ['/', '/about', '/pricing'],
   // },
 })
@@ -783,10 +676,9 @@ tanstackStart({
 
 | 模式 | 配置 | 适合 |
 |---|---|---|
-| **SSR** | 默认 | 动态内容、个性化（最常见） |
-| **SPA** | `spa: { enabled }` | 后台 / SaaS / 不需要 SEO |
-| **SSG** | `prerender: { enabled, crawlLinks }` | 博客 / 文档 / Marketing |
-| **混合** | `prerender.pages` + SSR 路由 | 部分预渲染 + 其余 SSR |
+| **SSR** | 默认 | 动态内容、个性化 |
+| **SPA** | `spa: { enabled }` | 后台 / SaaS |
+| **SSG** | `prerender: { enabled, crawlLinks }` | 博客 / 文档 |
 
 </v-click>
 
@@ -800,14 +692,9 @@ transition: slide-up
 
 ```tsx
 export const Route = createFileRoute('/dashboard')({
-  // 完整 SSR（默认）
-  // ssr: true,
-
-  // 数据预取，但组件在客户端渲染
-  // ssr: 'data-only',
-
-  // 完全跳过服务端（loader + 组件都在客户端）
-  ssr: false,
+  // ssr: true,             // 完整 SSR（默认）
+  // ssr: 'data-only',      // 数据预取，组件在客户端渲染
+  ssr: false,               // 全部客户端
 
   loader: () => fetchDashboard(),
   component: Dashboard,
@@ -819,16 +706,14 @@ export const Route = createFileRoute('/dashboard')({
 **三档语义**：
 
 - `true`（默认）→ beforeLoad + loader + render 全在服务端
-- `'data-only'` → beforeLoad + loader 服务端，**render 在客户端**
+- `'data-only'` → beforeLoad + loader 服务端，render 在客户端
 - `false` → 全部客户端
 
 </v-click>
 
 <v-click>
 
-> 💡 **继承规则**
->
-> 子路由只能比父更严格（`true → data-only → false`），不能反向。父禁用 SSR 则子也不能强开。
+> 💡 **继承规则**：子路由只能比父更严格（`true → data-only → false`），不能反向。
 
 </v-click>
 
@@ -839,15 +724,13 @@ transition: slide-up
 # 流式渲染：defer + Await
 
 ```tsx
-import { defer, Await } from '@tanstack/react-router'
+import { Await } from '@tanstack/react-router'
 import { Suspense } from 'react'
 
 export const Route = createFileRoute('/dashboard')({
   loader: async () => {
-    // 关键数据 await（阻塞首字节）
-    const user = await getCurrentUser()
-    // 慢数据不 await，包装成可流式的 promise
-    const reportPromise = generateReport(user.id)
+    const user = await getCurrentUser()                  // 关键数据 await
+    const reportPromise = generateReport(user.id)        // 慢数据不 await
     return { user, reportPromise }
   },
   component: Dashboard,
@@ -855,14 +738,11 @@ export const Route = createFileRoute('/dashboard')({
 
 function Dashboard() {
   const { user, reportPromise } = Route.useLoaderData()
-
   return (
     <>
       <h1>Welcome {user.name}</h1>
       <Suspense fallback={<Skeleton />}>
-        <Await promise={reportPromise}>
-          {(report) => <Chart data={report} />}
-        </Await>
+        <Await promise={reportPromise}>{(report) => <Chart data={report} />}</Await>
       </Suspense>
     </>
   )
@@ -877,42 +757,29 @@ transition: slide-up
 
 ```tsx
 // src/router.tsx —— 共享 queryClient
-import { QueryClient } from '@tanstack/react-query'
-
 const queryClient = new QueryClient()
 
 export function getRouter() {
-  return createRouter({
-    routeTree,
-    context: { queryClient },          // ← 注入路由 context
-  })
+  return createRouter({ routeTree, context: { queryClient } })
 }
-```
 
-```tsx
 // 路由 loader 中 prefetch
 export const Route = createFileRoute('/posts')({
   loader: ({ context: { queryClient } }) =>
-    queryClient.ensureQueryData({
-      queryKey: ['posts'],
-      queryFn: () => getPosts(),
-    }),
+    queryClient.ensureQueryData({ queryKey: ['posts'], queryFn: getPosts }),
   component: PostsList,
 })
 
 function PostsList() {
   // 组件中读同一个 cache，命中即 sync 返回
-  const { data } = useSuspenseQuery({
-    queryKey: ['posts'],
-    queryFn: () => getPosts(),
-  })
+  const { data } = useSuspenseQuery({ queryKey: ['posts'], queryFn: getPosts })
   return data.map((p) => <Post key={p.id} {...p} />)
 }
 ```
 
 <v-click>
 
-**双层缓存**：Router loader（per-route）+ Query cache（全局）——SSR 期数据序列化进 HTML，客户端 hydration 直接命中。
+**双层缓存**：Router loader（per-route）+ Query cache（全局）——SSR 数据序列化进 HTML，客户端 hydration 直接命中。
 
 </v-click>
 
@@ -924,35 +791,24 @@ transition: slide-up
 
 ```ts
 // src/routes/api/users.ts
-import { createFileRoute } from '@tanstack/react-router'
-
 export const Route = createFileRoute('/api/users')({
   server: {
     handlers: {
-      GET: async ({ request }) => {
-        const users = await db.users.findMany()
-        return Response.json(users)
-      },
+      GET: async () => Response.json(await db.users.findMany()),
       POST: async ({ request }) => {
-        const body = await request.json()
-        const user = await db.users.create({ data: body })
+        const user = await db.users.create({ data: await request.json() })
         return Response.json(user, { status: 201 })
       },
     },
   },
 })
-```
 
-```ts
 // src/routes/api/users/$id.ts → /api/users/:id
 export const Route = createFileRoute('/api/users/$id')({
   server: {
     handlers: {
       GET: async ({ params }) => Response.json(await db.users.get(params.id)),
-      DELETE: async ({ params }) => {
-        await db.users.delete(params.id)
-        return new Response(null, { status: 204 })
-      },
+      DELETE: async ({ params }) => (await db.users.delete(params.id), new Response(null, { status: 204 })),
     },
   },
 })
@@ -964,22 +820,17 @@ transition: slide-up
 
 # Server Routes vs Server Functions
 
-| 维度 | Server Route | Server Function (`createServerFn`) |
+| 维度 | Server Route | Server Function |
 |---|---|---|
 | 暴露 | 公开 URL（`/api/x`） | 内部 RPC endpoint |
 | 调用 | `fetch` / 外部 client | `useServerFn` / loader 内直调 |
 | 类型推导 | 需手写契约 | 端到端自动 |
 | 适合 | webhook / 三方集成 | UI 自家用 |
-| HTTP 方法 | 多 handler 命名导出 | POST（自动） |
 | 中间件 | `server.middleware` | `.middleware([...])` |
 
 <v-click>
 
-**经验**：
-
-- **UI 内部数据流** → `createServerFn`（类型最舒服）
-- **第三方 webhook / OAuth callback / GraphQL** → Server Route
-- **两边都用** → 写 Server Route，UI 用 `fetch` 再包一层 `createServerFn`
+**经验**：UI 内部数据流用 `createServerFn`（类型最舒服）；第三方 webhook / OAuth callback / GraphQL 用 Server Route；两边都用则写 Route，UI 再包 `createServerFn`。
 
 </v-click>
 
@@ -1006,9 +857,7 @@ export const Route = createRootRouteWithContext<{ user: User | null }>()({
 // 3. 受保护路由
 export const Route = createFileRoute('/dashboard')({
   beforeLoad: ({ context, location }) => {
-    if (!context.user) {
-      throw redirect({ to: '/login', search: { redirect: location.href } })
-    }
+    if (!context.user) throw redirect({ to: '/login', search: { redirect: location.href } })
   },
   loader: async ({ context }) => ({ stats: await getStats(context.user!.id) }),
   component: Dashboard,
@@ -1017,7 +866,7 @@ export const Route = createFileRoute('/dashboard')({
 
 <v-click>
 
-**模式**：根 route 拉一次 user → 子 route `beforeLoad` 检查 context → 未登录 `throw redirect()`。
+**模式**：根 route 拉一次 user → 子 route `beforeLoad` 检查 → 未登录 `throw redirect()`。
 
 </v-click>
 
@@ -1032,21 +881,8 @@ transition: slide-up
 import { cloudflare } from '@cloudflare/vite-plugin'
 
 export default defineConfig({
-  plugins: [
-    cloudflare(),
-    tanstackStart(),
-    viteReact(),
-  ],
+  plugins: [cloudflare(), tanstackStart(), viteReact()],
 })
-```
-
-```toml
-# wrangler.jsonc
-{
-  "name": "my-app",
-  "compatibility_date": "2024-12-01",
-  "main": ".output/server/index.mjs"
-}
 ```
 
 <v-click>
@@ -1055,12 +891,10 @@ export default defineConfig({
 
 | 平台 | 配置 |
 |---|---|
-| **Cloudflare Workers** | `@cloudflare/vite-plugin` + `wrangler.jsonc` |
+| **Cloudflare** | `@cloudflare/vite-plugin` |
 | **Netlify** | `@netlify/vite-plugin-tanstack-start` |
 | **Vercel** | Nitro preset（自动检测） |
-| **Node.js** | 默认产物 `pnpm start` |
-| **Bun / Deno** | runtime 直跑（需 React 19+） |
-| **Static (SSG)** | `prerender: { enabled }` |
+| **Node / Static** | 默认产物 / `prerender: { enabled }` |
 
 </v-click>
 
@@ -1109,20 +943,13 @@ transition: slide-up
 | UI 模型 | React Component（无 RSC） | React Server Components |
 | 数据加载 | `loader` / `createServerFn` | RSC async component |
 | 数据变更 | `createServerFn({ POST })` | Server Actions |
-| Client / Server | **无 RSC 边界** | `"use client"` 强制 |
 | 路由 | File-based + 类型推导 | File-based（基础类型） |
 | Search Params | Zod 校验 + 类型 | 字符串 / 手动解析 |
-| 构建工具 | Vite | Turbopack / Webpack |
 | 部署 | 任意平台 | Vercel 最优 |
 
 <v-click>
 
-**何时选 TanStack Start**：
-
-- 团队追求**极致类型安全**（路径 / search / loader 全推导）
-- 反 RSC 心智复杂度，想保留传统 React Component 模型
-- 部署到 Cloudflare Workers / Netlify / 自建 Node 不被 Vercel 锁定
-- 已经在用 TanStack Query / Form / Table 全家桶
+**何时选 TanStack Start**：极致类型安全 / 反 RSC 心智 / 不被 Vercel 锁定 / 已用 TanStack 全家桶。
 
 </v-click>
 
@@ -1134,21 +961,16 @@ transition: slide-up
 
 | 维度 | TanStack Start | React Router v7 (Framework) |
 |---|---|---|
-| 路由配置 | 文件 + `createFileRoute` | `routes.ts` 或 `flatRoutes()` |
+| 路由配置 | 文件 + `createFileRoute` | `routes.ts` / `flatRoutes()` |
 | 路由类型 | 编译期路径校验 | 自动生成 `+types/` |
-| 数据加载 | `loader` + Query 集成 | `loader` + auto revalidate |
 | 数据变更 | `createServerFn` + 手动 invalidate | `action` + 自动 revalidate |
 | Search Params | `validateSearch` (Zod) | 自己解析 |
-| 渐进增强（无 JS） | 弱（依赖 JS） | 强（`<Form>` 原生） |
+| 渐进增强（无 JS） | 弱 | 强（`<Form>` 原生） |
 | 当前状态 | RC | 稳定 |
 
 <v-click>
 
-**关键区别**：
-
-- **TSR 类型推导更激进**：`<Link>` 路径编译期校验，search 必带 schema
-- **RR 自动 revalidation**：action 完成后自动重跑 loader，TSS 需手动 `invalidate`
-- **TSS 与 TanStack Query 是绝配**，RR 自带数据层不需要 Query
+**关键区别**：TSR 类型推导更激进（`<Link>` 编译期校验，search 必带 schema）；RR action 完成后自动重跑 loader，TSS 需手动 `invalidate`；TSS 与 TanStack Query 绝配。
 
 </v-click>
 
@@ -1221,9 +1043,9 @@ transition: slide-up
 ```tsx
 // ❌ 复杂对象进 URL 失败
 navigate({ search: { filter: { tag: 'x', dates: [d1, d2] } } })
-// URL: ?filter=%5Bobject+Object%5D —— 默认 JSON stringify 处理可能丢类型
+// URL: ?filter=%5Bobject+Object%5D —— 默认 JSON stringify 可能丢类型
 
-// ✅ 显式用 z.preprocess 解析 / 限定 schema
+// ✅ 显式 schema + z.coerce
 const searchSchema = z.object({
   tag: z.string().optional(),
   from: z.coerce.date().optional(),
@@ -1233,17 +1055,11 @@ const searchSchema = z.object({
 
 <v-click>
 
-**默认序列化策略**：
-
-- 简单类型（string / number / boolean）→ URL safe
-- Array / Object → JSON.stringify
-- Date / Map / Set → 需 `z.coerce.*` 或自定义 `parseSearch` / `stringifySearch`
+**默认序列化**：简单类型 URL safe；Array / Object → JSON.stringify；Date / Map / Set 需 `z.coerce.*` 或自定义 `parseSearch` / `stringifySearch`。
 
 </v-click>
 
 <v-click>
-
-**自定义序列化**：
 
 ```ts
 createRouter({
@@ -1307,21 +1123,13 @@ export const getStuff = createServerFn().handler(async () => {
 
 <v-click>
 
-**可序列化类型**（对齐 React Server Actions / Server Functions）：
-
-- 基础：string / number / boolean / null / undefined
-- 集合：Array / Object / Map / Set
-- 时间：Date
-- 错误：Error（堆栈可能丢失）
-- Promise（用于 streaming）
+**可序列化**：基础类型 / Array / Object / Map / Set / Date / Error / Promise（用于 streaming）。
 
 **不支持**：函数 / class instance / Symbol / 循环引用。
 
 </v-click>
 
 <v-click>
-
-**逃生口**（仅在确实需要时）：
 
 ```ts
 createServerFn({ strict: false })                // 完全关闭检查
@@ -1453,38 +1261,25 @@ transition: slide-up
 入门
 ├── 跑通 npx @tanstack/cli create 默认模板
 ├── 读 Overview + Getting Started + Routing
-├── 写一个 CRUD：Posts 列表 + 详情 + 新建
-└── 理解 createFileRoute + loader + Outlet
+└── 写 CRUD：理解 createFileRoute + loader + Outlet
 
 进阶
 ├── createServerFn + inputValidator (Zod)
 ├── Search Params + validateSearch + loaderDeps
-├── beforeLoad + redirect + notFound 拦截
-├── Middleware：链式 + 工厂模式
-└── TanStack Query 集成 ensureQueryData
+├── beforeLoad + redirect / notFound 拦截
+└── Middleware 链式 + Query ensureQueryData 集成
 
 实战
-├── Selective SSR：data-only / false 何时用
-├── 流式渲染 defer + Await + Suspense
+├── Selective SSR / 流式渲染 defer + Await
 ├── 部署：Cloudflare / Netlify / Vercel / Node
-├── 静态预渲染 prerender + crawlLinks
-└── Server Routes：API endpoints + webhook
+└── 静态预渲染 + Server Routes API endpoints
 
-延伸
-├── 从 React Router / Next.js 迁移实操
-├── 跟进 RC 到 v1 GA changelog
-├── TanStack Form + Table 全家桶集成
-└── 大型项目类型性能调优
+延伸：从 RR / Next 迁移、RC→v1 changelog、Form/Table 全家桶
 ```
 
 <v-click>
 
-**官方资源**：
-
-- 文档：[tanstack.com/start](https://tanstack.com/start)
-- Router 文档：[tanstack.com/router](https://tanstack.com/router)
-- Examples：[github.com/TanStack/router/tree/main/examples/react](https://github.com/TanStack/router/tree/main/examples/react)
-- Discord：TanStack 官方社区（#start 频道）
+**官方资源**：[tanstack.com/start](https://tanstack.com/start) | [tanstack.com/router](https://tanstack.com/router) | [Examples](https://github.com/TanStack/router/tree/main/examples/react) | Discord `#start`
 
 </v-click>
 

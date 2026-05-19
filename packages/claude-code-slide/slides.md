@@ -289,13 +289,10 @@ transition: slide-up
 
 | 操作 | 快捷键 / 命令 |
 | --- | --- |
-| 退出 | `Ctrl+C` 两次 / `/quit` |
-| 中断当前回复 | `Esc` |
-| 后台任务 | 自动放后台，UI 提示「running in background」 |
-| 清空会话 | `/clear` |
-| 压缩对话历史 | `/compact <提示>`（总结后释放 token） |
-| 恢复上次会话 | `claude --continue` |
-| 恢复指定会话 | `claude --resume <session-id>` |
+| 退出 / 中断 | `Ctrl+C` 两次（`/quit`）/ `Esc` |
+| 清空 / 压缩 | `/clear` / `/compact <提示>` |
+| 后台任务 | 自动放后台，UI 提示 running |
+| 恢复上次 / 指定会话 | `claude --continue` / `--resume <id>` |
 
 <v-click>
 
@@ -343,12 +340,11 @@ transition: slide-up
 
 # CLAUDE.md vs 用户全局 Memory
 
-| 路径 | 范围 | 是否 commit |
+| 路径 | 范围 | commit |
 | --- | --- | --- |
-| `<project>/CLAUDE.md` | 项目级（团队共享） | ✓ 进仓库 |
+| `<project>/CLAUDE.md` | 项目级（团队共享） | ✓ |
 | `~/.claude/CLAUDE.md` | 用户级（本人偏好） | ✗ |
 | `<project>/.claude/settings.json` | 项目共享配置 | ✓ |
-| `<project>/.claude/settings.local.json` | 项目本地 | ✗ |
 | `~/.claude/settings.json` | 用户全局 | ✗ |
 
 <v-click>
@@ -413,18 +409,8 @@ transition: slide-up
 // ~/.claude/settings.json
 {
   "permissions": {
-    "allow": [
-      "Read(*)",
-      "Bash(pnpm:*)",
-      "Bash(git status:*)",
-      "Bash(git log:*)",
-      "mcp__context7__*"
-    ],
-    "deny": [
-      "Bash(rm -rf:*)",
-      "Bash(git push --force:*)",
-      "Edit(/etc/*)"
-    ],
+    "allow": ["Read(*)", "Bash(pnpm:*)", "mcp__context7__*"],
+    "deny": ["Bash(rm -rf:*)", "Bash(git push --force:*)"],
     "defaultMode": "acceptEdits"
   }
 }
@@ -432,13 +418,11 @@ transition: slide-up
 
 <v-click>
 
-| 格式 | 例子 | 匹配 |
-| --- | --- | --- |
-| `<Tool>` | `Read` | 该工具全部调用 |
-| `<Tool>(<pattern>)` | `Bash(pnpm:*)` | Bash 以 `pnpm` 开头 |
-| `<Tool>(<exact>)` | `Bash(pnpm test)` | 仅这条命令 |
-| `mcp__<server>__<tool>` | `mcp__github__create_pr` | 具体 MCP 工具 |
-| `mcp__<server>__*` | `mcp__github__*` | server 全部工具 |
+| 格式 | 匹配 |
+| --- | --- |
+| `<Tool>` / `<Tool>(<pattern>)` | 全部 / 前缀（`Bash(pnpm:*)`） |
+| `<Tool>(<exact>)` | 单条命令 |
+| `mcp__<server>__<tool>` / `mcp__<server>__*` | 具体工具 / server 全部 |
 
 </v-click>
 
@@ -482,22 +466,11 @@ transition: slide-up
 | `Glob` | 文件名模式匹配（`**/*.ts`） |
 | `Grep` | 正则全文搜索（基于 ripgrep） |
 | `Bash` | 执行 shell 命令（可后台跑） |
-| `WebFetch` | 抓 URL（自动 markdown 转换） |
-| `WebSearch` | Web 搜索 |
+| `WebFetch` / `WebSearch` | 抓 URL / Web 搜索 |
 
 <v-click>
 
-**搜索决策**：
-
-- **知文件名 / 路径模式** → Glob：`pages/*.vue`
-- **找内容（字符串 / 正则）** → Grep：`useUser\\(\\)`
-- **不知道在哪** → 先 Glob 看候选，再 Grep 缩范围
-
-</v-click>
-
-<v-click>
-
-Bash 长跑命令（dev / test）自动后台化，配 `Monitor` 实时读 stdout。
+**搜索决策**：知文件名走 Glob，找内容走 Grep；不确定先 Glob 看候选再 Grep 缩范围。Bash 长跑命令自动后台化，配 `Monitor` 读 stdout。
 
 </v-click>
 
@@ -509,14 +482,10 @@ transition: slide-up
 
 | 工具 | 用途 |
 | --- | --- |
-| `Agent` | spawn 子代理（独立上下文跑） |
-| `TodoWrite` | 维护任务清单（多步任务用） |
-| `Monitor` | 监控后台进程 stdout |
-| `BashOutput` | 读已结束后台命令的输出 |
-| `KillShell` | 终止后台 shell |
+| `Agent` / `TodoWrite` | spawn 子代理 / 维护任务清单 |
+| `Monitor` / `BashOutput` / `KillShell` | 后台进程 stdout / 读输出 / 终止 |
 | `AskUserQuestion` | 交互式问用户（卡点决策） |
-| `ScheduleWakeup` | 定时唤醒（自驱动） |
-| `ToolSearch` | 搜索可用工具 |
+| `ScheduleWakeup` / `ToolSearch` | 定时唤醒 / 搜索可用工具 |
 
 <v-click>
 
@@ -532,19 +501,13 @@ transition: slide-up
 
 | 命令 | 作用 |
 | --- | --- |
-| `/help` | 显示所有 slash 命令 |
-| `/login` / `/logout` | 切账号 |
-| `/model` | 选模型（Opus / Sonnet / Haiku） |
+| `/help` / `/model` | 显示命令 / 选模型 |
 | `/init` | 生成 `CLAUDE.md` 骨架 |
-| `/clear` | 清空会话 |
-| `/compact <提示>` | 总结后压缩对话 |
-| `/cost` | 显示当前 token 用量 + 费用 |
-| `/permissions` | 管理工具权限 |
-| `/hooks` | 查看 hook 配置 |
-| `/mcp` | 查看 MCP server 状态 |
-| `/agents` | 列出已配置 subagent |
-| `/release-notes` | 看本版本更新 |
-| `/quit` | 退出 |
+| `/clear` / `/compact` | 清空 / 压缩会话 |
+| `/cost` | 显示 token 用量 + 费用 |
+| `/permissions` / `/hooks` | 管理权限 / 查看 hook |
+| `/mcp` / `/agents` | 查看 MCP / subagent 状态 |
+| `/login` / `/quit` | 切账号 / 退出 |
 
 ---
 transition: slide-up
@@ -623,13 +586,9 @@ description: Use when writing Cypress E2E tests for this project
 
 # Cypress 测试规范
 
-E2E 测试必须：
-
 1. 用 test 服务器（端口 10060，test DB）
 2. beforeEach 展开侧边栏（默认折叠）
-3. `el-tree-select` 用 `.el-tree-node__content` 而非 `.el-select__item`
-
-详见 references/good-test.cy.ts。
+3. `el-tree-select` 用 `.el-tree-node__content`
 ```
 
 <v-click>
@@ -657,11 +616,9 @@ transition: slide-up
 
 | Skill | 来源 | 用途 |
 | --- | --- | --- |
-| `superpowers` | 社区 | 通用工程实践（TDD / 系统调试 / 评审） |
-| `easy-claude-code (ECC)` | 社区 | 简化 Claude Code 使用流程 |
+| `superpowers` | 社区 | 通用工程实践（TDD / 调试 / 评审） |
 | `cypress-skill` | 项目级 | 自家 Cypress 测试规范 |
-| `find-skills` | 内置 | 发现可装 skill |
-| `update-config` | 内置 | settings.json 配置助手 |
+| `find-skills` / `update-config` | 内置 | 发现 skill / settings.json 配置 |
 
 </v-clicks>
 
@@ -695,19 +652,13 @@ Hook = tool 调用前/后跑的自定义 shell 命令——审计 / 通知 / lin
     {
       "matcher": { "tool": "Edit" },
       "hooks": [
-        {
-          "type": "command",
-          "command": "echo \"[edit] $CLAUDE_TOOL_PATH at $(date)\" >> ~/edit.log"
-        }
+        { "type": "command", "command": "echo $CLAUDE_TOOL_PATH >> ~/edit.log" }
       ]
     },
     {
       "matcher": { "tool": "Bash" },
       "hooks": [
-        {
-          "type": "command",
-          "command": "echo \"[bash] $CLAUDE_TOOL_COMMAND\" >> ~/bash.log"
-        }
+        { "type": "command", "command": "echo $CLAUDE_TOOL_COMMAND >> ~/bash.log" }
       ]
     }
   ]
@@ -720,15 +671,7 @@ transition: slide-up
 
 # Hooks 机制：matcher + 环境变量 (2/3)
 
-**matcher 字段**：
-
-| 字段 | 类型 | 说明 |
-| --- | --- | --- |
-| `tool` | string | 工具名精确匹配 |
-| `tool_pattern` | string | 工具名 glob |
-| `command` | string | Bash 命令前缀匹配 |
-| `path` | string | 文件路径 glob |
-| `event` | "pre" / "post" | 调用前 / 后（默认 pre） |
+**matcher**：`tool`（精确）/ `tool_pattern`（glob）/ `command`（Bash 前缀）/ `path`（路径 glob）/ `event`（pre / post）
 
 <v-click>
 
@@ -736,13 +679,10 @@ transition: slide-up
 
 | 变量 | 含义 |
 | --- | --- |
-| `$CLAUDE_TOOL_NAME` | 工具名 |
-| `$CLAUDE_TOOL_PATH` | 操作路径（Read / Edit / Write） |
-| `$CLAUDE_TOOL_COMMAND` | Bash 命令 |
-| `$CLAUDE_TOOL_INPUT` | 完整工具输入 JSON |
-| `$CLAUDE_TOOL_OUTPUT` | 完整工具结果（仅 post 事件） |
-| `$CLAUDE_SESSION_ID` | 会话 ID |
-| `$CLAUDE_PROJECT_DIR` | 项目根 |
+| `$CLAUDE_TOOL_NAME` / `$CLAUDE_TOOL_PATH` | 工具名 / 操作路径 |
+| `$CLAUDE_TOOL_COMMAND` / `$CLAUDE_TOOL_INPUT` | Bash 命令 / 完整输入 JSON |
+| `$CLAUDE_TOOL_OUTPUT` | 工具结果（仅 post 事件） |
+| `$CLAUDE_SESSION_ID` / `$CLAUDE_PROJECT_DIR` | 会话 ID / 项目根 |
 | `$CLAUDE_HOOK_EVENT` | pre / post |
 
 </v-click>
@@ -800,18 +740,8 @@ MCP 是 Anthropic 推的「让 LLM 接外部工具」开放协议；Claude Code 
 // ~/.claude/settings.json
 {
   "mcpServers": {
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
-    },
-    "chrome-devtools": {
-      "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp"]
-    },
-    "filesystem-readonly": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/etc"]
-    }
+    "context7": { "command": "npx", "args": ["-y", "@upstash/context7-mcp"] },
+    "chrome-devtools": { "command": "npx", "args": ["-y", "chrome-devtools-mcp"] }
   }
 }
 ```
@@ -823,7 +753,6 @@ MCP 是 Anthropic 推的「让 LLM 接外部工具」开放协议；Claude Code 
 ```
 context7              ✓ connected   (2 tools)
 chrome-devtools       ✓ connected   (24 tools)
-filesystem-readonly   ✓ connected   (5 tools)
 ```
 
 </v-click>
@@ -857,25 +786,13 @@ transition: slide-up
 
 | 维度 | 内置工具 | MCP |
 | --- | --- | --- |
-| 数量 | 固定 | 装多少都行 |
-| 启动 | 即时 | spawn 子进程 |
-| 范围 | 通用（Read / Bash 等） | 专项（每个 server 一类） |
-| 鉴权 | 项目级 | server 自管 |
-| 更新 | 跟 Claude Code | 独立 |
+| 数量 / 启动 | 固定 / 即时 | 任意 / spawn 子进程 |
+| 范围 | 通用（Read / Bash） | 专项（一 server 一类） |
 | 命名 | `Read` / `Bash` | `mcp__<server>__<tool>` |
 
 <v-click>
 
-**一类 vs 二类**：
-
-- **内置工具（一类）**：永远可用
-- **MCP tool（二类）**：默认 permission 允许 `mcpServers` 全部，可单独 deny
-
-</v-click>
-
-<v-click>
-
-启动用 `--mcp-config <path>` 加载非默认配置文件，方便 CI / 不同 profile。
+**一类 vs 二类**：内置永远可用；MCP 默认允许 `mcpServers` 全部，可单独 deny。启动用 `--mcp-config <path>` 切换 profile。
 
 </v-click>
 
@@ -919,20 +836,15 @@ transition: slide-up
 
 | 类型 | 工具 | 适合 |
 | --- | --- | --- |
-| `Explore` | 只读（无 Edit / Write） | 大范围搜索 / 找代码 |
+| `Explore` / `Plan` | 只读 | 大范围搜索 / 规划实施 |
 | `general-purpose` | 全工具 | 复杂多步任务 |
-| `Plan` | 只读 | 规划实施步骤 |
 | `feature-dev:code-explorer` | 只读 | 深入分析现有代码 |
 | `feature-dev:code-architect` | 只读 + 写设计 | 设计新功能 |
 | `feature-dev:code-reviewer` | 只读 | 代码评审 |
 
 <v-click>
 
-**何时 spawn**：
-
-- **独立大任务**：搜几十文件后只要结果
-- **避免污染主上下文**：把脏活留给子代理
-- **领域专家**：需特定 prompt + tool 子集
+**何时 spawn**：独立大任务 / 避免污染主上下文 / 需特定 prompt + tool 子集的领域专家
 
 </v-click>
 
@@ -1249,13 +1161,9 @@ transition: slide-up
 
 | 变量 | 作用 |
 | --- | --- |
-| `ANTHROPIC_API_KEY` | API key（替代 OAuth） |
-| `ANTHROPIC_BASE_URL` | API endpoint（自定义 / 代理） |
-| `CLAUDE_MODEL` | 默认模型 |
-| `CLAUDE_PROJECT_DIR` | 项目根（hooks 内可用） |
-| `CLAUDE_SESSION_ID` | 当前会话 ID |
-| `CLAUDE_NO_UPDATE` | 1 禁用更新提示（CI 用） |
-| `CLAUDE_NO_HOOKS` | 1 临时禁用所有 hook |
+| `ANTHROPIC_API_KEY` / `ANTHROPIC_BASE_URL` | API key / endpoint |
+| `CLAUDE_MODEL` / `CLAUDE_PROJECT_DIR` | 默认模型 / 项目根 |
+| `CLAUDE_NO_UPDATE` / `CLAUDE_NO_HOOKS` | 禁用更新提示 / 禁用 hook |
 | `CLAUDE_LOG_LEVEL` | debug / info / warn / error |
 | `HTTPS_PROXY` / `HTTP_PROXY` | 网络代理 |
 
@@ -1273,14 +1181,11 @@ transition: slide-up
 
 | 维度 | Claude Code | Codex | Gemini CLI | OpenCode |
 | --- | --- | --- | --- | --- |
-| 模型 | Opus / Sonnet / Haiku | GPT / o-series | Gemini | 任意（OpenRouter / 本地） |
-| 上下文 | 200K / 1M | 200K | 1M（Gemini 2.5+） | 取决于模型 |
-| Hooks | ✓ | -（受限） | -（受限） | ✓ |
-| MCP | ✓（一类支持） | ✓ | ✓（部分） | ✓ |
-| Skills | ✓ | -（用 prompt） | -（用 prompt） | -（用 prompt） |
-| 开源 | ✗ | ✗ | 部分 | ✓ |
-| 私有部署 | Bedrock / Vertex | OpenAI 服务 | Vertex | 任意 |
-| 中国可用 | 需自备网络 | 需自备网络 | 需自备网络 | 看用什么模型 |
+| 模型 | Opus / Sonnet / Haiku | GPT / o-series | Gemini | 任意（本地） |
+| 上下文 | 200K / 1M | 200K | 1M | 取决于模型 |
+| Hooks / Skills | ✓ / ✓ | - / - | - / - | ✓ / - |
+| MCP | ✓ 一类 | ✓ | ✓ 部分 | ✓ |
+| 开源 / 私有部署 | ✗ / Bedrock 等 | ✗ / OpenAI | 部分 / Vertex | ✓ / 任意 |
 
 <v-click>
 
@@ -1547,12 +1452,10 @@ transition: slide-up
 <v-clicks>
 
 - **大仓库**：用 Opus[1m] 1M 上下文，或先 `/compact` 压缩历史
-- **多文件读取慢**：批量 Read 一次（一个 message 多个 Read tool call）
-- **MCP 启动慢**：`mcpServers` 中暂时禁用不用的，按需启
-- **hook 拖慢**：复杂 hook 放后台 / 改异步通知
-- **频繁 Edit 反复 Read**：让 Claude 先把所有需要的文件读完再开始改
-- **Prompt cache**：长会话 + 同样的 system prompt 命中 cache 后费用骤降
-- **避免无意义 grep**：知文件名直接 Read，省一次工具调用
+- **多文件读取慢**：一个 message 多个 Read tool call 并行
+- **MCP / hook 拖慢**：禁用不用的 MCP server / 复杂 hook 改异步
+- **Prompt cache**：长会话命中 cache 后费用骤降
+- **避免无意义 grep**：知文件名直接 Read
 
 </v-clicks>
 
@@ -1562,25 +1465,13 @@ transition: slide-up
 
 # 常见错误码
 
-| 现象 | 含义 |
+| 现象 | 含义 / 处理 |
 | --- | --- |
-| `authentication_error` | OAuth 过期 / API key 无效 |
-| `rate_limit_error` | 触发速率限制 |
-| `context_length_exceeded` | 上下文窗口满 |
-| `tool_use_failed` | 工具调用失败（参数错 / 权限拒） |
-| `mcp_connection_failed` | MCP server 启动失败 |
-| `permission_denied` | 用户拒绝某个工具调用 |
-
-<v-click>
-
-**对应处理**：
-
-- `authentication_error` → `/login` 重新 OAuth
-- `rate_limit_error` → 切 Sonnet 或等几分钟
-- `context_length_exceeded` → `/compact` 或换 1M 上下文
-- `mcp_connection_failed` → 终端跑 server 命令看错
-
-</v-click>
+| `authentication_error` | OAuth 过期 → `/login` |
+| `rate_limit_error` | 速率限制 → 切 Sonnet 或等几分钟 |
+| `context_length_exceeded` | 上下文满 → `/compact` 或换 1M |
+| `tool_use_failed` | 参数错 / 权限拒 |
+| `mcp_connection_failed` | MCP server 启动失败 → 终端跑命令看错 |
 
 ---
 transition: slide-up
@@ -1593,9 +1484,8 @@ transition: slide-up
 | `Authentication failed` | `/login` 重新 OAuth |
 | 模型回复总被截断 | `/compact` 或换 1M 上下文 |
 | Hook 不触发 | `/hooks` 看配置 / 路径对吗 |
-| MCP server 红色未连接 | 终端跑 server 命令看错 / npx 缓存 |
-| Skill 不被识别 | `~/.claude/skills/<name>/SKILL.md` 名字对吗 + 重启 |
-| 中国大陆连不上 | 自备网络（无国内代理） |
+| MCP server 未连接 | 终端跑 server 命令看错 / npx 缓存 |
+| Skill 不被识别 | SKILL.md 名字对吗 + 重启 |
 | 高 token 用量 | `/cost` 看分布 + 关 1M / 用 Sonnet |
 | 后台任务停不掉 | `KillShell` 或 `ps + kill` |
 
@@ -1625,21 +1515,14 @@ transition: slide-up
 
 | 版本 | 时间 | 主要变化 |
 | --- | --- | --- |
-| 1.0 | 2024 | 首个稳定版 |
-| 1.5 | 2024 | Hooks 引入 |
+| 1.0 / 1.5 | 2024 | 首个稳定版 / Hooks 引入 |
 | 1.8 | 2025 初 | MCP 一类支持 |
 | 2.0 | 2025 | Skills / Subagents / Memory 三件套 |
-| 2.x | 2025-2026 | 1M 上下文 / IDE 扩展增强 / Agent SDK GA |
+| 2.x | 2025-2026 | 1M 上下文 / IDE 扩展 / Agent SDK GA |
 
 <v-click>
 
-**关键演进**：
-
-- **Hooks** → 给 power user 可编程性
-- **MCP** → 打开外部工具生态
-- **Skills** → 用户自带「插件」
-- **Memory** → 跨会话连续性
-- **Subagents** → 并行 / 上下文隔离
+**关键演进**：Hooks 给 power user 可编程性 / MCP 打开外部工具生态 / Skills 用户自带插件 / Memory 跨会话连续性 / Subagents 并行 + 上下文隔离
 
 </v-click>
 
@@ -1651,29 +1534,13 @@ transition: slide-up
 
 <v-clicks>
 
-**Week 1 — 上手**
+**Week 1 — 上手**：装 + OAuth + 写 `CLAUDE.md` + 让 Claude 改一个小 bug
 
-- 装 + OAuth + 第一次对话
-- 写 `CLAUDE.md`，体会模型如何遵守规范
-- 用 `/init` + 让 Claude 改一个小 bug
+**Week 2 — 进阶**：切换模型 / 自定义 slash 命令 / Plan Mode 规划 + Sonnet 实施
 
-**Week 2 — 进阶**
+**Week 3 — 扩展**：装 1-2 个 MCP server / 写第一个 Hook / 装社区 Skill
 
-- 切换模型（Opus / Sonnet / Haiku）感受差异
-- 自定义 slash 命令（`~/.claude/commands/`）
-- 试 Plan Mode 规划 + Sonnet 实施
-
-**Week 3 — 扩展**
-
-- 装 1-2 个 MCP server（context7 / chrome-devtools）
-- 写第一个 Hook（如 Edit 后自动 prettier）
-- 装社区 Skill（superpowers）
-
-**Week 4 — 工作流**
-
-- 配 `~/.claude/settings.json` 的 permissions / hooks
-- spawn subagent 做并行任务
-- 积累 Memory，让 Claude 「认识」你的项目
+**Week 4 — 工作流**：配 permissions + hooks / spawn subagent / 积累 Memory
 
 </v-clicks>
 
@@ -1689,10 +1556,8 @@ transition: slide-up
 | GitHub | [anthropics/claude-code](https://github.com/anthropics/claude-code) |
 | Agent SDK | [docs.claude.com/en/api/agent-sdk](https://docs.claude.com/en/api/agent-sdk) |
 | MCP 协议 | [modelcontextprotocol.io](https://modelcontextprotocol.io/) |
-| Discord | [anthropic.com/discord](https://www.anthropic.com/discord) |
 | 社区清单 | [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code) |
-| 状态页 | [status.anthropic.com](https://status.anthropic.com/) |
-| API 文档 | [docs.claude.com/en/api](https://docs.claude.com/en/api/overview) |
+| Discord / 状态页 | [discord](https://www.anthropic.com/discord) / [status](https://status.anthropic.com/) |
 
 ---
 layout: center

@@ -114,16 +114,13 @@ transition: fade-out
 
 <v-click>
 
-| 维度          | Jotai 2               | Recoil              | Zustand 5           | Redux Toolkit       | Pinia 3           |
-| ------------- | --------------------- | ------------------- | ------------------- | ------------------- | ----------------- |
-| 框架绑定      | React (核心可 vanilla)| **React only**      | React (vanilla 可用)| React               | **Vue 3 官方**    |
-| API 风格      | **atom 原子化**       | atom + selector     | hook + flux         | Slice + Hook        | Composition       |
-| Provider      | 可选                  | 必需                | 无需                | 需要                | 需要              |
-| 状态模型      | 多 atom               | 多 atom + key       | 单 store / immutable| Slice / Immer       | 多 store          |
-| 包体积        | **~3 KB**             | ~22 KB              | ~1 KB               | ~10 KB              | ~1.5 KB           |
-| 异步          | **atom 内 async**     | selector 内 async   | 手动调 action       | RTK Query           | action 内 await   |
-| 维护状态      | **活跃 v2.20+**       | **已 archive**      | 活跃 v5             | 活跃 v2             | 活跃 v3           |
-| TypeScript    | 优秀（推导自动）      | 优秀                | curried 推导        | 优                  | 原生推导          |
+| 维度       | Jotai 2           | Recoil             | Zustand 5        | Redux Toolkit |
+| ---------- | ----------------- | ------------------ | ---------------- | ------------- |
+| API 风格   | **atom 原子化**   | atom + selector    | hook + flux      | Slice + Hook  |
+| Provider   | 可选              | 必需               | 无需             | 需要          |
+| 包体积     | **~3 KB**         | ~22 KB             | ~1 KB            | ~10 KB        |
+| 异步       | **atom 内 async** | selector 内 async  | 手动 action      | RTK Query     |
+| 维护状态   | **活跃 v2.20+**   | **已 archive**     | 活跃 v5          | 活跃 v2       |
 
 </v-click>
 
@@ -180,24 +177,18 @@ transition: fade-out
 
 **Poimandres（pmndrs）核心库一览**
 
-| 库              | 定位                  | 哲学               |
-| --------------- | --------------------- | ------------------ |
-| **Jotai**       | 原子状态              | atom 派生 + 订阅   |
-| **Zustand**     | 全局 store            | hooks-only flux    |
-| **Valtio**      | mutable proxy         | 直接 state.x = y   |
-| **R3F**         | React Three Fiber 3D  | 声明式 Three.js    |
-| **Drei**        | R3F 工具库            | 常用 3D 组件       |
-| **Leva**        | GUI 调试控件          | 类 dat.gui         |
+| 库          | 定位                  | 哲学               |
+| ----------- | --------------------- | ------------------ |
+| **Jotai**   | 原子状态              | atom 派生 + 订阅   |
+| **Zustand** | 全局 store            | hooks-only flux    |
+| **Valtio**  | mutable proxy         | 直接 state.x = y   |
+| **R3F**     | React Three Fiber 3D  | 声明式 Three.js    |
 
 </v-click>
 
 <v-click>
 
-**Daishi Kato 的「状态三剑客」**
-
-- Jotai = 「多 atom，自动派生」 → 适合大量独立小状态、表单、UI 局部派生
-- Zustand = 「单 store，hook 订阅」 → 适合应用级全局状态
-- Valtio = 「proxy mutable」 → 适合习惯 Vue / MobX 思维的开发者
+**Daishi Kato 的「状态三剑客」**：Jotai（多 atom 自动派生）/ Zustand（单 store hook 订阅）/ Valtio（proxy mutable）—— 同作者，三种范式覆盖不同场景。
 
 </v-click>
 
@@ -428,29 +419,21 @@ primitive atom + setter 的两种用法
 // atoms/counter.ts
 import { atom } from "jotai";
 
-// 数字 atom
-export const countAtom = atom(0);
-
-// 字符串 atom
-export const nameAtom = atom("Jotai");
-
-// 对象 atom（注意：整体替换才会触发更新）
-export const userAtom = atom({ id: 1, name: "Alice" });
-
-// 数组 atom
-export const todosAtom = atom<string[]>([]);
+export const countAtom = atom(0);                          // 数字
+export const nameAtom = atom("Jotai");                     // 字符串
+export const userAtom = atom({ id: 1, name: "Alice" });    // 对象（整体替换才触发更新）
+export const todosAtom = atom<string[]>([]);               // 数组（空数组需显式类型）
 ```
 
 ```tsx
-// 组件里使用
 function CounterApp() {
   const [count, setCount] = useAtom(countAtom);
 
-  // setter 的两种用法
-  const incrementDirect = () => setCount(count + 1);        // 直接传新值
-  const incrementUpdater = () => setCount((c) => c + 1);    // 传 updater 函数
+  // setter 两种用法
+  const incDirect   = () => setCount(count + 1);        // 直接传新值
+  const incUpdater  = () => setCount((c) => c + 1);     // updater 函数
 
-  return <button onClick={incrementUpdater}>{count}</button>;
+  return <button onClick={incUpdater}>{count}</button>;
 }
 ```
 
@@ -590,21 +573,17 @@ read 函数里 get(...) 自动建立依赖图
 import { atom } from "jotai";
 
 // 源 atom
-export const priceAtom = atom(100);
+export const priceAtom    = atom(100);
 export const quantityAtom = atom(2);
-export const taxRateAtom = atom(0.1);
+export const taxRateAtom  = atom(0.1);
 
-// 派生 atom（read-only）
-// 读取 price 和 quantity，自动建立依赖
-export const subtotalAtom = atom((get) => {
-  return get(priceAtom) * get(quantityAtom);
-});
+// 派生 atom：read 函数里 get(otherAtom) 自动建立依赖
+export const subtotalAtom = atom((get) => get(priceAtom) * get(quantityAtom));
 
-// 派生 atom 可以基于其他派生 atom
+// 派生 atom 也可基于其他派生 atom
 export const totalAtom = atom((get) => {
   const subtotal = get(subtotalAtom);
-  const tax = subtotal * get(taxRateAtom);
-  return subtotal + tax;
+  return subtotal + subtotal * get(taxRateAtom);
 });
 ```
 
@@ -681,23 +660,14 @@ const countAtom = atom(0);
 // write-only atom：第一参数 null，第二参数是 write 函数
 // write 函数签名：(get, set, ...args) => Result
 export const incrementAtom = atom(
-  null,                                          // read 部分：始终返回 null
+  null,
   (get, set) => set(countAtom, get(countAtom) + 1),
 );
 
-// 接受参数的 write-only atom
+// 接受参数的 write-only atom（write 函数也可是 async）
 export const addByAtom = atom(
   null,
   (get, set, step: number) => set(countAtom, get(countAtom) + step),
-);
-
-// 异步 action 也用 write 函数
-export const incrementAsyncAtom = atom(
-  null,
-  async (get, set) => {
-    await new Promise(r => setTimeout(r, 500));
-    set(countAtom, get(countAtom) + 1);
-  },
 );
 ```
 
@@ -707,7 +677,6 @@ export const incrementAsyncAtom = atom(
 
 ```tsx
 function Buttons() {
-  const increment = useSetAtom(incrementAtom);
   const addBy = useSetAtom(addByAtom);
   return <button onClick={() => addBy(5)}>+5</button>;
 }
@@ -768,17 +737,13 @@ transition: fade-out
 ```ts
 import { atom } from "jotai";
 
-// 源 atom：以摄氏度存储温度
-const celsiusAtom = atom(25);
+const celsiusAtom = atom(25);   // 源 atom：摄氏度
 
-// 读写 atom：暴露华氏度
-// read：从摄氏度计算华氏度
-// write：接收华氏度，反算回摄氏度并写入源
+// 读写 atom：read 派生华氏度，write 反算回摄氏度
 export const fahrenheitAtom = atom(
   (get) => get(celsiusAtom) * 1.8 + 32,
   (get, set, newFahrenheit: number) => {
-    const newCelsius = (newFahrenheit - 32) / 1.8;
-    set(celsiusAtom, newCelsius);
+    set(celsiusAtom, (newFahrenheit - 32) / 1.8);
   },
 );
 ```
@@ -791,13 +756,8 @@ export const fahrenheitAtom = atom(
 function TempInput() {
   // 看起来像 useState，但底层是「读派生 + 写源」
   const [fahrenheit, setFahrenheit] = useAtom(fahrenheitAtom);
-  return (
-    <input
-      type="number"
-      value={fahrenheit}
-      onChange={(e) => setFahrenheit(Number(e.target.value))}
-    />
-  );
+  return <input type="number" value={fahrenheit}
+    onChange={(e) => setFahrenheit(Number(e.target.value))} />;
 }
 ```
 
@@ -856,14 +816,11 @@ transition: fade-out
 ```ts
 import { atom } from "jotai";
 
-// userId atom：当前选中的用户 ID
 export const userIdAtom = atom(1);
 
-// async atom：根据 userId 拉数据
-// read 函数可以是 async，返回 Promise
+// async atom：read 函数可以是 async，返回 Promise
 export const userAtom = atom(async (get) => {
-  const id = get(userIdAtom);
-  const res = await fetch(`/api/users/${id}`);
+  const res = await fetch(`/api/users/${get(userIdAtom)}`);
   if (!res.ok) throw new Error("Failed to fetch user");
   return res.json();
 });
@@ -877,18 +834,12 @@ export const userAtom = atom(async (get) => {
 import { Suspense } from "react";
 
 function UserProfile() {
-  // 自动 Suspend —— Promise resolve 前抛给 Suspense 边界
+  // Promise resolve 前自动抛给 Suspense
   const user = useAtomValue(userAtom);
   return <div>Welcome, {user.name}</div>;
 }
 
-function App() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <UserProfile />
-    </Suspense>
-  );
-}
+// 使用：<Suspense fallback={<div>Loading...</div>}><UserProfile /></Suspense>
 ```
 
 </v-click>
@@ -1031,14 +982,11 @@ transition: fade-out
 **问题：派生 atom 想用 async atom 的值**
 
 ```ts
-const asyncUserAtom = atom(async () => {
-  return await fetch("/api/me").then(r => r.json());
-});
+const asyncUserAtom = atom(async () => fetch("/api/me").then(r => r.json()));
 
-// ❌ get(asyncUserAtom) 在 v2 中拿到的是 Promise，不能直接 .name
+// ❌ v2 中 get(asyncUserAtom) 拿到 Promise，不能直接 .name
 const greetingAtom = atom((get) => `Hello, ${get(asyncUserAtom).name}`);
-//                                                ^^^^^^^^^^^^^^^^^
-//                                                Promise<User>.name —— 报错
+//                                            ^^^ Promise<User>.name 报错
 ```
 
 </v-click>
@@ -1114,14 +1062,7 @@ transition: fade-out
 
 <v-click>
 
-**默认 store（绝大多数场景够用）**
-
-```tsx
-// 不需要 Provider，atom 共享全局 default store
-function App() {
-  return <Counter />;
-}
-```
+**默认 store（绝大多数场景够用）**：不写 Provider 时所有 atom 共享全局 default store。
 
 </v-click>
 
@@ -1138,12 +1079,8 @@ const storeB = createStore();
 function App() {
   return (
     <>
-      <Provider store={storeA}>
-        <TenantApp />  {/* 这棵子树用 storeA */}
-      </Provider>
-      <Provider store={storeB}>
-        <TenantApp />  {/* 这棵子树用 storeB，互不干扰 */}
-      </Provider>
+      <Provider store={storeA}><TenantApp /></Provider>
+      <Provider store={storeB}><TenantApp /></Provider>
     </>
   );
 }
@@ -1153,13 +1090,7 @@ function App() {
 
 <v-click>
 
-**也可只传初始值（不传 store，Provider 自动创建独立 store）**
-
-```tsx
-<Provider initialValues={[[countAtom, 100]]}>
-  <Counter />
-</Provider>
-```
+也可不传 store，仅用 `<Provider initialValues={[[countAtom, 100]]}>` 注入初始值，Provider 自动建独立 store。
 
 </v-click>
 
@@ -1224,16 +1155,11 @@ import { atomWithStorage, createJSONStorage } from "jotai/utils";
 // 1. 默认 localStorage
 export const darkModeAtom = atomWithStorage("darkMode", false);
 
-// 2. sessionStorage（页面刷新保留，关闭标签丢失）
-const sessionStorageObj = createJSONStorage(() => sessionStorage);
-export const draftAtom = atomWithStorage(
-  "draft",
-  "",
-  sessionStorageObj,
-);
+// 2. sessionStorage（关闭标签丢失）
+const sess = createJSONStorage(() => sessionStorage);
+export const draftAtom = atomWithStorage("draft", "", sess);
 
-// 3. 自定义存储（IndexedDB / cookie / remote）
-const customStorage = createJSONStorage(() => myCustomStorageImpl);
+// 3. 自定义存储：createJSONStorage(() => myCustomStorageImpl)
 ```
 
 </v-click>
@@ -1314,14 +1240,9 @@ resettable atom 与统一的重置符号
 
 ```ts
 import { atomWithReset, useResetAtom, RESET } from "jotai/utils";
-import { useAtom, useSetAtom } from "jotai";
 
-// 1. atomWithReset 创建可重置的 atom
-export const formAtom = atomWithReset({
-  name: "",
-  email: "",
-  bio: "",
-});
+// atomWithReset 创建可重置的 atom
+export const formAtom = atomWithReset({ name: "", email: "", bio: "" });
 ```
 
 </v-click>
@@ -1346,16 +1267,7 @@ function FormResetButtonV2() {
 
 <v-click>
 
-**派生 atom 转发 RESET**
-
-```ts
-const derivedAtom = atom(
-  (get) => get(formAtom),
-  (get, set, update: typeof RESET | Partial<Form>) => {
-    set(formAtom, update === RESET ? RESET : { ...get(formAtom), ...update });
-  },
-);
-```
+派生 atom 也可转发 RESET：`write` 函数判断 `update === RESET` → 转发到源 atom，整套表单一键重置。
 
 </v-click>
 
@@ -1412,17 +1324,15 @@ transition: fade-out
 
 ```ts
 import { atomFamily } from "jotai/utils";
-import { atom } from "jotai";
 
 // 一个 todoFamily 管理任意 id 的 todo atom
 export const todoAtomFamily = atomFamily((id: number) =>
   atom({ id, text: "", done: false }),
 );
 
-// 用法
-const todo1Atom = todoAtomFamily(1);  // 第一次：创建并缓存
-const todo1Again = todoAtomFamily(1); // 第二次：命中缓存，引用相同
-console.log(todo1Atom === todo1Again); // true
+// 同一 param 返回同一 atom 引用（缓存）
+const todo1Atom = todoAtomFamily(1);
+console.log(todoAtomFamily(1) === todo1Atom); // true
 ```
 
 </v-click>
@@ -1440,15 +1350,7 @@ function TodoItem({ id }: { id: number }) {
 
 <v-click>
 
-**清理：避免内存泄漏**
-
-```ts
-// 删除单个
-todoAtomFamily.remove(1);
-
-// 自动清理策略
-todoAtomFamily.setShouldRemove((createdAt, param) => Date.now() - createdAt > 60_000);
-```
+**清理避免泄漏**：`family.remove(1)` 删单个；或 `family.setShouldRemove((createdAt, param) => Date.now() - createdAt > 60_000)` 自动 LRU。
 
 </v-click>
 
@@ -1513,13 +1415,10 @@ transition: fade-out
 ```ts
 import { atomWithDefault } from "jotai/utils";
 
-const userAtom = atom({ id: 1, name: "Alice", theme: "dark" });
-
-// 默认值来自 user.theme，但用户可以单独覆盖
+// 默认值跟随 user.theme，但用户可单独覆盖
 export const themeAtom = atomWithDefault((get) => get(userAtom).theme);
 
-// 设置后就脱离派生，独立存储
-setTheme("light");  // 现在 themeAtom 是 'light'，不再跟随 user.theme
+setTheme("light");  // 脱离派生，独立存储
 // 重置回派生：setTheme(RESET)
 ```
 
@@ -1599,23 +1498,18 @@ React DevTools 自动支持 + jotai-devtools 进阶
 
 <v-click>
 
-**1. 给 atom 加 debugLabel**
+**1. debugLabel**：用 `@swc-jotai/debug-label` 自动给所有 atom 加 label（变量名）。
 
 ```ts
 const countAtom = atom(0);
-countAtom.debugLabel = "count";   // 方法 A：手动
-
-// 方法 B：用 SWC / Babel plugin 自动添加（推荐）
-// vite.config.ts:
-import jotaiSwc from "@swc-jotai/debug-label";
-// 配置后所有 atom 自动获得 debugLabel = 变量名
+countAtom.debugLabel = "count";   // 手动写法
 ```
 
 </v-click>
 
 <v-click>
 
-**2. React DevTools 直接看**
+**2. React DevTools 集成**
 
 ```tsx
 import { useAtomsDebugValue } from "jotai-devtools/utils";
@@ -1624,27 +1518,13 @@ function DebugAtoms() {
   useAtomsDebugValue();  // 在 React DevTools 显示所有 atom
   return null;
 }
-
-// 放在 App 根附近
-<DebugAtoms />
 ```
 
 </v-click>
 
 <v-click>
 
-**3. 浏览器 DevTools 面板**
-
-```bash
-pnpm add jotai-devtools
-```
-
-```tsx
-import { DevTools } from "jotai-devtools";
-import "jotai-devtools/styles.css";
-
-<DevTools />  // 浏览器右下角浮窗，time-travel + state tree
-```
+**3. 浏览器 DevTools 面板**：`pnpm add jotai-devtools` 后挂载 `<DevTools />`，右下角浮窗支持 time-travel + state tree。
 
 </v-click>
 
@@ -1704,31 +1584,19 @@ transition: fade-out
 
 <v-click>
 
-**服务端组件传数据**
+**服务端组件传数据 → 客户端 hydrate**
 
 ```tsx
-// Next.js App Router
+// Server Component (Next.js App Router)
 async function UsersPage() {
-  // 服务端拉数据
   const users = await fetchUsersFromDB();
   return <UsersHydrate users={users} />;
 }
-```
 
-</v-click>
-
-<v-click>
-
-**客户端 hydrate**
-
-```tsx
-"use client";
+// "use client" 组件
 import { useHydrateAtoms } from "jotai/utils";
-import { usersAtom } from "@/atoms/users";
-
 export function UsersHydrate({ users }: { users: User[] }) {
-  // 用服务端数据初始化 atom（仅首次有效，后续 render 不会再覆盖）
-  useHydrateAtoms([[usersAtom, users]]);
+  useHydrateAtoms([[usersAtom, users]]);   // 仅首次有效
   return <UserList />;
 }
 ```
@@ -1737,12 +1605,11 @@ export function UsersHydrate({ users }: { users: User[] }) {
 
 <v-click>
 
-**SSR 必备：Provider + createStore（避免跨请求共享）**
+**SSR 必备：Provider + createStore（每个请求独立 store，避免泄露）**
 
 ```tsx
-// app/layout.tsx
-"use client";
-const store = useMemo(() => createStore(), []);  // 每次渲染独立 store
+// app/layout.tsx ("use client")
+const store = useMemo(() => createStore(), []);
 return <Provider store={store}>{children}</Provider>;
 ```
 
@@ -1808,23 +1675,18 @@ primitive / derived / write-only 的泛型签名
 ```ts
 import { atom, type PrimitiveAtom, type Atom, type WritableAtom } from "jotai";
 
-// 1. primitive atom：自动推导
-const numAtom = atom(0);              // PrimitiveAtom<number>
-const strAtom = atom("hello");        // PrimitiveAtom<string>
+// 1. primitive：自动推导
+const numAtom = atom(0);                                    // PrimitiveAtom<number>
 
 // 2. 空数组 / null 需要显式
 const todosAtom = atom<string[]>([]);                       // PrimitiveAtom<string[]>
-const userAtom = atom<User | null>(null);                   // PrimitiveAtom<User | null>
+const userAtom  = atom<User | null>(null);                  // PrimitiveAtom<User | null>
 
 // 3. 派生只读：read 返回值即类型
 const doubleAtom = atom((get) => get(numAtom) * 2);         // Atom<number>
 
-// 4. write-only / read-write：write 参数类型要明确
-const addAtom = atom(
-  null,
-  (get, set, step: number) => set(numAtom, get(numAtom) + step),
-);
-// WritableAtom<null, [step: number], void>
+// 4. write-only：WritableAtom<null, [step: number], void>
+const addAtom = atom(null, (get, set, step: number) => set(numAtom, get(numAtom) + step));
 ```
 
 </v-click>
@@ -1899,9 +1761,6 @@ transition: fade-out
 **❌ 不用 immer：嵌套 spread 地狱**
 
 ```ts
-const userAtom = atom({ name: "", profile: { address: { city: "" } } });
-
-const setCity = useSetAtom(userAtom);
 setCity((u) => ({
   ...u,
   profile: { ...u.profile, address: { ...u.profile.address, city: "Shanghai" } },
@@ -1917,10 +1776,7 @@ setCity((u) => ({
 ```ts
 import { atomWithImmer } from "jotai-immer";
 
-export const userAtom = atomWithImmer({
-  name: "",
-  profile: { address: { city: "" } },
-});
+export const userAtom = atomWithImmer({ name: "", profile: { address: { city: "" } } });
 ```
 
 ```tsx
@@ -1995,25 +1851,20 @@ transition: fade-out
 
 <v-click>
 
-| 包                  | 定位                       | 典型场景                  |
-| ------------------- | -------------------------- | ------------------------- |
-| **jotai-immer**     | immer 集成                 | 深层嵌套对象更新          |
-| **jotai-tanstack-query** | TanStack Query 桥接   | 服务端状态 + 客户端 atom  |
-| **jotai-effect**    | 副作用 atom                | onMount 监听 / 自动同步   |
-| **jotai-xstate**    | XState 状态机集成          | 复杂流程 / wizard         |
-| **jotai-location**  | URL ↔ atom 双向同步        | 搜索 / 筛选页参数         |
-| **jotai-cache**     | 派生 atom 缓存             | 重计算成本高的派生        |
-| **jotai-scope**     | 子树 atom 隔离             | 同一 atom 在不同子树多份  |
-| **jotai-history**   | undo / redo                | 编辑器、表单回滚          |
-| **jotai-trpc**      | tRPC 集成                  | tRPC 全栈项目             |
+| 包                       | 典型场景                  |
+| ------------------------ | ------------------------- |
+| **jotai-immer**          | 深层嵌套对象更新          |
+| **jotai-tanstack-query** | 服务端状态 + 客户端 atom  |
+| **jotai-effect**         | onMount 监听 / 自动同步   |
+| **jotai-xstate**         | 复杂流程 / wizard         |
+| **jotai-location**       | URL ↔ atom 双向同步       |
+| **jotai-history**        | undo / redo               |
 
 </v-click>
 
 <v-click>
 
-**Recipes 文档（社区代码片段）**
-
-atomWithToggle / atomWithDebounce / atomWithRefresh / atomWithListeners 等小工具，复制粘贴即用。
+**Recipes 文档**：atomWithToggle / atomWithDebounce / atomWithRefresh 等小工具，复制粘贴即用。
 
 </v-click>
 
@@ -2092,31 +1943,19 @@ import { atomWithStorage } from "jotai/utils";
 
 type CartItem = { id: number; name: string; price: number; qty: number };
 
-// 1. 持久化：items 写入 localStorage
+// 1. 持久化 / 2. 派生：总数量 / 总价
 export const cartItemsAtom = atomWithStorage<CartItem[]>("cart", []);
+export const cartCountAtom = atom((get) => get(cartItemsAtom).reduce((s, i) => s + i.qty, 0));
+export const cartTotalAtom = atom((get) => get(cartItemsAtom).reduce((s, i) => s + i.price * i.qty, 0));
 
-// 2. 派生：总数量
-export const cartCountAtom = atom((get) =>
-  get(cartItemsAtom).reduce((s, item) => s + item.qty, 0),
-);
-
-// 3. 派生：总价
-export const cartTotalAtom = atom((get) =>
-  get(cartItemsAtom).reduce((s, item) => s + item.price * item.qty, 0),
-);
-
-// 4. write-only：添加商品（已存在则 +1）
+// 3. write-only：添加 / 清空
 export const addItemAtom = atom(null, (get, set, item: Omit<CartItem, "qty">) => {
   const items = get(cartItemsAtom);
   const existing = items.find((i) => i.id === item.id);
-  if (existing) {
-    set(cartItemsAtom, items.map((i) => i.id === item.id ? { ...i, qty: i.qty + 1 } : i));
-  } else {
-    set(cartItemsAtom, [...items, { ...item, qty: 1 }]);
-  }
+  set(cartItemsAtom, existing
+    ? items.map((i) => i.id === item.id ? { ...i, qty: i.qty + 1 } : i)
+    : [...items, { ...item, qty: 1 }]);
 });
-
-// 5. write-only：清空
 export const clearCartAtom = atom(null, (_get, set) => set(cartItemsAtom, []));
 ```
 
@@ -2180,12 +2019,11 @@ render 中创建 atom = 永远拿不到正确状态
 
 ```tsx
 function Counter() {
-  // 每次 render 都创建新的 atom 引用 → useAtom 永远拿默认值
+  // 每次 render 都创建新 atom 引用 → useAtom 永远拿默认值
   const countAtom = atom(0);
   const [count, setCount] = useAtom(countAtom);
   return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
 }
-// 点击 +1：state 改了，但下次 render 又 new 一个 atom → count 永远是 0
 ```
 
 </v-click>
@@ -2195,7 +2033,7 @@ function Counter() {
 **✅ 正确：atom 在模块顶层**
 
 ```tsx
-const countAtom = atom(0);  // ← 模块顶层，整个 app 共享
+const countAtom = atom(0);  // 模块顶层，整个 app 共享
 
 function Counter() {
   const [count, setCount] = useAtom(countAtom);
@@ -2207,16 +2045,7 @@ function Counter() {
 
 <v-click>
 
-**例外：组件作用域 atom 用 useMemo + useRef**
-
-```tsx
-function ItemRow({ id }: { id: number }) {
-  const itemAtom = useMemo(() => atom({ id, edited: false }), [id]);  // 引用稳定
-  const [item, setItem] = useAtom(itemAtom);
-  // ...
-}
-// 但更推荐 atomFamily：todoAtomFamily(id) 自动缓存
-```
+**例外**：必须在组件作用域时用 `useMemo(() => atom({ id }), [id])` 稳定引用；更优雅的方案是 `atomFamily`（自动缓存）。
 
 </v-click>
 
@@ -2276,20 +2105,7 @@ transition: fade-out
 
 依赖变化导致重复 fetch + Suspense 闪烁
 
-<v-click>
-
-**❌ 现象：userId 切换时旧 fetch 还没完成，新 fetch 又触发**
-
-```ts
-const userIdAtom = atom(1);
-
-const userAtom = atom(async (get) => {
-  const res = await fetch(`/api/users/${get(userIdAtom)}`);
-  return res.json();  // 没有用 signal 取消
-});
-```
-
-</v-click>
+**❌ 现象**：userId 切换时旧 fetch 还没完成，新 fetch 又触发，谁后返回谁覆盖。
 
 <v-click>
 
@@ -2297,8 +2113,7 @@ const userAtom = atom(async (get) => {
 
 ```ts
 const userAtom = atom(async (get, { signal }) => {
-  const id = get(userIdAtom);
-  const res = await fetch(`/api/users/${id}`, { signal });
+  const res = await fetch(`/api/users/${get(userIdAtom)}`, { signal });
   if (!res.ok) throw new Error("Failed");
   return res.json();
 });
@@ -2309,13 +2124,7 @@ const userAtom = atom(async (get, { signal }) => {
 
 <v-click>
 
-**额外：考虑 loadable + 保留旧数据**
-
-```ts
-import { loadable } from "jotai/utils";
-const userLoadableAtom = loadable(userAtom);
-// 切换时显示「上一个用户 + Loading...」覆盖层，UX 更平滑
-```
+**额外**：用 `loadable(userAtom)` 切换时显示「上一个用户 + Loading...」覆盖层，UX 更平滑。
 
 </v-click>
 
@@ -2401,15 +2210,7 @@ const totalAtom = atom((get) => get(itemsAtom).reduce(...));
 
 <v-click>
 
-**3. selectAtom 做自定义相等判断**
-
-```ts
-import { selectAtom } from "jotai/utils";
-import { isEqual } from "lodash-es";
-
-// 深比较，源数组引用变了但内容相同时不重渲
-const filterAtom = selectAtom(itemsAtom, (items) => items.map(i => i.id), isEqual);
-```
+**3. selectAtom 做自定义相等判断**：`selectAtom(itemsAtom, (items) => items.map(i => i.id), isEqual)` 引用变了但内容相同时不重渲。
 
 </v-click>
 
@@ -2488,26 +2289,18 @@ transition: fade-out
 ```tsx
 import { render, screen } from "@testing-library/react";
 import { Provider, createStore } from "jotai";
-import { countAtom } from "@/atoms/counter";
-import { Counter } from "@/Counter";
 
 test("counter increments", async () => {
-  // 1. 每个测试用例独立 store
+  // 1. 每个测试用例独立 store + 注入初始值
   const store = createStore();
-  store.set(countAtom, 10);  // 注入初始值
+  store.set(countAtom, 10);
 
-  // 2. Provider 包裹
-  render(
-    <Provider store={store}>
-      <Counter />
-    </Provider>,
-  );
-
-  // 3. 断言 UI
-  expect(screen.getByRole("button")).toHaveTextContent("10");
+  // 2. Provider 包裹 + 渲染 + 触发
+  render(<Provider store={store}><Counter /></Provider>);
   await userEvent.click(screen.getByRole("button"));
 
-  // 4. 直接读 store 验证 state
+  // 3. UI 层 + state 层双重断言
+  expect(screen.getByRole("button")).toHaveTextContent("11");
   expect(store.get(countAtom)).toBe(11);
 });
 ```
@@ -2600,9 +2393,8 @@ src/
 
 **命名约定**
 
-- 文件：`kebab-case.ts`（如 `user-profile.ts`）或按领域分（`atoms/auth.ts`）
 - atom 后缀：xxxAtom（`countAtom`、`userAtom`）
-- 派生 atom：动词 / 形容词在前（`isLoggedInAtom`、`filteredItemsAtom`）
+- 派生 atom：形容词在前（`isLoggedInAtom`、`filteredItemsAtom`）
 - 写 atom：动词在前（`addItemAtom`、`loginAtom`）
 - family：xxxAtomFamily（`todoAtomFamily`）
 
@@ -2678,54 +2470,34 @@ transition: fade-out
 
 <v-click>
 
-**1. 开发工具不进生产**
-
-```ts
-// vite.config.ts
-import { defineConfig } from "vite";
-
-export default defineConfig({
-  plugins: [
-    // SWC plugin 自动添加 debugLabel
-    ...(process.env.NODE_ENV === "development"
-      ? [jotaiSwcDebugLabel()]
-      : []),
-  ],
-});
-```
+**1. 开发工具不进生产**：`jotai-devtools` / `@swc-jotai/debug-label` 只在 `NODE_ENV === 'development'` 启用。
 
 </v-click>
 
 <v-click>
 
-**2. atomWithStorage 检查兼容**
+**2. atomWithStorage 检查**
 
-- key 命名加版本前缀（`v1:cart`），未来改结构方便迁移
+- key 加版本前缀（`v1:cart`），未来改结构方便迁移
 - 敏感字段（token / password）不要进 localStorage
 
 </v-click>
 
 <v-click>
 
-**3. SSR 项目检查 Provider + createStore**
-
-每个请求一个独立 store，否则用户 A 的 atom 状态会泄露到用户 B。
+**3. SSR 项目检查 Provider + createStore**：每个请求一个独立 store，否则用户 A 的 atom 状态会泄露到用户 B。
 
 </v-click>
 
 <v-click>
 
-**4. Bundle 验证**
-
-`npx vite-bundle-visualizer` 确认 jotai 占用 ~3 KB，未使用的扩展已 tree-shake。
+**4. Bundle 验证**：`npx vite-bundle-visualizer` 确认 jotai 占用 ~3 KB，未使用的扩展已 tree-shake。
 
 </v-click>
 
 <v-click>
 
-**5. atomFamily 内存管理**
-
-长期 SPA 设置 setShouldRemove 自动清理，避免泄漏。
+**5. atomFamily 内存管理**：长期 SPA 设置 `setShouldRemove` 自动清理，避免泄漏。
 
 </v-click>
 
@@ -2799,20 +2571,13 @@ transition: fade-out
 
 - [Jotai 官方文档](https://jotai.org/) — 结构清晰，3 小时能过完核心
 - [Jotai GitHub](https://github.com/pmndrs/jotai) — 源码 + Issue + Discussions
-- [Poimandres 社区](https://pmnd.rs/) — 同团队其他库
 - [Jotai Recipes](https://jotai.org/docs/recipes/atom-with-toggle) — 复制即用的代码片段
 
 </v-click>
 
 <v-click>
 
-**生态扩展**
-
-- [jotai-immer](https://jotai.org/docs/extensions/immer) — 嵌套对象更新
-- [jotai-tanstack-query](https://jotai.org/docs/extensions/query) — 服务端状态桥接
-- [jotai-effect](https://jotai.org/docs/extensions/effect) — 副作用 atom
-- [jotai-xstate](https://jotai.org/docs/extensions/xstate) — 状态机
-- [jotai-location](https://jotai.org/docs/extensions/location) — URL ↔ atom
+**生态扩展**：[jotai-immer](https://jotai.org/docs/extensions/immer) / [jotai-tanstack-query](https://jotai.org/docs/extensions/query) / [jotai-effect](https://jotai.org/docs/extensions/effect) / [jotai-xstate](https://jotai.org/docs/extensions/xstate) / [jotai-location](https://jotai.org/docs/extensions/location)
 
 </v-click>
 
@@ -2820,9 +2585,8 @@ transition: fade-out
 
 **实战参考**
 
-- [Daishi Kato《Micro State Management with React Hooks》](https://www.packtpub.com/product/micro-state-management-with-react-hooks) — 作者亲著
+- Daishi Kato《Micro State Management with React Hooks》— 作者亲著
 - [jotai-demo](https://github.com/jotaijs/jotai-demo) — 官方示例项目
-- [React Three Fiber](https://github.com/pmndrs/react-three-fiber) — 大型 Poimandres 案例
 
 </v-click>
 

@@ -110,19 +110,14 @@ transition: fade-out
 
 <v-click>
 
-| 维度          | Vuetify 3          | Element Plus       | Naive UI        | Ant Design Vue   | PrimeVue          |
-| ------------- | ------------------ | ------------------ | --------------- | ---------------- | ----------------- |
-| 框架绑定      | Vue 3              | Vue 3              | Vue 3           | Vue 3            | Vue 3 / React     |
-| 设计语言      | **Material 3**     | 中后台通用         | 简约现代        | Ant Design       | 多 Preset 主题    |
-| 组件数量      | **100+**           | 60+                | 70+             | 60+              | 80+               |
-| TS 支持       | **原生**           | 原生               | **原生**        | 原生             | 原生              |
-| 主题方案      | **JS Theme + CSS 变量** | SCSS + CSS vars | JS Theme Object | LESS + Token     | CSS vars + Theme  |
-| 多主题支持    | **任意命名主题**   | 单 / 双            | 单 / 双         | 单 / 双          | 多 Preset         |
-| 包体积        | 偏大（自动 tree-shake） | 中           | 小              | 偏大             | 中                |
-| 国际化        | 50+ 语言 + RTL     | 66+ 语言           | 30+ 语言        | 20+ 语言         | 50+ 语言          |
-| 主导团队      | Vuetify 团队       | 饿了么             | TuSimple 团队   | 蚂蚁集团         | PrimeTek          |
-| 历史          | **2016 至今**      | 2020 至今          | 2021 至今       | 2017 至今        | 2014 至今         |
-| 大版本风险    | 中（v2→v3 重写）   | 低（v2 长期）      | 低              | 低               | 中                |
+| 维度       | Vuetify 3               | Element Plus    | Naive UI        | Ant Design Vue |
+| ---------- | ----------------------- | --------------- | --------------- | -------------- |
+| 设计语言   | **Material 3**          | 中后台通用      | 简约现代        | Ant Design     |
+| 组件数量   | **100+**                | 60+             | 70+             | 60+            |
+| 主题方案   | **JS Theme + CSS 变量** | SCSS + CSS vars | JS Theme Object | LESS + Token   |
+| 多主题支持 | **任意命名主题**        | 单 / 双         | 单 / 双         | 单 / 双        |
+| 国际化     | 50+ 语言 + RTL          | 66+ 语言        | 30+ 语言        | 20+ 语言       |
+| 历史       | **2016 至今**           | 2020 至今       | 2021 至今       | 2017 至今      |
 
 </v-click>
 
@@ -172,16 +167,14 @@ transition: fade-out
 
 <v-click>
 
-| 版本             | 时间    | 关键事件                                                       |
-| ---------------- | ------- | -------------------------------------------------------------- |
-| Vuetify 0.x      | 2016    | 基于 Vue 1.x，John Leider 创立，Material Design 1 风格         |
-| Vuetify 1.x      | 2018    | Vue 2 适配，组件数破 80                                        |
-| Vuetify 2.x      | 2019    | 大幅重写，Material 2 风格，国际化 / 主题完整                   |
-| **Vuetify 3.x「Titan」** | 2022.5 | 基于 Vue 3 Composition + TypeScript 重写，新主题 API   |
-| Vuetify 3.4 "Blackguard" | 2023.10 | 数据表格虚拟化，Date Pickers 重写                    |
-| Vuetify 3.5 "Polaris"    | 2024.1  | Snackbar Queue，DataTable Filter 重写                |
-| Vuetify 3.7 "Odyssey"    | 2024.10 | 新增 VConfirmEdit / VStepperVertical，Material 3 持续推进     |
-| Vuetify 3.10+    | 2026+   | 持续迭代，新 theming API、useRules 校验、AI 助手集成          |
+| 版本                     | 时间    | 关键事件                                              |
+| ------------------------ | ------- | ----------------------------------------------------- |
+| Vuetify 1.x              | 2018    | Vue 2 适配，组件数破 80                               |
+| Vuetify 2.x              | 2019    | 大幅重写，Material 2 风格，国际化 / 主题完整          |
+| **Vuetify 3.x「Titan」** | 2022.5  | Vue 3 Composition + TypeScript 重写，新主题 API       |
+| Vuetify 3.4 "Blackguard" | 2023.10 | 数据表格虚拟化，Date Pickers 重写                     |
+| Vuetify 3.7 "Odyssey"    | 2024.10 | 新增 VConfirmEdit / VStepperVertical                  |
+| Vuetify 3.10+            | 2026+   | 新 theming API、useRules 校验、AI 助手集成            |
 
 </v-click>
 
@@ -239,33 +232,25 @@ transition: fade-out
 
 <v-click>
 
-**1. Material Design First（设计第一）**
-
-不是「类 Material 风」，而是严格贴合 Google Material Design 3 规范 —— 颜色、间距、字体、动效全部对齐。
+**1. Material Design First** —— 严格贴合 Google Material 3 规范，颜色 / 间距 / 字体 / 动效全部对齐。
 
 </v-click>
 
 <v-click>
 
-**2. Composition API + Composables（组合式优先）**
-
-useDisplay / useTheme / useLocale / useDate 四大 composable 是 Vuetify 的灵魂，所有响应式状态都通过 composable 暴露。
+**2. Composition API + Composables** —— useDisplay / useTheme / useLocale / useDate 四大 composable 是灵魂。
 
 </v-click>
 
 <v-click>
 
-**3. Theming Everywhere（处处可主题化）**
-
-每个组件都吃 theme 系统 —— color prop 接收主题色（primary/secondary/success/error），不需要硬编码颜色值。
+**3. Theming Everywhere** —— 每个组件都吃 theme 系统，color prop 接收主题色名，不硬编码颜色值。
 
 </v-click>
 
 <v-click>
 
-**4. SSR + Tree-shaking 标配**
-
-vite-plugin-vuetify 让按需引入零配置，vuetify-nuxt-module 让 SSR 一键启用 —— 现代项目所需的工程化能力开箱即用。
+**4. SSR + Tree-shaking 标配** —— vite-plugin-vuetify 零配置按需，vuetify-nuxt-module 一键 SSR。
 
 </v-click>
 
@@ -342,16 +327,14 @@ layoutClass: gap-x-8
 ```bash
 pnpm create vuetify
 # or npm create vuetify@latest
-# or yarn create vuetify
-# or bun create vuetify
 ```
 
-| 选项     | 说明                              |
-| -------- | --------------------------------- |
-| Project Name | 项目名（默认 vuetify-project） |
-| TypeScript | TS 还是 JS                      |
-| Routing    | Vue Router + 文件路由         |
-| Icons      | MDI / Material Symbols / FontAwesome |
+| 选项         | 说明                                 |
+| ------------ | ------------------------------------ |
+| Project Name | 项目名（默认 vuetify-project）       |
+| TypeScript   | TS 还是 JS                           |
+| Routing      | Vue Router + 文件路由                |
+| Icons        | MDI / Material Symbols / FontAwesome |
 
 </v-click>
 
@@ -365,13 +348,11 @@ pnpm create vuetify
 my-vuetify-app/
 ├─ src/
 │  ├─ plugins/
-│  │  ├─ vuetify.ts        # createVuetify 入口
-│  │  └─ index.ts          # 插件聚合
-│  ├─ App.vue              # 根组件 (v-app)
-│  ├─ main.ts              # 应用启动
-│  └─ assets/
-├─ vite.config.ts          # 内置 vite-plugin-vuetify
-└─ package.json
+│  │  ├─ vuetify.ts    # createVuetify 入口
+│  │  └─ index.ts      # 插件聚合
+│  ├─ App.vue          # 根组件 (v-app)
+│  └─ main.ts          # 应用启动
+└─ vite.config.ts      # 内置 vite-plugin-vuetify
 ```
 
 </v-click>
@@ -435,15 +416,10 @@ pnpm i -D vite-plugin-vuetify
 **2. vite.config.ts 配 plugin**
 
 ```ts
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
 import vuetify from "vite-plugin-vuetify";
 
 export default defineConfig({
-  plugins: [
-    vue(),
-    vuetify({ autoImport: true }),   // 自动按需引入组件 + 样式
-  ],
+  plugins: [vue(), vuetify({ autoImport: true })],
 });
 ```
 
@@ -454,14 +430,11 @@ export default defineConfig({
 **3. main.ts 注册插件**
 
 ```ts
-import { createApp } from "vue";
 import { createVuetify } from "vuetify";
 import "vuetify/styles";
 import "@mdi/font/css/materialdesignicons.css";
-import App from "./App.vue";
 
-const vuetify = createVuetify();
-createApp(App).use(vuetify).mount("#app");
+createApp(App).use(createVuetify()).mount("#app");
 ```
 
 </v-click>
@@ -518,33 +491,13 @@ transition: fade-out
 <v-click>
 
 ```vue
-<script setup lang="ts">
-import { ref } from "vue";
-
-const loading = ref(false);
-
-async function handleSubmit() {
-  loading.value = true;
-  try {
-    await fetch("/api/submit", { method: "POST" });
-  } finally {
-    loading.value = false;
-  }
-}
-</script>
-
 <template>
   <v-app>
     <v-main>
-      <v-container>
-        <v-btn color="primary" variant="elevated" :loading="loading" @click="handleSubmit">
-          提交订单
-        </v-btn>
-        <v-btn color="success" variant="tonal">成功</v-btn>
-        <v-btn color="warning" variant="outlined">警告</v-btn>
-        <v-btn color="error" variant="text">危险</v-btn>
-        <v-btn icon="mdi-heart" color="error" />
-      </v-container>
+      <v-btn color="primary" variant="elevated" :loading="loading">提交</v-btn>
+      <v-btn color="success" variant="tonal">成功</v-btn>
+      <v-btn color="error" variant="text">危险</v-btn>
+      <v-btn icon="mdi-heart" color="error" />
     </v-main>
   </v-app>
 </template>
@@ -554,12 +507,10 @@ async function handleSubmit() {
 
 <v-click>
 
-| Prop      | 取值                                              | 说明           |
-| --------- | ------------------------------------------------- | -------------- |
-| `color`   | primary / secondary / success / warning / error / info | 主题色名 |
-| `variant` | elevated / flat / tonal / outlined / text / plain | 视觉变体       |
-| `size`    | x-small / small / default / large / x-large       | 尺寸           |
-| `loading` `disabled` `block` `rounded` | boolean              | 状态 + 形态    |
+| Prop      | 取值                                                   |
+| --------- | ------------------------------------------------------ |
+| `color`   | primary / secondary / success / warning / error / info |
+| `variant` | elevated / flat / tonal / outlined / text / plain      |
 
 </v-click>
 
@@ -619,24 +570,20 @@ transition: fade-out
 
 <v-click>
 
-| 分类                | 代表组件                                                              |
-| ------------------- | --------------------------------------------------------------------- |
-| **Application**     | VApp / VAppBar / VNavigationDrawer / VMain / VFooter / VBottomNavigation |
-| **Form Inputs**     | VTextField / VTextarea / VSelect / VAutocomplete / VCombobox / VFileInput |
-| **Form Controls**   | VCheckbox / VRadio / VSwitch / VSlider / VRating / VOtpInput          |
-| **Date & Time**     | VDatePicker / VDateInput / VTimePicker                                |
-| **Data**            | VDataTable / VDataTableServer / VDataTableVirtual / VTreeview / VVirtualScroll |
-| **Display**         | VCard / VList / VTimeline / VChip / VAvatar / VBadge / VImg / VCarousel |
-| **Navigation**      | VTabs / VBreadcrumbs / VPagination / VStepper / VMenu / VBottomSheet  |
-| **Feedback**        | VAlert / VSnackbar / VProgressLinear / VProgressCircular / VSkeletonLoader |
-| **Overlay**         | VDialog / VBottomSheet / VOverlay / VMenu / VTooltip / VConfirmEdit   |
-| **Layout & Grid**   | VContainer / VRow / VCol / VSpacer / VDivider / VSheet                |
+| 分类            | 代表组件                                                |
+| --------------- | ------------------------------------------------------- |
+| **Application** | VApp / VAppBar / VNavigationDrawer / VMain / VFooter    |
+| **Form**        | VTextField / VSelect / VCheckbox / VSwitch / VSlider    |
+| **Data**        | VDataTable / VDataTableServer / VTreeview               |
+| **Display**     | VCard / VList / VTimeline / VChip / VAvatar / VImg      |
+| **Navigation**  | VTabs / VBreadcrumbs / VPagination / VStepper / VMenu   |
+| **Overlay**     | VDialog / VOverlay / VTooltip / VAlert / VSnackbar      |
 
 </v-click>
 
-<v-click text-xs class="mt-4">
+<v-click text-xs class="mt-2">
 
-> 💡 **设计原则**：每个组件都有 `density`（紧凑度）+ `variant`（视觉变体）+ `color`（主题色）三个核心维度。
+> 💡 每个组件都有 `density` + `variant` + `color` 三个核心维度。
 
 </v-click>
 
@@ -691,13 +638,10 @@ transition: fade-out
 import vuetify from "vite-plugin-vuetify";
 
 export default defineConfig({
-  plugins: [
-    vue(),
-    vuetify({
-      autoImport: true,            // 模板里的 <v-xxx> 自动 import 组件 + CSS
-      styles: { configFile: "src/styles/settings.scss" },  // 主题 SCSS 入口
-    }),
-  ],
+  plugins: [vue(), vuetify({
+    autoImport: true,                                     // 自动 import 组件 + CSS
+    styles: { configFile: "src/styles/settings.scss" },   // 主题 SCSS 入口
+  })],
 });
 ```
 
@@ -709,12 +653,9 @@ export default defineConfig({
 
 ```vue
 <template>
-  <v-app>
-    <!-- 这些组件全部自动 import + 按需加载 CSS -->
-    <v-btn>按钮</v-btn>
-    <v-text-field label="姓名" />
-    <v-data-table :headers="headers" :items="rows" />
-  </v-app>
+  <v-btn>按钮</v-btn>
+  <v-text-field label="姓名" />
+  <v-data-table :headers="headers" :items="rows" />
 </template>
 ```
 
@@ -722,7 +663,7 @@ export default defineConfig({
 
 <v-click>
 
-> 💡 **效果**：全量 bundle 约 ~750 KB（含全部组件 + 样式），自动按需后通常降到 ~200 KB（仅含实际使用组件）。
+> 💡 **效果**：全量 bundle ~750 KB，自动按需后约 ~200 KB（仅含实际使用组件）。
 
 </v-click>
 
@@ -779,21 +720,13 @@ rules / validate / vee-validate 三选一
 
 ```vue
 <script setup lang="ts">
-import { ref, reactive } from "vue";
-
 const formRef = ref();
 const valid = ref(false);
-const form = reactive({ name: "", email: "", age: 18 });
+const form = reactive({ name: "", email: "" });
 
 // 校验规则数组（每个 rule 是 value => true | string）
-const nameRules = [
-  (v: string) => !!v || "姓名必填",
-  (v: string) => v.length >= 2 || "至少 2 个字",
-];
-const emailRules = [
-  (v: string) => !!v || "邮箱必填",
-  (v: string) => /.+@.+\..+/.test(v) || "邮箱格式不正确",
-];
+const nameRules = [(v: string) => !!v || "姓名必填"];
+const emailRules = [(v: string) => /.+@.+\..+/.test(v) || "邮箱格式不正确"];
 
 async function submit() {
   const { valid } = await formRef.value.validate();
@@ -803,7 +736,7 @@ async function submit() {
 
 <template>
   <v-form ref="formRef" v-model="valid" @submit.prevent="submit">
-    <v-text-field v-model="form.name" :rules="nameRules" label="姓名" required />
+    <v-text-field v-model="form.name" :rules="nameRules" label="姓名" />
     <v-text-field v-model="form.email" :rules="emailRules" label="邮箱" />
     <v-btn type="submit" color="primary" :disabled="!valid">提交</v-btn>
   </v-form>
@@ -860,38 +793,24 @@ headers + items 两要素
 
 ```vue
 <script setup lang="ts">
-import { ref } from "vue";
-
-interface User {
-  id: number; name: string; email: string; role: string;
-}
-
 const search = ref("");
-const itemsPerPage = ref(10);
 const headers = [
   { title: "ID", key: "id" },
   { title: "姓名", key: "name" },
   { title: "邮箱", key: "email" },
-  { title: "角色", key: "role" },
   { title: "操作", key: "actions", sortable: false },
 ];
-const users = ref<User[]>([
-  { id: 1, name: "Tom", email: "tom@x.com", role: "Admin" },
-  { id: 2, name: "Jerry", email: "j@x.com", role: "Editor" },
-]);
+const users = ref([{ id: 1, name: "Tom", email: "tom@x.com" }]);
 </script>
 
 <template>
-  <v-data-table
-    v-model:items-per-page="itemsPerPage"
-    :headers="headers" :items="users" :search="search" class="elevation-1"
-  >
+  <v-data-table :headers="headers" :items="users" :search="search">
     <template #top>
-      <v-text-field v-model="search" prepend-inner-icon="mdi-magnify" label="搜索" />
+      <v-text-field v-model="search" prepend-inner-icon="mdi-magnify" />
     </template>
     <template #item.actions="{ item }">
-      <v-btn icon="mdi-pencil" size="small" variant="text" @click="edit(item)" />
-      <v-btn icon="mdi-delete" size="small" variant="text" color="error" @click="del(item)" />
+      <v-btn icon="mdi-pencil" size="small" variant="text" />
+      <v-btn icon="mdi-delete" size="small" color="error" />
     </template>
   </v-data-table>
 </template>
@@ -954,27 +873,16 @@ transition: fade-out
 
 ```vue
 <script setup lang="ts">
-import { ref } from "vue";
-
 const loading = ref(false);
 const itemsLength = ref(0);
 const items = ref([]);
 
-interface Options {
-  page: number;
-  itemsPerPage: number;
-  sortBy: { key: string; order: "asc" | "desc" }[];
-}
-
-async function loadItems({ page, itemsPerPage, sortBy }: Options) {
+async function loadItems({ page, itemsPerPage, sortBy }) {
   loading.value = true;
-  try {
-    const { list, total } = await api.queryUsers({ page, pageSize: itemsPerPage, sortBy });
-    items.value = list;
-    itemsLength.value = total;
-  } finally {
-    loading.value = false;
-  }
+  const { list, total } = await api.queryUsers({ page, pageSize: itemsPerPage, sortBy });
+  items.value = list;
+  itemsLength.value = total;
+  loading.value = false;
 }
 </script>
 
@@ -990,7 +898,7 @@ async function loadItems({ page, itemsPerPage, sortBy }: Options) {
 
 <v-click>
 
-> 💡 **关键差异**：相比 v-data-table，需提供 `items-length`（总数）+ 监听 `@update:options`（任何分页 / 排序 / 搜索变化触发）。
+> 💡 **关键差异**：需提供 `items-length` + 监听 `@update:options`（分页 / 排序 / 搜索任一变化触发）。
 
 </v-click>
 
@@ -1051,29 +959,17 @@ v-app + v-app-bar + v-navigation-drawer + v-main + v-footer
     <v-app-bar color="primary">
       <v-app-bar-nav-icon @click="drawer = !drawer" />
       <v-app-bar-title>My Application</v-app-bar-title>
-      <v-spacer />
-      <v-btn icon="mdi-magnify" />
-      <v-btn icon="mdi-account" />
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer">
       <v-list nav>
-        <v-list-item
-          v-for="item in navItems" :key="item.title"
-          :prepend-icon="item.icon" :title="item.title" :to="item.to"
-        />
+        <v-list-item v-for="item in navItems" :key="item.title"
+          :prepend-icon="item.icon" :title="item.title" :to="item.to" />
       </v-list>
     </v-navigation-drawer>
 
-    <v-main>
-      <v-container>
-        <router-view />
-      </v-container>
-    </v-main>
-
-    <v-footer app>
-      <span>&copy; {{ new Date().getFullYear() }} My Company</span>
-    </v-footer>
+    <v-main><v-container><router-view /></v-container></v-main>
+    <v-footer app>&copy; My Company</v-footer>
   </v-app>
 </template>
 ```
@@ -1128,20 +1024,9 @@ transition: fade-out
 <template>
   <v-container>
     <v-row>
-      <v-col cols="12" md="6" lg="4">
-        <v-card>左列 (移动端全宽 / 平板 1/2 / 桌面 1/3)</v-card>
-      </v-col>
-      <v-col cols="12" md="6" lg="4">
-        <v-card>中列</v-card>
-      </v-col>
-      <v-col cols="12" md="12" lg="4">
-        <v-card>右列</v-card>
-      </v-col>
-    </v-row>
-
-    <v-row align="center" justify="space-around" no-gutters>
-      <v-col cols="auto"><v-btn>按钮 1</v-btn></v-col>
-      <v-col cols="auto"><v-btn>按钮 2</v-btn></v-col>
+      <v-col cols="12" md="6" lg="4"><v-card>左列 (移动全宽 / 平板 1/2 / 桌面 1/3)</v-card></v-col>
+      <v-col cols="12" md="6" lg="4"><v-card>中列</v-card></v-col>
+      <v-col cols="12" md="12" lg="4"><v-card>右列</v-card></v-col>
     </v-row>
   </v-container>
 </template>
@@ -1151,12 +1036,11 @@ transition: fade-out
 
 <v-click>
 
-| Prop                 | 取值                                  | 说明                          |
-| -------------------- | ------------------------------------- | ----------------------------- |
-| `cols`               | 1-12 / auto                           | 默认占多少格（共 12 格）      |
-| `xs / sm / md / lg / xl` | 1-12 / auto                       | 各断点占多少格                |
-| `align / justify`    | start / center / end / space-between  | 行内对齐（v-row 上）          |
-| `dense / no-gutters` | boolean                               | 紧凑 / 无 gutter              |
+| Prop                     | 取值             | 说明           |
+| ------------------------ | ---------------- | -------------- |
+| `cols`                   | 1-12 / auto      | 默认占多少格   |
+| `xs / sm / md / lg / xl` | 1-12 / auto      | 各断点占多少格 |
+| `align / justify`        | start / center … | 行内对齐       |
 
 </v-click>
 
@@ -1214,30 +1098,19 @@ createVuetify 主题配置
 
 ```ts
 // plugins/vuetify.ts
-import { createVuetify } from "vuetify";
-
 const customLightTheme = {
   dark: false,
   colors: {
-    primary: "#1867C0",
-    secondary: "#5CBBF6",
-    success: "#4CAF50",
-    warning: "#FFC107",
-    error: "#FF5252",
-    info: "#2196F3",
-    background: "#FFFFFF",
-    surface: "#F5F5F5",
+    primary: "#1867C0", secondary: "#5CBBF6",
+    success: "#4CAF50", warning: "#FFC107",
+    error: "#FF5252", info: "#2196F3",
+    background: "#FFFFFF", surface: "#F5F5F5",
   },
 };
 
 const customDarkTheme = {
   dark: true,
-  colors: {
-    primary: "#2196F3",
-    secondary: "#424242",
-    background: "#121212",
-    surface: "#1E1E1E",
-  },
+  colors: { primary: "#2196F3", background: "#121212", surface: "#1E1E1E" },
 };
 
 export default createVuetify({
@@ -1307,23 +1180,18 @@ import { useTheme } from "vuetify";
 
 const theme = useTheme();
 
-// 当前主题名 / 当前是暗色?
-console.log(theme.global.name.value);       // 'light'
-console.log(theme.global.current.value.dark); // false
-console.log(theme.global.current.value.colors.primary);   // '#1867C0'
+// 当前主题状态
+console.log(theme.global.name.value);                    // 'light'
+console.log(theme.global.current.value.colors.primary);  // '#1867C0'
 
 // 切换方法（v3.10+ API）
-theme.toggle();                        // 切换 light / dark
-theme.change("dark");                  // 指定切换到 dark
-theme.cycle();                         // 循环所有已注册主题
-theme.cycle(["custom", "light", "system"]);  // 循环指定主题
+theme.toggle();         // 切换 light / dark
+theme.change("dark");   // 指定切换到 dark
+theme.cycle();          // 循环所有已注册主题
 </script>
 
 <template>
-  <v-btn
-    :icon="theme.global.current.value.dark ? 'mdi-weather-sunny' : 'mdi-weather-night'"
-    @click="theme.toggle()"
-  />
+  <v-btn :icon="theme.global.current.value.dark ? 'mdi-sun' : 'mdi-moon'" @click="theme.toggle()" />
 </template>
 ```
 
@@ -1396,32 +1264,15 @@ defaults 配置，零代码统一组件外观
 // plugins/vuetify.ts
 export default createVuetify({
   defaults: {
-    // 所有组件的全局默认（少用）
-    global: {
-      ripple: false,
-    },
-    // v-btn 全局默认
-    VBtn: {
-      color: "primary",
-      variant: "elevated",
-      rounded: "lg",
-    },
-    // v-card 全局默认
-    VCard: {
-      elevation: 4,
-      rounded: "lg",
-    },
-    // v-text-field 全局默认
+    global: { ripple: false },                                          // 全局
+    VBtn: { color: "primary", variant: "elevated", rounded: "lg" },     // 按钮
+    VCard: { elevation: 4, rounded: "lg" },                             // 卡片
     VTextField: {
       variant: "outlined",
       density: "comfortable",
       hideDetails: "auto",
     },
-    // v-data-table 全局默认
-    VDataTable: {
-      itemsPerPage: 25,
-      density: "comfortable",
-    },
+    VDataTable: { itemsPerPage: 25, density: "comfortable" },           // 表格
   },
 });
 ```
@@ -1488,15 +1339,13 @@ vue-i18n 适配器 + 50+ 内置 locale
 **1. createVuetify 配置 locale**
 
 ```ts
-import { createVuetify } from "vuetify";
 import { en, zhHans, ar } from "vuetify/locale";
 
 export default createVuetify({
   locale: {
-    locale: "zhHans",       // 默认中文
-    fallback: "en",         // 回退英文
+    locale: "zhHans", fallback: "en",
     messages: { en, zhHans, ar },
-    rtl: { ar: true },      // ar 阿拉伯启用 RTL
+    rtl: { ar: true },
   },
 });
 ```
@@ -1509,20 +1358,11 @@ export default createVuetify({
 
 ```vue
 <script setup lang="ts">
-import { useLocale } from "vuetify";
-
-const { current, t } = useLocale();
-
-function switchLang(code: "zhHans" | "en" | "ar") {
-  current.value = code;
-}
+const { current } = useLocale();
 </script>
 
 <template>
-  <v-btn @click="switchLang('en')">English</v-btn>
-  <v-btn @click="switchLang('zhHans')">中文</v-btn>
-  <v-btn @click="switchLang('ar')">العربية</v-btn>
-  <v-data-table v-bind="tableProps" />
+  <v-btn @click="current = 'zhHans'">中文</v-btn>
 </template>
 ```
 
@@ -1594,42 +1434,26 @@ useDisplay / useTheme / useLocale / useDate
 
 <v-click>
 
-```vue
-<script setup lang="ts">
+```ts
 import { useDisplay, useTheme, useLocale, useDate } from "vuetify";
 
-// 1) useDisplay：响应式断点 + 平台检测
-const { xs, sm, md, lg, xl, mobile, mdAndUp, platform } = useDisplay();
-console.log(mobile.value);          // 是否移动端
-console.log(mdAndUp.value);         // 是否 >= md 断点
-console.log(platform.value.ios);    // 是否 iOS
-
-// 2) useTheme：主题切换
-const theme = useTheme();
-theme.toggle();
-
-// 3) useLocale：语言切换
-const { current } = useLocale();
-current.value = "en";
-
-// 4) useDate：日期适配器
-const date = useDate();
-const today = date.date();
-const formatted = date.format(today, "fullDate");   // "May 19, 2026"
-const tomorrow = date.addDays(today, 1);
-</script>
+const { mobile, mdAndUp, platform } = useDisplay();        // 响应式断点 + 平台
+const theme = useTheme(); theme.toggle();                  // 主题切换
+const { current } = useLocale();                           // 语言切换
+const date = useDate();                                    // 日期适配器
+const formatted = date.format(date.date(), "fullDate");    // "May 19, 2026"
 ```
 
 </v-click>
 
 <v-click>
 
-| Composable    | 主要 API                                       | 用途                       |
-| ------------- | ---------------------------------------------- | -------------------------- |
-| `useDisplay`  | xs/sm/md/lg/xl, mobile, mdAndUp, platform      | 响应式断点 + 平台检测      |
-| `useTheme`    | theme.global.name, toggle, change, cycle       | 主题切换                   |
-| `useLocale`   | current, t, fallback, isRtl                    | 语言切换                   |
-| `useDate`     | date, format, addDays, isAfter                 | 日期适配（dayjs / luxon）  |
+| Composable   | 主要 API                                  | 用途              |
+| ------------ | ----------------------------------------- | ----------------- |
+| `useDisplay` | xs/sm/md/lg/xl, mobile, mdAndUp, platform | 响应式断点 + 平台 |
+| `useTheme`   | theme.global, toggle, change, cycle       | 主题切换          |
+| `useLocale`  | current, t, isRtl                         | 语言切换          |
+| `useDate`    | date, format, addDays                     | 日期适配          |
 
 </v-click>
 
@@ -1720,21 +1544,11 @@ export default defineNuxtConfig({
   modules: ["vuetify-nuxt-module"],
   vuetify: {
     vuetifyOptions: {
-      theme: {
-        defaultTheme: "light",
-        themes: { light: { colors: { primary: "#1867C0" } } },
-      },
-      icons: {
-        defaultSet: "mdi",
-      },
-      defaults: {
-        VBtn: { variant: "elevated" },
-      },
+      theme: { defaultTheme: "light", themes: { light: { colors: { primary: "#1867C0" } } } },
+      icons: { defaultSet: "mdi" },
+      defaults: { VBtn: { variant: "elevated" } },
     },
-    moduleOptions: {
-      ssrClientHints: { reloadOnFirstRequest: false },
-      styles: { configFile: "assets/settings.scss" },
-    },
+    moduleOptions: { ssrClientHints: { reloadOnFirstRequest: false } },
   },
 });
 ```
@@ -1814,13 +1628,8 @@ v-alert / v-snackbar / v-dialog
 **v-alert（行内警告，永久显示）**
 
 ```vue
-<v-alert type="success" title="保存成功" closable>
-  数据已保存到服务器
-</v-alert>
-
-<v-alert type="error" variant="tonal" prominent>
-  操作失败，请稍后重试
-</v-alert>
+<v-alert type="success" title="保存成功" closable>数据已保存到服务器</v-alert>
+<v-alert type="error" variant="tonal" prominent>操作失败，请稍后重试</v-alert>
 ```
 
 </v-click>
@@ -1830,12 +1639,7 @@ v-alert / v-snackbar / v-dialog
 **v-snackbar（短暂提示，底部弹出）**
 
 ```vue
-<v-snackbar v-model="snackbar" color="success" timeout="3000">
-  操作成功
-  <template #actions>
-    <v-btn variant="text" @click="snackbar = false">关闭</v-btn>
-  </template>
-</v-snackbar>
+<v-snackbar v-model="snackbar" color="success" timeout="3000">操作成功</v-snackbar>
 ```
 
 </v-click>
@@ -1848,11 +1652,9 @@ v-alert / v-snackbar / v-dialog
 <v-dialog v-model="dialog" max-width="500">
   <v-card>
     <v-card-title>确认删除？</v-card-title>
-    <v-card-text>删除后不可恢复，确认继续？</v-card-text>
     <v-card-actions>
-      <v-spacer />
       <v-btn @click="dialog = false">取消</v-btn>
-      <v-btn color="error" variant="elevated" @click="confirm">删除</v-btn>
+      <v-btn color="error" @click="confirm">删除</v-btn>
     </v-card-actions>
   </v-card>
 </v-dialog>
@@ -1921,11 +1723,8 @@ transition: fade-out
 **方案一：MDI 字体（开箱即用）**
 
 ```ts
-// main.ts
+// main.ts —— createVuetify 默认就是 mdi 字体方案，无需额外配置
 import "@mdi/font/css/materialdesignicons.css";
-
-// createVuetify 默认就是 mdi 字体方案，无需额外配置
-const vuetify = createVuetify({});
 ```
 
 ```vue
@@ -1940,34 +1739,21 @@ const vuetify = createVuetify({});
 **方案二：MDI SVG（按需 + Tree-shake）**
 
 ```ts
-import { createVuetify } from "vuetify";
 import { aliases, mdi } from "vuetify/iconsets/mdi-svg";
-import { mdiAccount, mdiHome } from "@mdi/js";
+import { mdiHome } from "@mdi/js";
 
-const vuetify = createVuetify({
-  icons: {
-    defaultSet: "mdi",
-    aliases: { ...aliases, account: mdiAccount },
-    sets: { mdi },
-  },
-});
+createVuetify({ icons: { defaultSet: "mdi", aliases, sets: { mdi } } });
 ```
 
 ```vue
-<script setup>
-import { mdiHome } from "@mdi/js";
-</script>
-
-<template>
-  <v-icon :icon="mdiHome" />
-</template>
+<v-icon :icon="mdiHome" />
 ```
 
 </v-click>
 
 <v-click>
 
-> 💡 **选择**：原型 / 演示用字体方案（一行 import 全部图标）；生产项目用 SVG 方案（仅打包用到的图标）。
+> 💡 **选择**：原型用字体方案（一行 import 全部图标）；生产用 SVG 方案（仅打包用到的图标）。
 
 </v-click>
 
@@ -2130,17 +1916,11 @@ transition: fade-out
 
 ```vue
 <!-- ❌ 错：直接渲染 v-btn -->
-<template>
-  <v-btn>按钮</v-btn>
-</template>
+<template><v-btn>按钮</v-btn></template>
 
 <!-- ✅ 对：必须包一层 v-app -->
 <template>
-  <v-app>
-    <v-main>
-      <v-btn>按钮</v-btn>
-    </v-main>
-  </v-app>
+  <v-app><v-main><v-btn>按钮</v-btn></v-main></v-app>
 </template>
 ```
 
@@ -2157,11 +1937,9 @@ transition: fade-out
 ```ts
 // main.ts —— 顺序关键
 import "vuetify/styles";   // ✅ 必须放在第一行！
-import { createApp } from "vue";
 import { createVuetify } from "vuetify";
 
-// SSR 模式必须传 ssr: true
-const vuetify = createVuetify({ ssr: true });
+const vuetify = createVuetify({ ssr: true });   // SSR 模式必须传 ssr: true
 ```
 
 </v-click>
@@ -2228,19 +2006,11 @@ transition: fade-out
 
 **坑 3：主题切换后 SSR 水合不匹配**
 
-</v-click>
-
-<v-click>
-
 ```ts
-// ❌ 错：在客户端 mounted 后才设主题
-onMounted(() => {
-  const stored = localStorage.getItem("theme") ?? "light";
-  theme.change(stored);   // 服务端是 light，客户端突然变 dark → 水合 mismatch
-});
+// ❌ 错：客户端 mounted 后才设主题 → 服务端 light、客户端突然 dark → 水合 mismatch
+onMounted(() => theme.change(localStorage.getItem("theme") ?? "light"));
 
 // ✅ 对：用 Nuxt cookie 持久化，服务端 / 客户端用同一值
-// 或用 useStorage（在 created 阶段读取，client-only 模式）
 ```
 
 </v-click>
@@ -2248,10 +2018,6 @@ onMounted(() => {
 <v-click>
 
 **坑 4：v-data-table 行 key 警告**
-
-</v-click>
-
-<v-click>
 
 ```vue
 <!-- ❌ 错：items 没有 id 字段，Vuetify 用 index 当 key -->
@@ -2267,18 +2033,9 @@ onMounted(() => {
 
 **坑 5：v-form 校验返回 Promise，必须 await**
 
-</v-click>
-
-<v-click>
-
 ```ts
-// ❌ 错：valid 是 Promise 对象，永远 truthy
-const valid = formRef.value.validate();
-if (valid) submit();
-
-// ✅ 对：解构 await
-const { valid } = await formRef.value.validate();
-if (valid) submit();
+const valid = formRef.value.validate();           // ❌ Promise 永远 truthy
+const { valid } = await formRef.value.validate(); // ✅ 解构 await
 ```
 
 </v-click>
@@ -2340,40 +2097,25 @@ transition: fade-out
 
 <v-click>
 
-**项目初始化**
-
-- ✅ 必用 `pnpm create vuetify` 脚手架，省 30+ 分钟手动配置
-- ✅ vite-plugin-vuetify 的 autoImport 保持默认 true
-- ✅ SSR 项目用官方 `vuetify-nuxt-module`，不要手写 plugin
+**项目初始化**：必用 `pnpm create vuetify` 脚手架；autoImport 保持默认 true；SSR 项目用官方 `vuetify-nuxt-module`。
 
 </v-click>
 
 <v-click>
 
-**主题与样式**
-
-- ✅ JS Theme 对象定义主题色，不要写 SCSS 变量
-- ✅ defaults 全局配 VBtn / VTextField / VCard 等高频组件的统一外观
-- ✅ useTheme + useStorage 持久化主题偏好
+**主题与样式**：JS Theme 对象定义主题色（不写 SCSS 变量）；defaults 统一 VBtn / VTextField / VCard 外观；useTheme + useStorage 持久化偏好。
 
 </v-click>
 
 <v-click>
 
-**表单与表格**
-
-- ✅ 复杂校验用 vee-validate 集成，简单校验用 rules 数组
-- ✅ DataTable 必加 item-value，避免行 key 警告
-- ✅ 大数据集用 v-data-table-server 服务端分页
+**表单与表格**：复杂校验用 vee-validate，简单用 rules；DataTable 必加 item-value；大数据集用 v-data-table-server。
 
 </v-click>
 
 <v-click>
 
-**响应式与国际化**
-
-- ✅ 用 useDisplay 而非 CSS @media 做条件渲染
-- ✅ i18n 接 vue-i18n 适配器，业务文案 + 组件文案统一管理
+**响应式与国际化**：用 useDisplay 而非 CSS @media 做条件渲染；i18n 接 vue-i18n 适配器，业务 + 组件文案统一。
 
 </v-click>
 
@@ -2455,17 +2197,14 @@ transition: fade-out
 - 100+ 组件覆盖 Vue 生态最广，几乎不用找第三方
 - Material Design 3 风格独此一家，C 端 / 国际化产品首选
 - 主题系统强大：JS Theme + CSS 变量 + 多主题命名空间
-- Composition API + Composables 高度 Vue 3 风格
-- vite-plugin-vuetify 自动按需 + 自动样式按需
-- vuetify-nuxt-module Nuxt 集成完美
+- Composables 高度 Vue 3 风格，vite-plugin-vuetify 自动按需
 - 50+ 语言 + RTL 完整支持，跨国 SaaS 首选
 
 **缺点**
 
-- 设计语言强势 —— 一眼能看出「这是 Vuetify」，自定义空间有限
+- 设计语言强势，一眼能看出「这是 Vuetify」，自定义空间有限
 - bundle 偏大（按需后 ~200 KB，比 Naive UI 大一倍）
-- 中文资源弱于 Element Plus，国内文档 / 教程相对少
-- v2 → v3 重写引发社区一定割裂，部分 v2 项目迁移困难
+- 中文资源弱于 Element Plus，v2 → v3 迁移困难
 - 移动端性能一般，专门移动库（vant / nutui）更适合 H5
 
 </v-clicks>
@@ -2531,41 +2270,25 @@ transition: fade-out
 
 <v-click>
 
-**第 1 周：核心组件熟练**
-
-- 跑通 `pnpm create vuetify` 脚手架，理解项目结构
-- 通读官方文档 Application / Form / Data 三大分类
-- 写一个 CRUD 页面（DataTable + Form + Dialog 三件套）
+**第 1 周：核心组件熟练** —— 跑通 `pnpm create vuetify` 脚手架；通读 Application / Form / Data 三大分类；写一个 CRUD 页面（DataTable + Form + Dialog）。
 
 </v-click>
 
 <v-click>
 
-**第 2 周：主题 + Composables 精进**
-
-- 实现多主题切换（light / dark / custom），useStorage 持久化
-- 用 defaults 统一全站 VBtn / VTextField / VCard 外观
-- 实现响应式布局（useDisplay 控制移动端 / 桌面端差异）
+**第 2 周：主题 + Composables 精进** —— 多主题切换（light/dark/custom）+ useStorage 持久化；defaults 统一外观；useDisplay 控制响应式布局。
 
 </v-click>
 
 <v-click>
 
-**第 3-4 周：企业级整合**
-
-- 接入 Vue Router + Pinia + Vite + UnoCSS / Tailwind
-- 实现 i18n（vue-i18n 适配器）+ RTL 切换
-- 接入 ECharts / Apache Antv 等专业图表
-- 配 vee-validate 处理复杂表单
+**第 3-4 周：企业级整合** —— 接入 Vue Router + Pinia + UnoCSS；实现 i18n + RTL；接入 ECharts；用 vee-validate 处理复杂表单。
 
 </v-click>
 
 <v-click>
 
-**长期：Nuxt + SSR 深度**
-
-- vuetify-nuxt-module 完整接入 Nuxt 项目
-- 阅读 Vuetify 源码，理解 v-app / theme / composables 内部实现
+**长期：Nuxt + SSR 深度** —— vuetify-nuxt-module 完整接入；阅读源码理解 v-app / theme / composables 内部实现。
 
 </v-click>
 
@@ -2639,7 +2362,6 @@ transition: fade-out
 - 📖 [Vuetify 官方文档](https://vuetifyjs.com/) —— 英文为主，质量第一档
 - 🎮 [Vuetify Playground](https://play.vuetifyjs.com/) —— 在线编辑测试
 - 💻 [GitHub](https://github.com/vuetifyjs/vuetify) —— 39K+ star
-- 📺 [Vuetify Discord](https://community.vuetifyjs.com/) —— 活跃官方社区
 
 </v-click>
 
@@ -2648,7 +2370,6 @@ transition: fade-out
 **企业模板**
 
 - [Materio](https://demos.themeselection.com/materio-vuetify-vuejs-admin-template/) —— 商业模板，功能完整
-- [Vuexy](https://demos.pixinvent.com/vuexy-vuejs-admin-template/) —— 经典 Vuetify 后台
 - [Vuestic](https://github.com/epicmaxco/vuestic-admin) —— 免费开源后台
 
 </v-click>
@@ -2657,9 +2378,8 @@ transition: fade-out
 
 **配套技术栈**
 
-- Vue Router 4 + Pinia + Vite + vuetify-nuxt-module = Vuetify 黄金组合
+- Vue Router 4 + Pinia + vuetify-nuxt-module = Vuetify 黄金组合
 - vee-validate + Yup + VueUse + ECharts = 实用四件套
-- vue-i18n + Vuetify locale 适配器 = 国际化标配
 
 </v-click>
 

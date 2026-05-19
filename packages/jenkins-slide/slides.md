@@ -552,15 +552,7 @@ stage('Cross-OS Build') {
 transition: slide-up
 ---
 
-# Multibranch Pipeline
-
-```
-仓库提交 push / PR → Jenkins 扫描
-  ↓
-为每个分支自动建 Job（含 Jenkinsfile）
-  ↓
-按 Jenkinsfile 跑 Pipeline
-```
+# Multibranch Pipeline 变量与信任
 
 <v-click>
 
@@ -570,16 +562,15 @@ transition: slide-up
 | --- | --- |
 | `BRANCH_NAME` | 分支名 |
 | `CHANGE_ID` | PR 号（非 PR 时空） |
-| `CHANGE_TARGET` | PR 目标分支（PR 时） |
+| `CHANGE_TARGET` | PR 目标分支 |
 | `CHANGE_BRANCH` | PR 源分支 |
 | `CHANGE_AUTHOR` | PR 作者 |
-| `CHANGE_URL` | PR URL |
 
 </v-click>
 
 <v-click>
 
-**Trust 设置**：fork PR 默认 `Nobody` 信任——`Jenkinsfile` 不会跑，防恶意 PR 注入。设 `From users with Approve permission` 可让协作者 PR 跑。
+**Trust 设置**：fork PR 默认 `Nobody`——`Jenkinsfile` 不会跑，防恶意注入；设 `From users with Approve permission` 可让协作者 PR 跑。
 
 </v-click>
 
@@ -657,21 +648,15 @@ transition: slide-up
 | Secret Text | 单字符串 token | `credentials('id')` 注入 env |
 | Secret File | 整文件 | env 拿到的是临时文件路径 |
 | SSH Key | git / 服务器登录 | `sshagent(['id'])` |
-| Certificate | mTLS 证书 | -          |
-| Docker registry | image push | `withDockerRegistry` |
 
 ```groovy
 environment {
-  DB_PASSWORD = credentials('db-prod') // env 注入 + log mask
-  KUBECONFIG = credentials('kube-config') // Secret File：env = 临时路径
+  DB_PASSWORD = credentials('db-prod')      // log mask
+  KUBECONFIG = credentials('kube-config')   // env = 临时路径
 }
 
-stage('Deploy') {
-  steps {
-    withCredentials([sshUserPrivateKey(credentialsId: 'prod-key', keyFileVariable: 'KEY')]) {
-      sh "ssh -i $KEY user@prod 'deploy.sh'"
-    }
-  }
+withCredentials([sshUserPrivateKey(credentialsId: 'prod-key', keyFileVariable: 'KEY')]) {
+  sh "ssh -i $KEY user@prod 'deploy.sh'"
 }
 ```
 
@@ -685,35 +670,25 @@ transition: slide-up
 # casc.yaml
 jenkins:
   systemMessage: "Jenkins managed by JCasC"
-  numExecutors: 0      # built-in 不跑 build
+  numExecutors: 0                       # built-in 不跑 build
   authorizationStrategy:
     roleBased:
       roles:
         global:
-          - name: "admin"
-            permissions: ["Overall/Administer"]
+          - { name: "admin", permissions: ["Overall/Administer"] }
   clouds:
     - kubernetes:
         name: "k8s"
         templates:
-          - name: "default"
-            containers:
-              - name: "jnlp"
-                image: "jenkins/inbound-agent:latest"
+          - { name: "default", containers: [{ name: "jnlp", image: "jenkins/inbound-agent:latest" }] }
 credentials:
   system:
     domainCredentials:
       - credentials:
-          - usernamePassword:
-              id: "github"
-              username: "ci"
-              password: "${GITHUB_TOKEN}"
+          - usernamePassword: { id: "github", username: "ci", password: "${GITHUB_TOKEN}" }
 ```
 
-```bash
-CASC_JENKINS_CONFIG=/var/jenkins_home/casc.yaml
-# 启动时自动加载 → 整个 Jenkins 配置代码化
-```
+`CASC_JENKINS_CONFIG=/path/casc.yaml` 启动自动加载 → 整个 Jenkins 配置代码化
 
 ---
 transition: slide-up
@@ -729,21 +704,16 @@ transition: slide-up
 | `secrets/` | master.key + credentials |
 | `config.xml` | 全局配置 |
 | `users/` | 用户配置 |
-| `plugins/` | 插件（可重装）|
 
 ```bash
-# 全量备份
-tar czf jenkins-backup-$(date +%Y%m%d).tar.gz \
-  -C /var/jenkins_home \
+# 全量备份（plugins 可重装，不必备份）
+tar czf jenkins-$(date +%Y%m%d).tar.gz -C /var/jenkins_home \
   jobs secrets config.xml users
-
-# 增量（仅配置变化）
-rsync -av --delete /var/jenkins_home/jobs/ backup-host:/backups/jobs/
 ```
 
 <v-click>
 
-**陷阱**：漏 `secrets/` 时 restore 后所有凭据无法解密（master.key 不在 = 密钥本丢失）。
+**陷阱**：漏 `secrets/` 时 restore 后所有凭据无法解密（master.key 丢 = 密钥本丢）。
 
 </v-click>
 
@@ -758,25 +728,20 @@ pipeline {
   agent { kubernetes { yaml /* pod spec */ } }
   stages {
     stage('Build') {
-      steps {
-        container('kaniko') {
-          sh '/kaniko/executor --destination=registry/app:${BUILD_NUMBER}'
-        }
-      }
+      steps { container('kaniko') {
+        sh '/kaniko/executor --destination=registry/app:${BUILD_NUMBER}'
+      } }
     }
     stage('Deploy') {
-      steps {
-        container('helm') {
-          withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-            sh """
-              helm upgrade --install app charts/app/ \\
-                --set image.tag=${BUILD_NUMBER} \\
-                --namespace=prod \\
-                --kubeconfig=$KUBECONFIG
-            """
-          }
+      steps { container('helm') {
+        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+          sh """
+            helm upgrade --install app charts/app/ \\
+              --set image.tag=${BUILD_NUMBER} \\
+              --namespace=prod --kubeconfig=$KUBECONFIG
+          """
         }
-      }
+      } }
     }
   }
 }
@@ -826,7 +791,6 @@ stage('Build') {
     stash name: 'reports', includes: 'coverage/**, test-results/**'
   }
 }
-
 stage('Deploy') {
   agent { label 'deployer' }  // 切到另一 agent
   steps {
@@ -834,7 +798,6 @@ stage('Deploy') {
     sh 'rsync -av dist/ deploy@server:/var/www/'
   }
 }
-
 stage('Publish Reports') {
   steps {
     unstash 'reports'
@@ -846,7 +809,7 @@ stage('Publish Reports') {
 
 <v-click>
 
-`stash` 适合小文件跨 stage / agent（< 50MB）；大文件用 artifacts 或共享存储。
+`stash` 适合小文件跨 stage / agent（< 50MB）；大文件用 artifacts。
 
 </v-click>
 

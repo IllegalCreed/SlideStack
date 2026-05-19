@@ -118,16 +118,14 @@ transition: fade-out
 
 <v-click>
 
-| 维度 | Eleventy 3 | Hugo | Jekyll | Astro 5 | Next.js 15 |
-| --- | --- | --- | --- | --- | --- |
-| 语言 / 运行时 | **Node.js 18+** | Go | Ruby | Node.js | Node.js |
-| 安装成本 | 一行 npm | 一个二进制 | gem install | npm | npm |
-| 默认输出 JS | **0KB** | 0KB | 0KB | 极少（Island） | 较多（hydration） |
-| 模板引擎数量 | **11 种** | Go Template | Liquid | Astro JSX | React / MDX |
-| 配置方式 | 零配置即用 | YAML 全局 | YAML | TS | TS |
-| 构建速度 | 快（千页 ~2s） | **极快** | 慢 | 快 | 中 |
-| 学习曲线 | **极平缓** | 中（Go 语法） | 平缓 | 中（Island 概念） | 陡（React 全栈） |
-| 典型用户 | Web 性能党 / 个人站 | 文档 / 营销 | GitHub Pages 默认 | 内容平台 | SaaS / 全栈 |
+| 维度 | Eleventy 3 | Hugo | Astro 5 | Next.js 15 |
+| --- | --- | --- | --- | --- |
+| 语言 | **Node.js 18+** | Go | Node.js | Node.js |
+| 默认 JS | **0KB** | 0KB | 极少（Island） | 较多（hydration） |
+| 模板引擎 | **11 种** | Go Template | Astro JSX | React / MDX |
+| 构建速度 | 快（千页 ~2s） | **极快** | 快 | 中 |
+| 学习曲线 | **极平缓** | 中 | 中 | 陡 |
+| 典型用户 | 性能党 / 个人 | 文档 / 营销 | 内容平台 | SaaS / 全栈 |
 
 </v-click>
 
@@ -253,36 +251,22 @@ Eleventy 的核心信条与差异化卖点
 
 <v-click>
 
-**Zach Leatherman 在 Eleventy 官网首页写的第一句话：**
-
-> _"Eleventy is a simpler static site generator."_
->
 > _"Zero client-side JavaScript by default."_
+
+- 构建产物默认是**纯 HTML + CSS**，不强加任何 JS 框架运行时
+- 写不写客户端 JS、用什么框架，**完全你说了算**
 
 </v-click>
 
 <div v-click>
 
-**含义**
-
-- 构建产物默认是**纯 HTML + CSS**，不强加任何 JS 框架运行时
-- 你要不要写客户端 JS，写多少，用什么框架，**完全你说了算**
-- 默认配置下，Lighthouse Performance 几乎都是 100 分
-- 与 Next/Nuxt/Gatsby 这种「framework-baked-in」形成鲜明对比
-
-</div>
-
-<div v-click>
-
 **对比首屏 JS 体积**
 
-| SSG / 框架 | 默认 First Load JS | 哲学 |
-| --- | --- | --- |
-| **Eleventy** | **0 KB** | 零默认 JS |
-| Astro | ~3 KB | Island 架构 |
-| Hugo | 0 KB | 静态 HTML |
-| Next.js | ~80-200 KB | React Runtime |
-| Nuxt 3 | ~70-150 KB | Vue Runtime |
+| SSG / 框架 | 默认 First Load JS |
+| --- | --- |
+| **Eleventy / Hugo** | **0 KB** |
+| Astro | ~3 KB（Island） |
+| Next.js | ~80-200 KB（React Runtime） |
 
 </div>
 
@@ -336,16 +320,9 @@ Node.js 18+，三条命令搞定脚手架
 
 ```bash
 # Node.js 18+ 必须（v3 起强制）
-node -v
-
-# 进入空目录
 mkdir my-site && cd my-site
-
-# 初始化 npm 项目（ESM 推荐）
 npm init -y
-npm pkg set type="module"
-
-# 安装 Eleventy
+npm pkg set type="module"        # ESM 推荐
 npm install @11ty/eleventy
 ```
 
@@ -353,17 +330,12 @@ npm install @11ty/eleventy
 
 <div v-click>
 
-**首次运行 / 启动开发服务器**
+**启动开发服务器**
 
 ```bash
 npx @11ty/eleventy            # 首次构建（输出到 _site/）
-npx @11ty/eleventy --serve    # 启动开发服务器（localhost:8080）
-npx @11ty/eleventy --watch    # 仅监听文件变化，不启服务器
-
-# 别名命令（package.json scripts 推荐）
-# "build": "eleventy",
-# "dev": "eleventy --serve",
-# "clean": "rm -rf _site"
+npx @11ty/eleventy --serve    # 开发服务器（localhost:8080）
+npx @11ty/eleventy --watch    # 监听文件变化，不启服务器
 ```
 
 </div>
@@ -491,20 +463,14 @@ Eleventy 最大杀手锏：自由组合任意引擎
 
 <v-click>
 
-| 引擎 | 扩展名 | 风格 | 典型用途 |
-| --- | --- | --- | --- |
-| **HTML** | `.html` | 标签语言 | 直接写 HTML，由 Liquid 预处理 |
-| **Markdown** | `.md` | Markdown | 内容主力（文章 / 博客） |
-| **Liquid** | `.liquid` | Shopify / Jekyll 同款 | 推荐 |
-| **Nunjucks** | `.njk` | Mozilla 出品 | 推荐 |
-| **WebC** | `.webc` | Eleventy 自家 | 现代组件化 |
-| **11ty.js** | `.11ty.js` | 纯 JS | 程序化生成 |
-| **JSX** | `.11ty.jsx` | React 语法 | React 用户 |
-| **TypeScript** | `.11ty.ts` | TS | 类型驱动 |
-| **Handlebars** | `.hbs` | Mustache 派生 | 简单插值 |
-| **Mustache** | `.mustache` | 最小模板 | 极简场景 |
-| **EJS** | `.ejs` | 嵌入式 JS | Node 圈熟人 |
-| **HAML / Pug** | `.haml / .pug` | 缩进式 | 个人偏好 |
+| 引擎 | 扩展名 | 典型用途 |
+| --- | --- | --- |
+| **Markdown** | `.md` | 内容主力（文章 / 博客） |
+| **Nunjucks** | `.njk` | 推荐布局引擎（Mozilla 出品） |
+| **Liquid** | `.liquid` | Shopify / Jekyll 同款 |
+| **WebC** | `.webc` | Eleventy 自家组件化 |
+| **11ty.js / JSX / TS** | `.11ty.{js,jsx,ts}` | 程序化生成 |
+| **其他** | `.hbs / .mustache / .ejs / .pug` | 按需启用 |
 
 </v-click>
 
@@ -565,15 +531,10 @@ YAML 头部 + 布局继承
 title: 我的第一篇博客
 layout: base.njk
 date: 2026-05-18
-author: zhangxu
-tags:
-  - tutorial
-  - eleventy
+tags: [tutorial, eleventy]
 ---
 
 # {{ title }}
-
-发表于 {{ date | dateFormat }}……
 ```
 
 </v-click>
@@ -585,23 +546,12 @@ tags:
 ```jinja
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="utf-8">
-    <title>{{ title }} - 我的博客</title>
-  </head>
-  <body>
-    <header><nav>...</nav></header>
-    <main>{{ content | safe }}</main>
-    <footer>© 2026 {{ author }}</footer>
-  </body>
+  <head><title>{{ title }}</title></head>
+  <body><main>{{ content | safe }}</main></body>
 </html>
 ```
 
-</div>
-
-<div v-click>
-
-> 💡 **layout 链**：布局可以嵌套 ——`base.njk` 可指定 `layout: skeleton.njk`，多层包装组合。
+> 💡 **layout 链**：布局可嵌套 —— `base.njk` 可再指定 `layout: skeleton.njk`。
 
 </div>
 
@@ -655,11 +605,11 @@ transition: fade-out
 
 **默认（基于文件路径）**
 
-| 输入路径 | 输出文件 | URL |
-| --- | --- | --- |
-| `index.md` | `_site/index.html` | `/` |
-| `about.md` | `_site/about/index.html` | `/about/` |
-| `posts/hello.md` | `_site/posts/hello/index.html` | `/posts/hello/` |
+| 输入路径 | URL |
+| --- | --- |
+| `index.md` | `/` |
+| `about.md` | `/about/` |
+| `posts/hello.md` | `/posts/hello/` |
 
 </v-click>
 
@@ -669,27 +619,9 @@ transition: fade-out
 
 ```yaml
 ---
-title: 关于我
-permalink: /me/                    # 自定义路径
----
-```
-
-```yaml
----
-title: 我的文章
-permalink: "/blog/{{ page.date | slugify }}/{{ title | slugify }}/"
----
-```
-
-</div>
-
-<div v-click>
-
-**禁止输出（仅出现在 collections）**
-
-```yaml
----
-permalink: false           # 不写文件，只参与数据流
+permalink: /me/                              # 自定义路径
+permalink: "/blog/{{ title | slugify }}/"    # 模板插值
+permalink: false                             # 禁止输出（仅进 collections）
 ---
 ```
 
@@ -749,21 +681,14 @@ transition: fade-out
 
 ```yaml
 ---
-title: 我的文章
-tags:
-  - posts
-  - tutorial
+tags: [posts, tutorial]
 ---
 ```
 
 ```jinja
-<!-- 任意模板中遍历 -->
 <ul>
   {% for post in collections.posts %}
-    <li>
-      <a href="{{ post.url }}">{{ post.data.title }}</a>
-      <time>{{ post.date | dateFormat }}</time>
-    </li>
+    <li><a href="{{ post.url }}">{{ post.data.title }}</a></li>
   {% endfor %}
 </ul>
 ```
@@ -775,21 +700,16 @@ tags:
 **自定义 collection（eleventy.config.js）**
 
 ```js
-export default function (eleventyConfig) {
-  // 只取最近 5 篇
-  eleventyConfig.addCollection("latestPosts", (api) => {
-    return api.getFilteredByTag("posts")
-      .reverse()
-      .slice(0, 5);
-  });
-};
+eleventyConfig.addCollection("latestPosts", (api) =>
+  api.getFilteredByTag("posts").reverse().slice(0, 5),
+);
 ```
 
 </div>
 
 <div v-click>
 
-> 💡 **特殊集合**：`collections.all` 包含所有内容；某些文件加 `eleventyExcludeFromCollections: true` 可排除。
+> 💡 **特殊集合**：`collections.all` 包含所有内容；`eleventyExcludeFromCollections: true` 可排除。
 
 </div>
 
@@ -849,28 +769,19 @@ Eleventy 最强大也最容易迷糊的机制
 
 **优先级从高到低（高优先级覆盖低优先级）**
 
-| # | 数据源 | 示例 |
-| --- | --- | --- |
-| 1 | **Computed Data** | `eleventyComputed.title = (data) => ...` |
-| 2 | **模板 Front Matter** | `---\\ntitle: 标题\\n---` |
-| 3 | **模板专属数据文件** | `posts/hello-world.11tydata.js` |
-| 4 | **目录数据文件** | `posts/posts.json` |
-| 5 | **Layout Front Matter** | layout 自己的 front matter |
-| 6 | **Configuration API** | `eleventyConfig.addGlobalData()` |
-| 7 | **全局数据文件** | `_data/site.json` |
+1. **Computed Data** — `eleventyComputed.title = (data) => ...`
+2. **模板 Front Matter** — `--- title: 标题 ---`
+3. **模板专属数据** — `posts/hello.11tydata.js`
+4. **目录数据文件** — `posts/posts.json`
+5. **Layout Front Matter** — layout 自身 front matter
+6. **Configuration API** — `eleventyConfig.addGlobalData()`
+7. **全局数据文件** — `_data/site.json`
 
 </v-click>
 
 <div v-click>
 
-**深合并**：对象 / 数组默认 deep merge；对单个 key 想覆盖时加 `override:`
-
-```yaml
----
-override:tags:               # 覆盖父级 tags，不再合并
-  - new-tag
----
-```
+> 💡 对象 / 数组默认 deep merge；单个 key 覆盖加 `override:tags:` 前缀。
 
 </div>
 
@@ -928,29 +839,19 @@ transition: fade-out
 **全局数据（`_data/site.json`）**
 
 ```json
-{
-  "name": "我的博客",
-  "url": "https://example.com",
-  "author": "张三",
-  "twitter": "@my-handle"
-}
+{ "name": "我的博客", "url": "https://example.com", "author": "张三" }
 ```
 
-任意模板中：
-
-```jinja
-{{ site.name }} —— {{ site.author }}
-```
+模板中：`{{ site.name }} —— {{ site.author }}`
 
 </v-click>
 
 <div v-click>
 
-**动态全局数据（`_data/navigation.js`）**
+**动态全局数据（`_data/navigation.js`，支持 async）**
 
 ```js
 export default async function () {
-  // 可以是 async：从 CMS / API / 文件系统读取
   const res = await fetch("https://my-cms.com/menu.json");
   return res.json();
 }
@@ -960,16 +861,13 @@ export default async function () {
 
 <div v-click>
 
-**目录数据（`posts/posts.json` 或 `posts/posts.11tydata.js`）**
+**目录数据（`posts/posts.json`）**
 
 ```json
-{
-  "layout": "post.njk",
-  "tags": ["posts"]
-}
+{ "layout": "post.njk", "tags": ["posts"] }
 ```
 
-posts/ 下所有 .md 自动应用 layout + tags，无需重复写。
+> posts/ 下所有 .md 自动继承 layout + tags，无需重复。
 
 </div>
 
@@ -1031,21 +929,13 @@ Configuration API 三件套：`addFilter` / `addShortcode` / `addGlobalData`
 **自定义 filter（最常用）**
 
 ```js
-// eleventy.config.js
-export default function (eleventyConfig) {
-  eleventyConfig.addFilter("dateFormat", (date) => {
-    return new Intl.DateTimeFormat("zh-CN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }).format(date);
-  });
-};
+eleventyConfig.addFilter("dateFormat", (date) =>
+  new Intl.DateTimeFormat("zh-CN", { dateStyle: "long" }).format(date),
+);
 ```
 
 ```jinja
-{{ page.date | dateFormat }}
-<!-- 2026 年 5 月 18 日 -->
+{{ page.date | dateFormat }}  <!-- 2026 年 5 月 18 日 -->
 ```
 
 </v-click>
@@ -1055,10 +945,9 @@ export default function (eleventyConfig) {
 **Shortcode（可带参数 + body）**
 
 ```js
-eleventyConfig.addShortcode("youtube", (id, title) => {
-  return `<iframe src="https://www.youtube.com/embed/${id}"
-            title="${title}" loading="lazy"></iframe>`;
-});
+eleventyConfig.addShortcode("youtube", (id, title) =>
+  `<iframe src="https://www.youtube.com/embed/${id}" title="${title}" loading="lazy"></iframe>`,
+);
 ```
 
 ```jinja
@@ -1139,31 +1028,21 @@ transition: fade-out
 
 **官方核心插件（@11ty/* 命名空间）**
 
-| 插件 | 作用 |
-| --- | --- |
-| `@11ty/eleventy-img` | 图片优化（生成多尺寸 / 格式） |
-| `@11ty/eleventy-fetch` | 构建期 HTTP 请求 + 缓存 |
-| `@11ty/eleventy-plugin-syntaxhighlight` | Prism.js 代码高亮 |
-| `@11ty/eleventy-plugin-rss` | RSS / Atom feed 生成 |
-| `@11ty/eleventy-plugin-i18n` | 国际化 |
-| `@11ty/eleventy-navigation` | 导航树 |
-| `@11ty/eleventy-plugin-bundle` | CSS / JS 包 bundling |
-| `@11ty/eleventy-plugin-webc` | WebC 组件支持 |
+- `eleventy-img` —— 图片优化（多尺寸 / AVIF / WebP）
+- `eleventy-fetch` —— 构建期 HTTP 请求 + 缓存
+- `plugin-syntaxhighlight` —— Prism.js 代码高亮
+- `plugin-rss / i18n / navigation` —— SEO / 多语言 / 导航
+- `plugin-bundle / webc` —— CSS-JS bundle / WebC 组件
 
 </v-click>
 
 <div v-click>
 
-**使用方式（eleventy.config.js）**
+**使用方式**
 
 ```js
 import syntaxHighlight from "@11ty/eleventy-plugin-syntaxhighlight";
-import { eleventyImageTransformPlugin } from "@11ty/eleventy-img";
-
-export default function (eleventyConfig) {
-  eleventyConfig.addPlugin(syntaxHighlight);
-  eleventyConfig.addPlugin(eleventyImageTransformPlugin);
-};
+eleventyConfig.addPlugin(syntaxHighlight);
 ```
 
 </div>
@@ -1224,19 +1103,12 @@ transition: fade-out
 
 **安装 + 启用**
 
-```bash
-npm install @11ty/eleventy-plugin-webc
-```
-
 ```js
-// eleventy.config.js
 import pluginWebC from "@11ty/eleventy-plugin-webc";
 
-export default function (eleventyConfig) {
-  eleventyConfig.addPlugin(pluginWebC, {
-    components: "_components/**/*.webc",
-  });
-};
+eleventyConfig.addPlugin(pluginWebC, {
+  components: "_components/**/*.webc",
+});
 ```
 
 </v-click>
@@ -1247,24 +1119,18 @@ export default function (eleventyConfig) {
 
 ```html
 <style webc:scoped>
-  :host { display: inline-block; }
   button { background: red; color: white; }
 </style>
-
 <button @text="label"></button>
 ```
 
-**使用（任意 .webc 页面）**
-
-```html
-<btn label="点我"></btn>
-```
+使用：`<btn label="点我"></btn>`
 
 </div>
 
 <div v-click>
 
-> 💡 **零运行时**：WebC 编译为纯 HTML，**不引入任何客户端 JS** —— 符合 Eleventy 的「零默认 JS」哲学。
+> 💡 **零运行时**：WebC 编译为纯 HTML，**不引入任何客户端 JS**。
 
 </div>
 
@@ -1337,13 +1203,10 @@ export default function (eleventyConfig) {
 ```jinja
 {% css %}
   body { font-family: system-ui; }
-  h1 { color: tomato; }
 {% endcss %}
 
-<!-- 在 layout 中输出累计的所有 CSS -->
 <style>{% getBundle "css" %}</style>
-
-<!-- 或写到 hash 化的文件并返回 URL -->
+<!-- 或 hash 化外部文件： -->
 <link rel="stylesheet" href="{% getBundleFileUrl 'css' %}">
 ```
 
@@ -1408,35 +1271,22 @@ transition: fade-out
 
 <v-click>
 
-**安装 + HTML Transform 模式（最简单）**
-
-```bash
-npm install @11ty/eleventy-img
-```
+**HTML Transform 模式（最简单）**
 
 ```js
 import { eleventyImageTransformPlugin } from "@11ty/eleventy-img";
 
-export default function (eleventyConfig) {
-  eleventyConfig.addPlugin(eleventyImageTransformPlugin, {
-    formats: ["avif", "webp", "auto"],
-    widths: ["auto", 400, 800, 1200],
-    htmlOptions: { imgAttributes: { loading: "lazy", decoding: "async" } },
-  });
-};
+eleventyConfig.addPlugin(eleventyImageTransformPlugin, {
+  formats: ["avif", "webp", "auto"],
+  widths: ["auto", 400, 800, 1200],
+});
 ```
 
 </v-click>
 
 <div v-click>
 
-**HTML 中直接写 `<img>` 即可**
-
-```html
-<img src="cover.jpg" alt="封面" width="1200" height="600">
-```
-
-构建后自动展开为：
+**HTML 中直接写 `<img>` 即可，构建后自动展开为：**
 
 ```html
 <picture>
@@ -1505,39 +1355,28 @@ transition: fade-out
 pagination:
   data: collections.posts        # 数据源
   size: 10                       # 每页 10 条
-  alias: chunks                  # 在模板里用 chunks 引用
+  alias: chunks
 permalink: "/blog/page-{{ pagination.pageNumber + 1 }}/"
 ---
 ```
 
 ```jinja
-<ul>
-  {% for post in chunks %}
-    <li><a href="{{ post.url }}">{{ post.data.title }}</a></li>
-  {% endfor %}
-</ul>
-
-<a href="{{ pagination.href.previous }}">上一页</a>
-<a href="{{ pagination.href.next }}">下一页</a>
+{% for post in chunks %}<a href="{{ post.url }}">{{ post.data.title }}</a>{% endfor %}
+<a href="{{ pagination.href.previous }}">上一页</a> · <a href="{{ pagination.href.next }}">下一页</a>
 ```
 
 </v-click>
 
 <div v-click>
 
-**从数据生成详情页（pagination.size: 1）**
+**从数据生成详情页（`size: 1`，每条数据一页）**
 
 ```yaml
 ---
-pagination:
-  data: collections.posts
-  size: 1
-  alias: post
+pagination: { data: collections.posts, size: 1, alias: post }
 permalink: "/posts/{{ post.data.slug }}/"
 ---
 ```
-
-每条数据生成一个独立页面。
 
 </div>
 
@@ -1615,13 +1454,9 @@ npx @11ty/eleventy --serve        # 监听 + 开发服务器（推荐）
 **配置自定义 watch 路径**
 
 ```js
-export default function (eleventyConfig) {
-  // 额外监听 _styles/ 目录（默认只监听输入目录）
-  eleventyConfig.addWatchTarget("./_styles/");
-
-  // 配置防抖间隔（默认 0）
-  eleventyConfig.setWatchThrottleWaitTime(100);
-};
+// 额外监听 _styles/，默认只监听输入目录
+eleventyConfig.addWatchTarget("./_styles/");
+eleventyConfig.setWatchThrottleWaitTime(100); // 防抖
 ```
 
 </div>
@@ -1683,32 +1518,24 @@ transition: fade-out
 **目录结构（推荐）**
 
 ```text
-en/
-├── en.json                 # 目录数据：{ "lang": "en" }
-├── index.md
-└── about.md
-zh/
-├── zh.json                 # 目录数据：{ "lang": "zh" }
-├── index.md
-└── about.md
-_data/
-└── i18n.js                 # 字符串字典
+en/  ├── en.json (lang: en)  ├── index.md  └── about.md
+zh/  ├── zh.json (lang: zh)  ├── index.md  └── about.md
+_data/i18n.js     # 字符串字典
 ```
 
 </v-click>
 
 <div v-click>
 
-**字典文件（\_data/i18n.js）**
+**字典 + 模板**
 
 ```js
+// _data/i18n.js
 export default {
   en: { hello: "Hello", read_more: "Read more" },
   zh: { hello: "你好", read_more: "阅读更多" },
 };
 ```
-
-**模板中**
 
 ```jinja
 <h1>{{ i18n[lang].hello }}</h1>
@@ -1764,16 +1591,15 @@ key 集中维护，组件复用同一份字典。
 transition: fade-out
 ---
 
-# 部署：Netlify / Vercel（零配置）
+# 部署：Netlify / Vercel / GitHub Pages
 
 主流 PaaS 自动识别 Eleventy 项目
 
 <v-click>
 
-**Netlify**
+**Netlify（netlify.toml）**
 
 ```toml
-# netlify.toml
 [build]
 publish = "_site"
 command = "npx @11ty/eleventy"
@@ -1786,39 +1612,14 @@ NODE_VERSION = "20"
 
 <div v-click>
 
-**Vercel**
+**Vercel（vercel.json）**
 
 ```json
-{
-  "buildCommand": "npx @11ty/eleventy",
-  "outputDirectory": "_site"
-}
+{ "buildCommand": "npx @11ty/eleventy", "outputDirectory": "_site" }
 ```
 
-</div>
-
-<div v-click>
-
-**GitHub Pages（gh-pages 分支）**
-
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy
-on:
-  push: { branches: [main] }
-permissions: { contents: read, pages: write, id-token: write }
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm }
-      - run: npm ci && npx @11ty/eleventy
-      - uses: actions/upload-pages-artifact@v3
-        with: { path: _site }
-      - uses: actions/deploy-pages@v4
-```
+**GitHub Pages**：用 `actions/upload-pages-artifact@v3` + `actions/deploy-pages@v4`，
+源码在 main 分支，无需维护 gh-pages。
 
 </div>
 
@@ -1873,39 +1674,28 @@ GitHub Action + Cloudflare API 或 rsync 到 VPS
 **Cloudflare Pages（推荐）**
 
 ```bash
-# 在 Cloudflare 控制台连接 GitHub 仓库
-# Build command:   npx @11ty/eleventy
-# Build output:    _site
-# 免费 + Edge 网络 + 全球 CDN
+# Cloudflare 控制台连接 GitHub 仓库即可
+# Build command: npx @11ty/eleventy   Output: _site
+# 免费 + 全球 Edge 网络
 ```
 
 </v-click>
 
 <div v-click>
 
-**VPS + rsync 部署**
+**VPS + rsync + Nginx**
 
 ```bash
-# 本地构建 + 推到服务器
 npx @11ty/eleventy
 rsync -avz --delete _site/ deploy@server.com:/var/www/blog/
 ```
 
 ```nginx
-# nginx 配置（/etc/nginx/sites-enabled/blog.conf）
 server {
-  listen 443 ssl http2;
-  server_name blog.example.com;
   root /var/www/blog;
-
-  location / {
-    try_files $uri $uri/index.html /404.html;
-  }
-
-  # 静态资源缓存
-  location ~* \.(css|js|jpg|png|webp|avif|woff2)$ {
-    expires 1y;
-    add_header Cache-Control "public, immutable";
+  location / { try_files $uri $uri/index.html /404.html; }
+  location ~* \.(css|js|webp|avif|woff2)$ {
+    expires 1y; add_header Cache-Control "public, immutable";
   }
 }
 ```
@@ -1964,10 +1754,10 @@ transition: fade-out
 
 <v-click>
 
-**ESM 优先（不再要求 CommonJS）**
+**ESM 优先 + 配置文件名简化**
 
 ```js
-// eleventy.config.js（ESM 风格）
+// eleventy.config.js（新名，v3+）
 import { eleventyImageTransformPlugin } from "@11ty/eleventy-img";
 
 export default function (eleventyConfig) {
@@ -1975,29 +1765,19 @@ export default function (eleventyConfig) {
 };
 ```
 
+旧名 `.eleventy.js`（CJS）仍兼容，但官方推荐新名 + ESM。
+
 </v-click>
-
-<div v-click>
-
-**配置文件名简化**
-
-| 旧（v2） | 新（v3+） |
-| --- | --- |
-| `.eleventy.js` | **`eleventy.config.js`**（不带前缀） |
-| 必须 CommonJS | ESM 优先 |
-
-</div>
 
 <div v-click>
 
 **其他 3.x 亮点**
 
-- ✨ Bundle Plugin 内置（CSS/JS bundling 无需外部工具）
-- ✨ HTML Transform Plugin（图片 / 链接预处理）
-- ✨ WebC 进入生产就绪
-- ⚡ 构建性能优化（千页 ~2 秒）
-- 🔧 Node 18+ 强制（v3）
-- 🆕 v3.1 增加 transforms 链 + virtual templates
+- Bundle Plugin 内置（CSS/JS bundling 无需外部工具）
+- HTML Transform Plugin（图片 / 链接预处理）
+- WebC 进入生产就绪
+- 千页 ~2 秒构建；Node 18+ 强制
+- v3.1：transforms 链 + virtual templates
 
 </div>
 
@@ -2055,12 +1835,11 @@ transition: fade-out
 
 | 诉求 | 首选 | 理由 |
 | --- | --- | --- |
-| 极致性能 + 零默认 JS | **Eleventy** | 唯一「真零 JS」框架（不算 Hugo） |
-| 个人技术博客 + 中文社区 | **Hexo** | 主题美 / 教程多 / 上手快 |
+| 极致性能 + 零默认 JS | **Eleventy** | 唯一「真零 JS」的 JS 框架 |
+| 个人博客 + 中文社区 | **Hexo** | 主题美 / 教程多 / 上手快 |
 | 极速构建 + 多用途 | **Hugo** | Go 单二进制 / 千篇 1 秒 |
-| GitHub Pages 默认 | **Jekyll** | 内置支持 / 不用 CI |
-| Vue 文档站 / 项目文档 | **VitePress** | Vite 驱动 / Vue 生态 |
-| 多版本文档 + 博客 + i18n | **Docusaurus** | React 圈一等公民 |
+| Vue 文档站 | **VitePress** | Vite 驱动 / Vue 生态 |
+| 多版本文档 + i18n | **Docusaurus** | React 圈一等公民 |
 | Island 性能 + 内容平台 | **Astro** | 适合需要少量交互的内容站 |
 
 </v-click>
@@ -2122,18 +1901,15 @@ transition: fade-out
 
 <v-click>
 
-| 问题 | 原因 | 修复 |
-| --- | --- | --- |
-| 模板插值 `<span v-pre>{{ var }}</span>` 不渲染 | 模板引擎未识别 | 改文件扩展名 `.html` → `.njk` |
-| Markdown 内 HTML 被 Liquid 解析 | HTML 默认走 Liquid 预处理 | front matter 加 `templateEngineOverride: md` |
-| Layout 不生效 | `_includes/` 路径错 | 检查 `dir.includes` 配置或文件位置 |
-| Collection 为空 | tag 字段写错 | 确认 `tags: posts` 是字符串或数组 |
-| 子目录部署 CSS 全丢 | pathPrefix 未配 | `pathPrefix: "/sub/"` + 所有链接走 url filter |
-| `{{ content }}` 输出转义字符 | Nunjucks 默认转义 | 加 `safe` filter |
-| `--serve` 端口被占 | 8080 默认 | `--serve --port 3000` |
-| 图片 build 慢 | AVIF 编码 | 用 `.cache/` 缓存（默认开启） |
-| pagination 不分页 | data 路径错 | 用 `collections.posts` 而非 `posts` |
-| Date 格式怪 | JS Date 默认 toString | 加自定义 dateFormat filter |
+| 问题 | 修复 |
+| --- | --- |
+| 模板插值 `<span v-pre>{{ var }}</span>` 不渲染 | 改扩展名 `.html` → `.njk` |
+| Markdown 内 HTML 被 Liquid 解析 | front matter 加 `templateEngineOverride: md` |
+| Collection 为空 | 确认 `tags` 是字符串或数组 |
+| 子目录部署 CSS 全丢 | `pathPrefix` + 所有链接走 url filter |
+| `{{ content }}` 输出转义字符 | 加 `safe` filter |
+| pagination 不分页 | 用 `collections.posts` 而非 `posts` |
+| Date 格式怪 | 加自定义 dateFormat filter |
 
 </v-click>
 
@@ -2253,10 +2029,7 @@ transition: fade-out
 
 **入门 → 进阶**
 
-- [Get Started](https://www.11ty.dev/docs/get-started/) —— 官方安装与初始化
-- [Sample Content](https://www.11ty.dev/docs/sample-content/) —— 完整示例项目
-- [Configuration](https://www.11ty.dev/docs/config/) —— 配置文件全字段
-- [Template Languages](https://www.11ty.dev/docs/languages/) —— 11 种引擎速查
+- [Get Started](https://www.11ty.dev/docs/get-started/) · [Sample Content](https://www.11ty.dev/docs/sample-content/) · [Configuration](https://www.11ty.dev/docs/config/) · [Template Languages](https://www.11ty.dev/docs/languages/)
 
 </v-click>
 
@@ -2264,10 +2037,7 @@ transition: fade-out
 
 **专题深入**
 
-- [Data Cascade](https://www.11ty.dev/docs/data-cascade/) —— 数据系统精髓
-- [Collections](https://www.11ty.dev/docs/collections/) —— 集合与自定义 API
-- [Permalinks](https://www.11ty.dev/docs/permalinks/) —— URL 结构定制
-- [Plugins](https://www.11ty.dev/docs/plugins/) —— 官方插件目录
+- [Data Cascade](https://www.11ty.dev/docs/data-cascade/) · [Collections](https://www.11ty.dev/docs/collections/) · [Permalinks](https://www.11ty.dev/docs/permalinks/) · [Plugins](https://www.11ty.dev/docs/plugins/)
 
 </div>
 
@@ -2275,9 +2045,7 @@ transition: fade-out
 
 **社区资源**
 
-- [Starter Projects](https://www.11ty.dev/docs/starter/) —— 官方 starter 模板
-- [Speedlify](https://www.11ty.dev/speedlify/) —— Eleventy 站点性能榜
-- [11ty Rocks](https://11ty.rocks/) —— Stephanie Eckles 维护的教程站
+- [Starter Projects](https://www.11ty.dev/docs/starter/) · [Speedlify](https://www.11ty.dev/speedlify/) · [11ty Rocks](https://11ty.rocks/)
 
 </div>
 

@@ -476,30 +476,21 @@ transition: slide-up
 # Tool Use：完整循环
 
 ```python
-messages = [{"role": "user", "content": "查账单然后邮件回复 alice@example.com"}]
+messages = [{"role": "user", "content": "查账单然后邮件回复"}]
 
 while True:
-    response = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=2048,
-        tools=tools,
-        messages=messages,
-    )
-
-    messages.append({"role": "assistant", "content": response.content})
-
-    if response.stop_reason == "end_turn":
+    resp = client.messages.create(model="claude-sonnet-4-6",
+        max_tokens=2048, tools=tools, messages=messages)
+    messages.append({"role": "assistant", "content": resp.content})
+    if resp.stop_reason == "end_turn":
         break
 
     tool_results = []
-    for block in response.content:
+    for block in resp.content:
         if block.type == "tool_use":
             result = call_my_function(block.name, block.input)
-            tool_results.append({
-                "type": "tool_result",
-                "tool_use_id": block.id,
-                "content": result,
-            })
+            tool_results.append({"type": "tool_result",
+                "tool_use_id": block.id, "content": result})
 
     messages.append({"role": "user", "content": tool_results})
 ```
@@ -579,25 +570,15 @@ with open("paper.pdf", "rb") as f:
     pdf_data = base64.standard_b64encode(f.read()).decode("utf-8")
 
 message = client.messages.create(
-    model="claude-sonnet-4-6",
-    max_tokens=2048,
-    messages=[
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "document",
-                    "source": {
-                        "type": "base64",
-                        "media_type": "application/pdf",
-                        "data": pdf_data,
-                    },
-                    "cache_control": {"type": "ephemeral"},   # PDF 也可缓存
-                },
-                {"type": "text", "text": "总结这篇论文的核心贡献"},
-            ],
-        }
-    ],
+    model="claude-sonnet-4-6", max_tokens=2048,
+    messages=[{"role": "user", "content": [
+        {"type": "document",
+         "source": {"type": "base64",
+                    "media_type": "application/pdf",
+                    "data": pdf_data},
+         "cache_control": {"type": "ephemeral"}},   # PDF 也可缓存
+        {"type": "text", "text": "总结这篇论文的核心贡献"},
+    ]}],
 )
 ```
 
@@ -641,24 +622,14 @@ with open("screenshot.png", "rb") as f:
     image_data = base64.standard_b64encode(f.read()).decode("utf-8")
 
 message = client.messages.create(
-    model="claude-sonnet-4-6",
-    max_tokens=1024,
-    messages=[
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "image",
-                    "source": {
-                        "type": "base64",
-                        "media_type": "image/png",
-                        "data": image_data,
-                    },
-                },
-                {"type": "text", "text": "这截图里是什么错误？"},
-            ],
-        }
-    ],
+    model="claude-sonnet-4-6", max_tokens=1024,
+    messages=[{"role": "user", "content": [
+        {"type": "image",
+         "source": {"type": "base64",
+                    "media_type": "image/png",
+                    "data": image_data}},
+        {"type": "text", "text": "这截图里是什么错误？"},
+    ]}],
 )
 ```
 
@@ -672,11 +643,9 @@ transition: slide-up
 
 **支持**
 
-- OCR（图中文字）准确率高
-- 图表理解 / 数据提取
+- OCR（图中文字）/ 图表数据提取
 - UI 截图 → 代码（HTML / Vue / React）
-- 截图 debug（看 error 截图定位）
-- 复杂图（架构图 / 流程图）描述
+- 截图 debug / 复杂图描述
 
 **不支持**
 
@@ -686,8 +655,7 @@ transition: slide-up
 **规格**
 
 - 格式：png / jpeg / gif / webp
-- 自动 resize 最长边 ≤ 1568 px
-- 每图 token 估算：≈ (W × H) / 750
+- 自动 resize 最长边 ≤ 1568 px，token ≈ (W × H) / 750
 
 </v-clicks>
 
@@ -792,8 +760,7 @@ transition: slide-up
 
 ```python
 with client.messages.stream(
-    model="claude-sonnet-4-6",
-    max_tokens=2048,
+    model="claude-sonnet-4-6", max_tokens=2048,
     messages=[{"role": "user", "content": "解释 React 18 并发模式"}],
 ) as stream:
     for text in stream.text_stream:
@@ -802,16 +769,7 @@ with client.messages.stream(
 
 <v-click>
 
-底层事件类型：
-
-| 事件 | 含义 |
-| --- | --- |
-| `message_start` | 消息开始 |
-| `content_block_start` | 新 content block 开始 |
-| `content_block_delta` | block 内容增量 |
-| `content_block_stop` | 当前 block 结束 |
-| `message_delta` | 消息级 delta（usage） |
-| `message_stop` | 完结 |
+底层 SSE 事件：`message_start` → `content_block_{start,delta,stop}` → `message_delta` → `message_stop`，UI 可精准展示 thinking / text / tool_use 各阶段。
 
 </v-click>
 
@@ -890,9 +848,7 @@ transition: slide-up
 
 <v-clicks>
 
-- RPM = requests / minute
-- ITPM = input tokens / minute
-- OTPM = output tokens / minute
+- RPM / ITPM / OTPM = requests / input tokens / output tokens per minute
 - **按 model 独立计**：Opus 限速不影响 Sonnet
 - Bursts 用 Batches（不受 RPM 限制）
 
@@ -973,12 +929,9 @@ transition: slide-up
 | --- | --- | --- | --- |
 | 模型 ID | `claude-sonnet-4-6` | `anthropic.claude-sonnet-4-6-v1:0` | `claude-sonnet-4-6@20250620` |
 | 鉴权 | API key | AWS SigV4 | GCP IAM |
-| 价格 | 标准 | 同标准 | 同标准 |
 | 1M 上下文 | ✓ | 部分 region | 部分 region |
 | MCP | ✓ | ✗ | ✗ |
-| Prompt Cache | ✓ | ✓ | ✓ |
-| Extended Thinking | ✓ | ✓ | ✓ |
-| Batches | ✓ | ✓ | ✓ |
+| Cache / Thinking / Batches | ✓ | ✓ | ✓ |
 
 <v-click>
 
@@ -1032,15 +985,12 @@ transition: slide-up
 
 | 能力 | Claude | GPT | Gemini |
 | --- | --- | --- | --- |
-| **Prompt Caching** | 一类（4 breakpoints） | 自动（5-15min） | Implicit + Explicit |
-| **Extended Thinking** | ✓ (`thinking`) | ✓ (o-series) | ✓ (`thinkingConfig`) |
+| **Prompt Caching** | 一类（4 breakpoints） | 自动 | Implicit + Explicit |
 | **Tool Use** | JSON Schema 全集 | 受限子集 | Function Calling |
 | **MCP** | ✓ 一类 | ✗（社区） | ✗（社区） |
 | **PDF 原生** | ✓ | ✗（需 OCR） | ✓ |
-| **图像生成** | ✗ | ✓ (DALL-E) | ✓ (Imagen) |
-| **音频/视频** | ✗ | ✓ | ✓ |
-| **Web 搜索** | 需 MCP | ✓ 内置 | ✓ 内置 |
-| **结构化输出** | 通过 tool_use | ✓ 一类 | ✓ 一类 |
+| **图像 / 音视频生成** | ✗ | ✓ | ✓ |
+| **Web 搜索 / 结构化输出** | 需 MCP / 通过 tool_use | ✓ 内置 / 一类 | ✓ 内置 / 一类 |
 | **上下文** | 200K / 1M | 128K-256K | 1M / 2M |
 
 ---
@@ -1092,23 +1042,11 @@ transition: slide-up
 | Breakpoints | 4 个（粒度控制） | 自动决定 | Explicit 可自定 |
 | 控制力 | 强 | 弱 | 中 |
 
-<v-clicks>
+<v-click>
 
-**Claude 优势**
+**Claude 折扣最深 + 控制力最强**（4 breakpoint 任意分段），适合 Claude Code 类「同 system prompt 反复用」场景；GPT 自动零代码；Gemini TTL 最长。
 
-- 折扣最深（90%）
-- 控制力最强（4 个 breakpoint 任意分段）
-- 适合 Claude Code 类「同 system prompt 反复用」场景
-
-**GPT 优势**
-
-- 自动，零代码
-
-**Gemini 优势**
-
-- TTL 最长（Explicit 1 小时）
-
-</v-clicks>
+</v-click>
 
 ---
 transition: slide-up
@@ -1121,7 +1059,6 @@ transition: slide-up
 ```python
 tools = [{
     "name": "search",
-    "description": "...",
     "input_schema": {  # 完整 JSON Schema
         "type": "object",
         "properties": {
@@ -1132,19 +1069,14 @@ tools = [{
 }]
 ```
 
-**GPT**：早期受限子集
+**GPT**：早期受限子集（注意 `parameters` 而非 `input_schema`）
 
 ```python
-tools = [{
-    "type": "function",
-    "function": {
-        "name": "search",
-        "parameters": {  # 注意是 parameters 不是 input_schema
-            "type": "object",
-            "properties": {"query": {"type": "string"}},
-        },
-    },
-}]
+tools = [{"type": "function", "function": {
+    "name": "search",
+    "parameters": {"type": "object",
+        "properties": {"query": {"type": "string"}}},
+}}]
 ```
 
 ---
@@ -1166,22 +1098,10 @@ client.messages.create(
 
 <v-clicks>
 
-**这是 Anthropic 主推的差异化能力**——MCP（Model Context Protocol）是它们牵头的开放标准。
+**Anthropic 主推的差异化能力** —— MCP（Model Context Protocol）是它们牵头的开放标准。
 
-**GPT**：
-
-- 无官方 MCP 支持
-- 需要把 MCP server 的 tool 手动转成 OpenAI function 格式
-
-**Gemini**：
-
-- 同 GPT，社区有适配器
-- Google 自家有「Function Calling + Extensions」生态
-
-**意义**
-
-- 第三方工具开发者只需写一次 MCP server，Claude 直接接入
-- Claude Code / Claude Desktop 内置 MCP 客户端
+- **GPT / Gemini**：无官方支持，需手动转 function 格式（社区有适配器）
+- **意义**：开发者写一次 MCP server，Claude Code / Desktop 内置客户端直接接入
 
 </v-clicks>
 
@@ -1194,24 +1114,16 @@ transition: slide-up
 | 能力 | Claude | GPT | Gemini |
 | --- | --- | --- | --- |
 | 图像输入 | ✓ | ✓ | ✓ |
-| 图像生成 | ✗ | ✓ DALL-E | ✓ Imagen |
 | PDF 输入 | ✓ 原生 | ✗（需 OCR） | ✓ 原生 |
-| 音频输入 | ✗ | ✓ Whisper | ✓ |
-| 音频输出 | ✗ | ✓ TTS | ✓ |
-| 视频输入 | ✗ | ✓ | ✓ |
+| 图像生成 | ✗ | ✓ DALL-E | ✓ Imagen |
+| 音频 / 视频 | ✗ | ✓ | ✓ |
 | 实时模式 | ✗ | ✓ Realtime | ✓ Live |
 
-<v-clicks>
+<v-click>
 
-**Claude 取舍**：只投资文本 + 图像 + PDF 三个核心模态。
+**Claude 取舍**：只投资文本 + 图像 + PDF 三核心模态，生成 / 音视频留给专长方。适合纯文本 / 代码 / 文档；多模态创意走 GPT-4o / Gemini 2.5。
 
-- 不做生成（让 DALL-E / SD 专长）
-- 不做音视频（让 Whisper / Gemini Live 专长）
-
-**适合 Claude**：纯文本 / 代码 / 文档场景
-**不适合**：多模态创意工作流（用 GPT-4o / Gemini 2.5）
-
-</v-clicks>
+</v-click>
 
 ---
 transition: slide-up
@@ -1223,25 +1135,15 @@ transition: slide-up
 | --- | --- | --- | --- |
 | Web 搜索 | ✗（需 MCP） | ✓ `web_search` | ✓ Grounding |
 | 代码解释器 | ✗（需 MCP） | ✓ `code_interpreter` | ✓ |
-| 图像生成 | ✗ | ✓ `image_generation` | ✓ |
-| 文件搜索 | ✗ | ✓ Assistants API | ✓ |
+| 图像生成 / 文件搜索 | ✗ | ✓ | ✓ |
 
-<v-clicks>
+<v-click>
 
-**Claude 哲学**：不内置，通过 MCP 接外部
-- 优点：可换源
-- 缺点：自己接入
+**Claude**：不内置，靠 MCP 接外部（可换源，需自接入）
+**GPT**：内置一整套（一行配置，绑定自家服务）
+**选型**：要 Web 搜索 / 代码沙箱 → GPT 最快；要灵活换源 / 私有数据 → Claude + MCP
 
-**GPT 哲学**：内置一整套
-- 优点：一行配置
-- 缺点：绑定 OpenAI 自家服务
-
-**实际选型**
-
-- 要 Web 搜索 / 代码沙箱 → GPT 最快
-- 要灵活换源 / 私有数据 → Claude + MCP
-
-</v-clicks>
+</v-click>
 
 ---
 transition: slide-up
@@ -1252,35 +1154,27 @@ transition: slide-up
 **Claude**：通过 tool_use 间接做
 
 ```python
-response = client.messages.create(
-    tools=[{
-        "name": "extract_info",
-        "input_schema": MY_SCHEMA,
-    }],
-    tool_choice={"type": "tool", "name": "extract_info"},
-    ...
-)
-# 从 response.content[0].input 拿结构化输出
+resp = client.messages.create(
+    tools=[{"name": "extract_info", "input_schema": MY_SCHEMA}],
+    tool_choice={"type": "tool", "name": "extract_info"}, ...)
+# 从 resp.content[0].input 拿结构化输出
 ```
 
 **GPT**：一类公民
 
 ```python
-openai_client.chat.completions.create(
-    response_format={
-        "type": "json_schema",
-        "json_schema": {"name": "result", "schema": MY_SCHEMA, "strict": True},
-    },
-    ...
-)
+openai_client.chat.completions.create(response_format={
+    "type": "json_schema",
+    "json_schema": {"name": "result", "schema": MY_SCHEMA, "strict": True},
+}, ...)
 ```
 
 **Gemini**：一类公民
 
 ```python
-model.generate_content(
-    generation_config={"response_schema": MY_SCHEMA, "response_mime_type": "application/json"},
-)
+model.generate_content(generation_config={
+    "response_schema": MY_SCHEMA,
+    "response_mime_type": "application/json"})
 ```
 
 ---
@@ -1289,21 +1183,17 @@ transition: slide-up
 
 # 差异 8：上下文窗口
 
-| 模型 | 标准上下文 | 大上下文模型 |
+| 模型 | 标准上下文 | 大上下文 |
 | --- | --- | --- |
 | Claude Opus 4.7 | 200K | 1M (`[1m]` 后缀) |
-| Claude Sonnet 4.6 | 200K | - |
-| Claude Haiku 4.5 | 200K | - |
-| GPT-5 | 256K | - |
-| GPT-4o | 128K | - |
-| Gemini 2.5 Pro | 1M | 2M |
-| Gemini 2.5 Flash | 1M | - |
+| Claude Sonnet / Haiku | 200K | - |
+| GPT-5 / GPT-4o | 256K / 128K | - |
+| Gemini 2.5 Pro / Flash | 1M | 2M / - |
 
 <v-clicks>
 
 - **Gemini 上下文最长**（2M），但召回率随长度下降快
-- **Claude 200K 是默认**——大多数场景够用
-- **Claude 1M 用法**：模型 ID 加 `[1m]` 后缀，价格翻倍
+- **Claude 200K 默认够用**；1M 用法：ID 加 `[1m]`，价格翻倍
 
 </v-clicks>
 
@@ -1380,25 +1270,18 @@ transition: slide-up
 
 **选 Claude**
 
-- 编码 / Agent 长任务
-- 长系统提示反复用（Cache 命中率高）
-- 安全敏感场景（Constitutional 拒绝率低）
-- 需要 MCP 生态
-- Tool Use 灵活度需求高
+- 编码 / Agent 长任务，长系统提示反复用（Cache 命中率高）
+- 安全敏感场景 + 需要 MCP 生态 / Tool Use 灵活度
 
 **选 GPT**
 
-- 多模态全栈（图 / 音 / 视频）
-- 实时语音应用（Realtime API）
-- 需要内置 web 搜索 / 代码沙箱
-- 已有 OpenAI 生态投入
+- 多模态全栈（图 / 音 / 视频）+ 实时语音（Realtime）
+- 需要内置 web 搜索 / 代码沙箱，已有 OpenAI 生态
 
 **选 Gemini**
 
-- 超长上下文（2M）
-- 多模态视频 / 音频
-- 已有 Google Cloud 生态
-- 成本敏感（Flash 系列便宜）
+- 超长上下文（2M）+ 多模态视频 / 音频
+- 已有 Google Cloud 生态，成本敏感（Flash 便宜）
 
 </v-clicks>
 
@@ -1487,29 +1370,13 @@ transition: slide-up
 
 <v-clicks>
 
-**接入**
+**接入**：API key 走 Secret Manager；三家通道（Anthropic / Bedrock / Vertex）准备 fallback；模型 ID 配置化
 
-- API key 走 Secret Manager，不进代码
-- 三家通道（Anthropic / Bedrock / Vertex）准备 fallback
-- 模型 ID 配置化，方便切换
+**性能**：长 system prompt 加 `cache_control`；高并发用 Batches（不占 RPM）；流式响应改善体验
 
-**性能**
+**监控**：记录 token / cost / latency；监控 cache 命中率（< 50% 重新设计 prompt）；设 daily budget 上限
 
-- 长 system prompt 加 `cache_control`
-- 高并发用 Batches（不占 RPM）
-- 流式响应改善体验
-
-**监控**
-
-- 记录 token / cost / latency 每次调用
-- 监控 cache 命中率（< 50% 该重新设计 prompt）
-- 设置 daily budget 上限
-
-**容灾**
-
-- 多模型 fallback（Opus → Sonnet 链路）
-- 多通道 fallback（Anthropic → Bedrock）
-- 429 / 529 retry with 指数退避
+**容灾**：多模型 fallback（Opus → Sonnet）；多通道 fallback（Anthropic → Bedrock）；429 / 529 指数退避重试
 
 </v-clicks>
 
@@ -1524,18 +1391,11 @@ transition: slide-up
 | HumanEval | 95 | 90 | 78 | 92 | 89 |
 | SWE-bench Verified | 68 | 55 | 30 | 60 | 50 |
 | MMLU | 90 | 86 | 78 | 89 | 87 |
-| GPQA | 60 | 50 | 30 | 55 | 48 |
 | Aider | 82 | 75 | 50 | 78 | 72 |
 
 <v-click>
 
-数字为示意，以官方公布为准。
-
-**关键观察**
-
-- Claude Opus 4.7 在编码相关 benchmark 一致领先
-- GPT-5 在 MMLU / GPQA 等通用知识略占优
-- Sonnet 4.6 是性价比之王（接近 Opus 的 70% 能力，价格 20%）
+数字为示意，以官方公布为准。**Opus 4.7 编码领先；GPT-5 通用知识略占优；Sonnet 4.6 是性价比之王**（接近 Opus 70% 能力，价格 20%）。
 
 </v-click>
 

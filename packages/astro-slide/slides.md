@@ -112,7 +112,6 @@ transition: slide-up
 
 | 版本       | 时间    | 关键特性                                                                              |
 | ---------- | ------- | ------------------------------------------------------------------------------------- |
-| **0.x**    | 2021    | Snowpack 时代，Islands 雏形                                                           |
 | **1.0**    | 2022.8  | 切到 Vite，正式 1.0                                                                   |
 | **2.0**    | 2023.1  | Content Collections（v2 API）、Hybrid 模式                                            |
 | **3.0**    | 2023.8  | View Transitions Beta、Image 服务                                                     |
@@ -122,7 +121,7 @@ transition: slide-up
 
 <v-click>
 
-**今天主要讲 Astro 5+**。`<ViewTransitions />` → `<ClientRouter />`、Content v2 → Content Layer、Hybrid 模式被吞并入 `static`，老项目升级要看 Migration Guide。
+**今天主要讲 Astro 5+**。`<ViewTransitions />` → `<ClientRouter />`、Content v2 → Content Layer、Hybrid 合并入 `static`，老项目升级看 Migration Guide。
 
 </v-click>
 
@@ -134,30 +133,34 @@ transition: slide-up
 
 **静态 HTML 优先 + 显式 Islands 加 JS + Content Schema 强类型 + Adapter 多平台部署**
 
-```mermaid {scale: 0.7}
-graph TD
-  A[请求 / 构建] --> B{output: static / server?}
-  B -->|static| C[构建期渲染所有页面]
-  B -->|server| D[运行时按需渲染]
-  C --> E[纯 HTML + CSS 输出]
-  D --> F[Adapter 跑在 Vercel/CF/Node]
-  E --> G{页面里有 client:* 指令?}
+```mermaid {scale: 0.5}
+graph LR
+  A[请求 / 构建] --> B{output?}
+  B -->|static| C[构建期渲染] --> E[纯 HTML 输出]
+  B -->|server| D[运行时渲染] --> F[Adapter 跑]
+  E --> G{client:*?}
   F --> G
-  G -->|有| H[Hydrate 对应 Island 组件]
+  G -->|有| H[Hydrate Island]
   G -->|没| I[零 JS]
-  H --> J[React/Vue/Svelte/Solid 独立运行]
 ```
+
+---
+transition: slide-up
+---
+
+# 对比 Next.js / Nuxt / SvelteKit
+
+| 维度     | Astro 5             | Next.js 16    | Nuxt 4         | SvelteKit 2     |
+| -------- | ------------------- | ------------- | -------------- | --------------- |
+| 默认组件 | `.astro`（零 JS）   | RSC           | SSR Vue        | Svelte SSR      |
+| 多框架   | ✅（React/Vue/...） | ❌（仅 React） | ❌（仅 Vue）   | ❌（仅 Svelte） |
+| 默认 JS  | **0KB**             | RSC + hydrate | 全 hydrate     | 全 hydrate      |
+| 数据     | Content Collections | RSC + fetch   | useFetch       | load()          |
 
 <v-click>
 
-对比 Next.js / Nuxt / SvelteKit：
-
-| 维度     | Astro 5            | Next.js 16   | Nuxt 4       | SvelteKit 2  |
-| -------- | ------------------ | ------------ | ------------ | ------------ |
-| 默认组件 | `.astro`（零 JS） | RSC          | SSR Vue      | Svelte SSR   |
-| 多框架   | ✅（React/Vue/...） | ❌（仅 React） | ❌（仅 Vue）   | ❌（仅 Svelte） |
-| 默认 JS  | **0KB**            | RSC + hydrate | 全 hydrate   | 全 hydrate   |
-| 数据     | Content Collections | RSC + fetch  | useFetch     | load()       |
+**核心差异**：Astro 默认零 JS HTML，框架们默认全 hydrate。
+内容站选 Astro，交互密集应用回 Next/Nuxt/SvelteKit。
 
 </v-click>
 
@@ -229,8 +232,7 @@ transition: slide-up
 
 ```astro
 ---
-// 这块叫 Component Script，只在服务端 / 构建期跑
-// 所有 import / await / 变量 都在这里
+// Component Script —— 只在服务端 / 构建期跑
 import Layout from "../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
@@ -238,12 +240,10 @@ const posts = await getCollection("blog");
 const title = "首页";
 ---
 
-<!-- 这块叫 Component Template，HTML 超集 + {表达式} -->
+<!-- Component Template —— HTML 超集 + {表达式} -->
 <Layout title={title}>
   <h1>{title}</h1>
-  <ul>
-    {posts.map((post) => <li>{post.data.title}</li>)}
-  </ul>
+  <ul>{posts.map((post) => <li>{post.data.title}</li>)}</ul>
 </Layout>
 ```
 
@@ -252,9 +252,8 @@ const title = "首页";
 **关键点**：
 
 - frontmatter 用 `---` 围栏，只在**服务端 / 构建期**执行
-- 模板里 `{expr}` 是表达式，不是 JSX —— 但写起来很像
-- 顶层 `await` 是合法的（构建期就 resolve）
-- `Astro.props` 拿到调用方传入的属性，`Astro.params` 拿到动态路由参数
+- 模板里 `{expr}` 是表达式，不是 JSX —— 但写起来像
+- 顶层 `await` 合法，`Astro.props` 拿属性，`Astro.params` 拿路由参数
 
 </v-click>
 
@@ -267,17 +266,13 @@ transition: slide-up
 ```astro
 ---
 // src/components/Card.astro
-interface Props {
-  title: string;
-  href?: string;
-}
-
+interface Props { title: string; href?: string; }
 const { title, href = "#" } = Astro.props;
 ---
 
 <article class="card">
   <a {href}><h2>{title}</h2></a>
-  <slot />                          <!-- 默认插槽 -->
+  <slot />                                <!-- 默认插槽 -->
   <slot name="footer">没有 footer</slot>  <!-- 命名插槽 + fallback -->
 </article>
 ```
@@ -292,11 +287,7 @@ const { title, href = "#" } = Astro.props;
 
 <v-click>
 
-**和 React/Vue 不一样的地方**：
-
-- `interface Props` 是约定俗成的类型名，Astro 自动识别
-- Slot 是 HTML 原生 slot 语义，**不是函数**：传不了 prop 给插槽消费者
-- 简写：`{href}` 等价于 `href={href}`（跟 JSX `{...}` 不一样）
+**关键差异**：`interface Props` 自动识别；Slot 是 HTML 原生语义（不是函数）；简写 `{href}` 等价于 `href={href}`。
 
 </v-click>
 
@@ -339,7 +330,7 @@ transition: slide-up
 ```astro
 ---
 // src/pages/blog/[slug].astro
-import { getCollection } from "astro:content";
+import { getCollection, render } from "astro:content";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog");
@@ -355,19 +346,13 @@ const { Content } = await render(post);
 
 <article>
   <h1>{post.data.title}</h1>
-  <time>{post.data.pubDate.toLocaleDateString()}</time>
   <Content />
 </article>
 ```
 
 <v-click>
 
-**关键点**：
-
-- `getStaticPaths` 在**构建期跑一次**，返回所有要生成的路径
-- `params` 进 URL，`props` 进组件（避免重复查 DB）
-- SSR 模式下不需要 `getStaticPaths`，直接读 `Astro.params.slug` 运行时查
-- 跟 Next.js `generateStaticParams` 同概念
+**关键点**：构建期跑一次返回所有路径；`params` 进 URL，`props` 进组件（避免重复查 DB）；SSR 模式不需要 `getStaticPaths`，直接读 `Astro.params.slug`；跟 Next.js `generateStaticParams` 同概念。
 
 </v-click>
 
@@ -409,20 +394,11 @@ transition: slide-up
 # Islands Architecture（二）：5 种 client 指令
 
 ```astro
-<!-- 1. client:load —— 立即 hydrate（关键交互）-->
-<NavBar client:load />
-
-<!-- 2. client:idle —— 浏览器空闲时 hydrate（次要交互）-->
-<NewsletterForm client:idle />
-
-<!-- 3. client:visible —— 进入视口时 hydrate（首屏下半区）-->
-<CommentSection client:visible />
-
-<!-- 4. client:media —— 媒体查询匹配时 hydrate（响应式组件）-->
-<MobileMenu client:media="(max-width: 768px)" />
-
-<!-- 5. client:only —— 完全不 SSR，仅客户端渲染 -->
-<MapWidget client:only="react" />
+<NavBar client:load />                                     <!-- 1. 立即 hydrate -->
+<NewsletterForm client:idle />                             <!-- 2. 浏览器空闲时 -->
+<CommentSection client:visible />                          <!-- 3. 进入视口时 -->
+<MobileMenu client:media="(max-width: 768px)" />           <!-- 4. 媒体查询匹配 -->
+<MapWidget client:only="react" />                          <!-- 5. 跳过 SSR -->
 ```
 
 <v-clicks>
@@ -449,21 +425,18 @@ import { defineCollection, z } from "astro:content";
 import { glob, file } from "astro/loaders";
 
 const blog = defineCollection({
-  // loader：从哪里来（5.x Content Layer API）
   loader: glob({ pattern: "**/*.md", base: "./src/content/blog" }),
-  // schema：是什么形状（Zod 校验 + 类型推断）
   schema: z.object({
     title: z.string(),
     pubDate: z.coerce.date(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
-    cover: z.string().optional(),
   }),
 });
 
 const authors = defineCollection({
   loader: file("./src/data/authors.json"),
-  schema: z.object({ id: z.string(), name: z.string(), bio: z.string() }),
+  schema: z.object({ id: z.string(), name: z.string() }),
 });
 
 export const collections = { blog, authors };
@@ -471,7 +444,7 @@ export const collections = { blog, authors };
 
 <v-click>
 
-**5.x Content Layer 关键升级**：loader 解耦了「数据从哪来」—— glob 只是其中之一，还能写自定义 loader 从 CMS / DB / API 拉。
+**5.x Content Layer 关键升级**：loader 解耦「数据从哪来」—— glob 只是其中之一，还能写自定义 loader 从 CMS / DB / API 拉。
 
 </v-click>
 
@@ -483,23 +456,15 @@ transition: slide-up
 
 ```astro
 ---
-// src/pages/blog/index.astro
+// src/pages/blog/index.astro —— 拉全量 + 过滤草稿
 import { getCollection } from "astro:content";
-
-// 拉全量 + 过滤草稿
-const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
-);
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
 ---
 
-<ul>
-  {posts.map((post) => (
-    <li>
-      <a href={`/blog/${post.id}`}>{post.data.title}</a>
-      <time>{post.data.pubDate.toLocaleDateString()}</time>
-    </li>
-  ))}
-</ul>
+<ul>{posts.map((post) => (
+  <li><a href={`/blog/${post.id}`}>{post.data.title}</a></li>
+))}</ul>
 ```
 
 ```astro
@@ -509,7 +474,6 @@ import { getEntry, render } from "astro:content";
 
 const post = await getEntry("blog", Astro.params.slug);
 if (!post) return Astro.redirect("/404");
-
 const { Content, headings } = await render(post);
 ---
 
@@ -531,11 +495,9 @@ import type { Loader } from "astro/loaders";
 // 从 Hashnode GraphQL API 拉文章
 const hashnode: Loader = {
   name: "hashnode",
-  load: async ({ store, parseData, logger }) => {
-    logger.info("Fetching posts from Hashnode...");
+  load: async ({ store, parseData }) => {
     const res = await fetch("https://gql.hashnode.com/...");
     const { data } = await res.json();
-
     for (const post of data.publication.posts.edges) {
       const parsed = await parseData({ id: post.node.slug, data: post.node });
       store.set({ id: parsed.id, data: parsed });
@@ -545,15 +507,14 @@ const hashnode: Loader = {
 
 const posts = defineCollection({
   loader: hashnode,
-  schema: z.object({ slug: z.string(), title: z.string(), content: z.string() }),
+  schema: z.object({ slug: z.string(), title: z.string() }),
 });
-
 export const collections = { posts };
 ```
 
 <v-click>
 
-社区已有 loader：Notion / Sanity / Contentful / Storyblok / GitHub / RSS / WordPress / Strapi。`astro.build/integrations` 搜 loader。
+社区已有 loader：Notion / Sanity / Contentful / Storyblok / RSS / WordPress / Strapi。
 
 </v-click>
 
@@ -564,13 +525,8 @@ transition: slide-up
 # 多框架混用：`astro add` 一条命令
 
 ```bash
-# 一次装多个
-npx astro add react vue svelte solid
-
-# 或者按需
-npx astro add react
-npx astro add tailwind
-npx astro add mdx
+npx astro add react vue svelte solid    # 一次装多个
+npx astro add tailwind mdx              # 加样式 + 内容
 ```
 
 ```astro
@@ -592,7 +548,7 @@ import SolidWidget from "../components/Widget.tsx";
 
 <v-clicks>
 
-**官方支持**：`@astrojs/react` / `@astrojs/vue` / `@astrojs/svelte` / `@astrojs/solid-js` / `@astrojs/preact` / `@astrojs/alpinejs`
+**官方支持**：`@astrojs/react` / `vue` / `svelte` / `solid-js` / `preact` / `alpinejs`
 
 **限制**：只有 `.astro` 能嵌套多框架。React 组件里不能 import Vue 组件，反之亦然。
 
@@ -604,20 +560,13 @@ transition: slide-up
 
 # 多框架的状态共享：Nano Stores
 
-> 💡 **为什么需要**
->
-> Islands 之间是隔离的：React Counter 的 `useState` Vue 看不见，反之亦然。
-> 需要跨 Island 共享状态时，用一个**框架无关的小型 store**，Nano Stores 是 Astro 官方推荐。
+> 💡 Islands 之间隔离：React Counter 的 `useState` Vue 看不见。跨 Island 共享状态用**框架无关的小型 store**，Nano Stores 是 Astro 官方推荐。
 
 ```ts
 // src/stores/cart.ts
 import { atom } from "nanostores";
-
 export const $cart = atom<{ id: string; qty: number }[]>([]);
-
-export function addItem(id: string) {
-  $cart.set([...$cart.get(), { id, qty: 1 }]);
-}
+export const addItem = (id: string) => $cart.set([...$cart.get(), { id, qty: 1 }]);
 ```
 
 ```tsx
@@ -637,7 +586,6 @@ import { useStore } from "@nanostores/vue";
 import { $cart } from "../stores/cart";
 const cart = useStore($cart);
 </script>
-
 <template><span>购物车 ({{ cart.length }})</span></template>
 ```
 
@@ -648,37 +596,29 @@ transition: slide-up
 # SSR / SSG / Hybrid：output 选项
 
 ```js
-// astro.config.mjs
+// astro.config.mjs —— 'static' (默认) | 'server'
 import { defineConfig } from "astro/config";
 import vercel from "@astrojs/vercel";
 
-export default defineConfig({
-  // 'static' (默认) | 'server'
-  output: "server",
-  adapter: vercel(),
-});
+export default defineConfig({ output: "server", adapter: vercel() });
 ```
 
 ```astro
 ---
-// 单页覆盖整体配置
-// src/pages/blog/[slug].astro
-export const prerender = true;       // server 模式下强制 SSG
+// 单页覆盖：server 模式下强制 SSG
+export const prerender = true;
 ---
 ```
 
 <v-clicks>
 
-**三种实战组合**（Astro 5 后 hybrid 被合并）：
+| 场景         | output     | 单页 prerender   |
+| ------------ | ---------- | ---------------- |
+| **纯静态站** | `"static"` | 不需要           |
+| **混合站**   | `"static"` | 个别页 `false`   |
+| **全 SSR**   | `"server"` | 默认全 on-demand |
 
-| 场景               | output     | 单页 prerender   |
-| ------------------ | ---------- | ---------------- |
-| **纯静态站**       | `"static"` | 不需要           |
-| **混合站**         | `"static"` | 个别页 `false`   |
-| **混合站（反向）** | `"server"` | 个别页 `true`    |
-| **全 SSR**         | `"server"` | 默认全 on-demand |
-
-**经验**：内容站默认 `static`，需要 user-specific 的几页声明 `prerender = false`。
+**经验**：内容站默认 `static`，user-specific 的几页 `prerender = false`。
 
 </v-clicks>
 
@@ -690,29 +630,22 @@ transition: slide-up
 
 ```bash
 # 一条命令搞定（修改 config + 装包 + 改 output）
-npx astro add vercel
-npx astro add netlify
-npx astro add cloudflare
-npx astro add node
+npx astro add vercel    # 或 netlify / cloudflare / node
 ```
 
 <v-clicks>
 
-| Adapter           | 平台                  | 特性                                                |
-| ----------------- | --------------------- | --------------------------------------------------- |
-| **@astrojs/vercel** | Vercel                | ISR / Image / Edge / Speed Insights 一应俱全        |
-| **@astrojs/netlify** | Netlify Functions     | Forms / Identity / On-Demand Builders               |
-| **@astrojs/cloudflare** | CF Workers / Pages    | 全球边缘 + KV / R2 / D1 / Workers AI                |
-| **@astrojs/node**   | 自有 Node / Docker    | `standalone` 或 `middleware` 模式                   |
+| Adapter                 | 平台               | 特性                                  |
+| ----------------------- | ------------------ | ------------------------------------- |
+| **@astrojs/vercel**     | Vercel             | ISR / Image / Edge / Speed Insights   |
+| **@astrojs/netlify**    | Netlify Functions  | Forms / Identity / On-Demand Builders |
+| **@astrojs/cloudflare** | CF Workers / Pages | 全球边缘 + KV / R2 / D1 / Workers AI  |
+| **@astrojs/node**       | 自有 Node / Docker | `standalone` 或 `middleware` 模式     |
 
 ```js
 // astro.config.mjs
 import node from "@astrojs/node";
-
-export default defineConfig({
-  output: "server",
-  adapter: node({ mode: "standalone" }),    // 自己跑 build/server/entry.mjs
-});
+export default defineConfig({ output: "server", adapter: node({ mode: "standalone" }) });
 ```
 
 </v-clicks>
@@ -723,10 +656,7 @@ transition: slide-up
 
 # Server Islands（5.x stable）
 
-> 💡 **场景**
->
-> 整页主要内容可以 prerender（CDN 秒回），但有**用户特有的小区域**（头像、购物车计数、推荐位）需要服务端动态算。
-> 传统做法是整页改 SSR —— Astro 给了第三选择：**Server Islands**。
+> 💡 整页 prerender（CDN 秒回），但有**用户特有的小区域**（头像、购物车、推荐位）需要动态。传统做法整页改 SSR —— Astro 给了第三选择：**Server Islands**。
 
 ```astro
 ---
@@ -734,18 +664,15 @@ transition: slide-up
 import Layout from "../../layouts/Base.astro";
 import Avatar from "../../components/Avatar.astro";
 import Reviews from "../../components/Reviews.astro";
-import ProductInfo from "../../components/ProductInfo.astro";
 
 export const prerender = true;   // 整页 SSG
 ---
 
 <Layout>
-  <header>
-    <!-- 个性化区域，请求时才渲染 -->
-    <Avatar server:defer>
-      <GenericAvatar slot="fallback" />
-    </Avatar>
-  </header>
+  <!-- 个性化区域，请求时才渲染 -->
+  <Avatar server:defer>
+    <GenericAvatar slot="fallback" />
+  </Avatar>
 
   <ProductInfo id={Astro.params.id} />   <!-- 静态部分 -->
 
@@ -795,31 +722,21 @@ import { ClientRouter } from "astro:transitions";
 
 <html>
   <head>
-    <title>My Site</title>
     <ClientRouter />     <!-- 一行启用 SPA 风格导航 -->
   </head>
-  <body>
-    <slot />
-  </body>
+  <body><slot /></body>
 </html>
 ```
 
 <v-clicks>
 
-**关键指令**：
-
 ```astro
-<!-- 命名 transition，两页面间共享元素，自动 morph -->
+<!-- 共享元素 morph -->
 <img src={cover} transition:name={`cover-${post.id}`} />
-
 <!-- 自定义动画 -->
 <main transition:animate="slide" />
-<aside transition:animate="fade" />
-<nav transition:animate="none" />
-
 <!-- 跨页保留状态（video / form / 第三方 widget）-->
 <video src="bg.mp4" autoplay loop transition:persist />
-
 <!-- 强制整页刷新 -->
 <a href="/legacy" data-astro-reload>Legacy</a>
 ```
@@ -870,8 +787,7 @@ transition: slide-up
 
 ```astro
 ---
-// src/pages/posts/[slug].astro
-import { Image, Picture, getImage } from "astro:assets";
+import { Image, Picture } from "astro:assets";
 import cover from "../../assets/cover.jpg";
 ---
 
@@ -891,10 +807,7 @@ import cover from "../../assets/cover.jpg";
 ```js
 // astro.config.mjs
 export default defineConfig({
-  image: {
-    domains: ["images.unsplash.com"],
-    remotePatterns: [{ protocol: "https" }],
-  },
+  image: { domains: ["images.unsplash.com"], remotePatterns: [{ protocol: "https" }] },
 });
 ```
 
@@ -913,19 +826,14 @@ export const server = {
   like: defineAction({
     input: z.object({ postId: z.string() }),
     handler: async ({ postId }, ctx) => {
-      if (!ctx.locals.user) {
-        throw new ActionError({ code: "UNAUTHORIZED", message: "请先登录" });
-      }
+      if (!ctx.locals.user) throw new ActionError({ code: "UNAUTHORIZED" });
       return await db.likes.create({ userId: ctx.locals.user.id, postId });
     },
   }),
 
   signup: defineAction({
     accept: "form",                    // 接受 FormData
-    input: z.object({
-      email: z.string().email(),
-      password: z.string().min(8),
-    }),
+    input: z.object({ email: z.string().email(), password: z.string().min(8) }),
     handler: async ({ email, password }) => {
       const user = await db.users.create({ email, password });
       return { id: user.id };
@@ -946,16 +854,8 @@ import { actions } from "astro:actions";
 
 export function LikeButton({ postId }: { postId: string }) {
   const handleClick = async () => {
-    // safe 模式：拿 { data, error }
-    const { data, error } = await actions.like({ postId });
-    if (error) {
-      console.error(error.code, error.message);
-      return;
-    }
-    console.log("liked:", data);
-
-    // 或者 orThrow：失败抛异常
-    // const result = await actions.like.orThrow({ postId });
+    const { data, error } = await actions.like({ postId });  // safe 模式
+    if (error) return console.error(error.code, error.message);
   };
   return <button onClick={handleClick}>👍</button>;
 }
@@ -994,15 +894,7 @@ const auth = defineMiddleware(async (ctx, next) => {
   return next();
 });
 
-// 安全 header
-const securityHeaders = defineMiddleware(async (ctx, next) => {
-  const response = await next();
-  response.headers.set("X-Frame-Options", "DENY");
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  return response;
-});
-
-// 国际化 rewrite（不改 URL，改路由匹配）
+// 国际化 rewrite
 const i18n = defineMiddleware(async (ctx, next) => {
   if (ctx.url.pathname.startsWith("/zh")) {
     return ctx.rewrite(ctx.url.pathname.replace("/zh", ""));
@@ -1010,12 +902,12 @@ const i18n = defineMiddleware(async (ctx, next) => {
   return next();
 });
 
-export const onRequest = sequence(auth, securityHeaders, i18n);
+export const onRequest = sequence(auth, i18n);
 ```
 
 <v-click>
 
-`ctx.locals` 是 per-request 容器，下游 `.astro` / endpoint 直接 `Astro.locals.user` 读。类型在 `src/env.d.ts` 的 `App.Locals` 接口声明。
+`ctx.locals` 是 per-request 容器，下游 `Astro.locals.user` 直接读。类型在 `App.Locals` 声明。
 
 </v-click>
 
@@ -1030,17 +922,12 @@ transition: slide-up
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = async () => {
-  const posts = await db.posts.findMany();
-  return new Response(JSON.stringify(posts), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return Response.json(await db.posts.findMany());
 };
 ```
 
 ```ts
 // src/pages/api/posts/[id].ts —— 动态 + 全 HTTP 方法
-import type { APIRoute } from "astro";
-
 export const GET: APIRoute = async ({ params }) => {
   const post = await db.posts.findUnique({ where: { id: params.id! } });
   if (!post) return new Response(null, { status: 404 });
@@ -1056,7 +943,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 
 <v-click>
 
-支持 `GET` / `POST` / `PUT` / `PATCH` / `DELETE` / `OPTIONS` / `HEAD` / `ALL`（兜底）。基于 Web 标准 Request / Response，跟 SvelteKit `+server.ts` 是一个思路。
+支持 `GET` / `POST` / `PUT` / `PATCH` / `DELETE` / `OPTIONS` / `HEAD` / `ALL`（兜底）。基于 Web 标准 Request / Response，跟 SvelteKit `+server.ts` 同思路。
 
 </v-click>
 
@@ -1077,7 +964,6 @@ export default defineConfig({
       PUBLIC_API_URL: envField.string({ context: "client", access: "public" }),
       PORT:           envField.number({ context: "server", access: "public", default: 3000 }),
       DATABASE_URL:   envField.string({ context: "server", access: "secret" }),
-      AI_MODEL:       envField.enum({ context: "server", access: "public", values: ["gpt", "claude"] }),
     },
     validateSecrets: true,
   },
@@ -1109,14 +995,11 @@ transition: slide-up
 | ---------- | ------------------- | ---------------- | ------------------- | --------------- |
 | 基础       | 多框架混搭          | React 19         | Vue 3               | Svelte 5        |
 | 默认输出   | **零 JS HTML**      | RSC + hydrate    | SSR Vue + hydrate   | SSR + hydrate   |
-| 路由       | `src/pages/`        | `app/`           | `pages/`            | `src/routes/`   |
 | 数据       | Content Collections | RSC + fetch      | `useFetch`          | `load()`        |
 | 部署       | Adapter 多平台      | Vercel-first     | Nitro 30+ preset    | Adapter 多平台  |
 | 包体积     | **最小**            | 大               | 中                  | 小              |
-| 学习曲线   | **低**              | 高（RSC/Cache）  | 中                  | 中              |
-| 内容站     | ⭐⭐⭐⭐⭐               | ⭐⭐⭐              | ⭐⭐⭐                 | ⭐⭐⭐⭐            |
-| SaaS 应用  | ⭐⭐                  | ⭐⭐⭐⭐⭐            | ⭐⭐⭐⭐                | ⭐⭐⭐⭐            |
-| 招聘市场   | 中                  | **最大**         | 中                  | 小              |
+| 内容站     | ⭐⭐⭐⭐⭐           | ⭐⭐⭐         | ⭐⭐⭐           | ⭐⭐⭐⭐        |
+| SaaS 应用  | ⭐⭐              | ⭐⭐⭐⭐⭐      | ⭐⭐⭐⭐          | ⭐⭐⭐⭐        |
 
 ---
 transition: slide-up
@@ -1127,22 +1010,15 @@ transition: slide-up
 | 场景                              | 推荐                |
 | --------------------------------- | ------------------- |
 | **博客 / 文档 / 营销页**          | **Astro 5**         |
-| **个人作品集 / 媒体站**           | **Astro 5**         |
-| **多框架混搭 / 渐进式迁移**       | **Astro 5**         |
 | **电商展示 + 局部动态**           | Astro + Server Islands |
 | **复杂 SaaS / 多人协作仪表盘**    | Next.js / SvelteKit |
 | **重 RSC / Cache Components**     | Next.js 16          |
 | **Vue 圈强 SSR + 自动导入**       | Nuxt 4              |
 | **极致包体积 / Svelte 圈**        | SvelteKit 2         |
-| **跨端 Web + Mobile**             | Next + Expo / Nuxt + Capacitor |
 
 <v-click>
 
-> 💡 **关键判断**
->
-> Astro 选型主轴是「**内容占比 vs 交互占比**」。
-> 内容驱动（博客 / 文档 / 营销）选 Astro 没竞品；交互密集（SaaS / 后台）回到 Next/Nuxt/SvelteKit。
-> 模糊场景（电商）首选 Astro + Server Islands 试试，不够再切。
+> 💡 主轴：**内容占比 vs 交互占比**。内容驱动选 Astro 没竞品；交互密集回到 Next/Nuxt/SvelteKit；电商等模糊场景首选 Astro + Server Islands。
 
 </v-click>
 
@@ -1173,10 +1049,7 @@ transition: slide-up
 
 # 常见踩坑（一）：`.astro` 不能用 hooks
 
-> 💡 **核心原则**
->
-> `.astro` 的 frontmatter **只在服务端 / 构建期跑**，没有 React hooks / Vue Composition API 的概念。
-> 想要响应式状态？请用 framework component + `client:*` 指令。
+> 💡 `.astro` frontmatter **只在服务端 / 构建期跑**，没有 React hooks / Vue Composition API。想要响应式状态？用 framework component + `client:*` 指令。
 
 ```astro
 ---
@@ -1191,11 +1064,9 @@ const [count, setCount] = useState(0);
 ```astro
 ---
 // ✅ 正确：.astro 只算静态值；交互交给框架组件
-const initialCount = 0;
 import Counter from "../components/Counter.tsx";
 ---
-
-<Counter client:load initialCount={initialCount} />
+<Counter client:load initialCount={0} />
 ```
 
 ```tsx
@@ -1328,11 +1199,7 @@ transition: slide-up
 # 测试
 
 ```bash
-# 单元测试 / 组件测试
-pnpm add -D vitest @testing-library/react @testing-library/vue happy-dom
-
-# E2E
-pnpm add -D playwright
+pnpm add -D vitest @testing-library/react happy-dom playwright
 ```
 
 ```ts
@@ -1342,10 +1209,7 @@ import { getViteConfig } from "astro/config";
 
 export default getViteConfig(
   defineConfig({
-    test: {
-      environment: "happy-dom",
-      include: ["src/**/*.test.{ts,tsx}"],
-    },
+    test: { environment: "happy-dom", include: ["src/**/*.test.{ts,tsx}"] },
   }),
 );
 ```
@@ -1355,10 +1219,10 @@ export default getViteConfig(
 **层次划分**：
 
 - **纯函数 / utils**：Vitest 直接跑
-- **Framework 组件**：Vitest + Testing Library（React/Vue/Svelte 各自的版本）
+- **Framework 组件**：Vitest + Testing Library
 - **`.astro` 组件**：`experimental_AstroContainer` API（5.x 起）渲染后断言 HTML
-- **E2E**：Playwright（官方推荐），跑真实构建后 preview server
-- **Content schema**：Zod 本身就是运行时校验，build 期失败即 schema 测试
+- **E2E**：Playwright（官方推荐），跑构建后 preview server
+- **Content schema**：Zod 本身即运行时校验，build 失败即 schema 测试
 
 </v-clicks>
 
@@ -1436,17 +1300,10 @@ transition: slide-up
 
 <v-clicks>
 
-**第 1 周：基础**
+**第 1-2 周：基础 + 内容**
 
-- HTML / CSS 复习 + `.astro` 语法（frontmatter、Props、Slots）
-- 文件路由 + Layout + 静态 / 动态路由
-- 跟着 [Astro Tutorial](https://docs.astro.build/en/tutorial/0-introduction/) 做完一个博客
-
-**第 2 周：内容 + Islands**
-
-- Content Collections（`defineCollection` + Zod + `getCollection`）
-- Islands Architecture + 5 种 client 指令
-- 第一个 React/Vue 组件混入
+- `.astro` 语法 + 文件路由 + Layout
+- Content Collections + 5 种 client 指令 + 跟 [Astro Tutorial](https://docs.astro.build/en/tutorial/0-introduction/) 做完一个博客
 
 **第 3 周：渲染 + 部署**
 
@@ -1456,9 +1313,8 @@ transition: slide-up
 
 **第 4 周+：进阶**
 
-- Server Islands 实战 + Astro Actions + Middleware + `astro:env`
-- Content Layer 自定义 loader（CMS / DB / API）
-- 性能优化 + Sentry 监控 + Playwright E2E
+- Server Islands + Astro Actions + Middleware + `astro:env`
+- Content Layer 自定义 loader + 性能优化 + Playwright E2E
 
 </v-clicks>
 

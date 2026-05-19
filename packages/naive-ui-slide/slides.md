@@ -115,18 +115,14 @@ transition: fade-out
 
 <v-click>
 
-| 维度          | Naive UI           | Element Plus      | Vuetify 3       | Ant Design Vue   | PrimeVue          |
-| ------------- | ------------------ | ----------------- | --------------- | ---------------- | ----------------- |
-| 框架绑定      | **Vue 3**          | Vue 3             | Vue 3           | Vue 3            | Vue 3 / React     |
-| 设计语言      | **现代简约**       | 中后台通用        | Material 3      | Ant Design       | 多 Preset 主题    |
-| 组件数量      | **90+**            | 60+               | 80+             | 60+              | 80+               |
-| TS 支持       | **100% 原生**      | 原生              | 原生            | 原生             | 原生              |
-| 主题方案      | **JS Object**      | SCSS + CSS vars   | SCSS + Theme    | LESS + Token     | CSS vars + Theme  |
-| 样式文件      | **零 import**      | 需 import CSS     | 需 import CSS   | 需 import CSS    | 需 import CSS     |
-| 包体积        | **小（CSS-in-JS）**| 中                | 偏大            | 偏大             | 中                |
-| 主导团队      | **TUSEN AI**       | 饿了么            | 社区 / Vuetify  | 蚂蚁集团         | PrimeTek          |
-| 颜值评分      | **★★★★★**          | ★★★               | ★★★★            | ★★★★             | ★★★               |
-| 尤雨溪点名    | **是**             | 否                | 否              | 否               | 否                |
+| 维度       | Naive UI      | Element Plus    | Vuetify 3    | Ant Design Vue |
+| ---------- | ------------- | --------------- | ------------ | -------------- |
+| 设计语言   | **现代简约**  | 中后台通用      | Material 3   | Ant Design     |
+| 组件数量   | **90+**       | 60+             | 80+          | 60+            |
+| 主题方案   | **JS Object** | SCSS + CSS vars | SCSS + Theme | LESS + Token   |
+| 样式文件   | **零 import** | 需 import CSS   | 需 import    | 需 import      |
+| 颜值评分   | **★★★★★**     | ★★★             | ★★★★         | ★★★★           |
+| 尤雨溪点名 | **是**        | 否              | 否           | 否             |
 
 </v-click>
 
@@ -176,16 +172,14 @@ transition: fade-out
 
 <v-click>
 
-| 时间     | 关键事件                                                       |
-| -------- | -------------------------------------------------------------- |
-| 2015     | TuSimple（图森未来）成立，专注 L4 级自动驾驶                  |
-| 2018     | 07akioni（曾文涛）加入 TuSimple，负责内部前端工具链            |
-| 2020.09  | Naive UI 立项，基于 Vue 3 Composition API + TypeScript 重写    |
-| 2021     | Naive UI 1.0 正式发布，定位「现代 Vue 3 设计型组件库」         |
-| 2022     | Naive UI 2.0，主题系统重构 + 虚拟列表全面落地                  |
-| 2023     | 尤雨溪在多次公开场合推荐 Naive UI，社区急速扩张                |
-| 2024     | TuSimple 更名为 TUSEN AI，Naive UI 继续维护                    |
-| 2025-26  | 当前主线 v2.40+，活跃迭代，18.3k+ GitHub star                  |
+| 时间    | 关键事件                                              |
+| ------- | ----------------------------------------------------- |
+| 2018    | 07akioni（曾文涛）加入 TuSimple，负责内部前端工具链   |
+| 2020.09 | Naive UI 立项，基于 Vue 3 + TypeScript 重写           |
+| 2021    | Naive UI 1.0 正式发布                                 |
+| 2022    | Naive UI 2.0，主题系统重构 + 虚拟列表全面落地         |
+| 2023    | 尤雨溪在多次公开场合推荐，社区急速扩张                |
+| 2025-26 | 当前主线 v2.40+，活跃迭代，18.3k+ GitHub star         |
 
 </v-click>
 
@@ -415,16 +409,7 @@ NConfigProvider + 全套 Provider + App
 
 ```vue
 <script setup lang="ts">
-import {
-  NConfigProvider,
-  NMessageProvider,
-  NDialogProvider,
-  NNotificationProvider,
-  NLoadingBarProvider,
-  darkTheme,
-} from "naive-ui";
-import { ref } from "vue";
-
+import { darkTheme } from "naive-ui";
 const isDark = ref(false);
 const theme = computed(() => (isDark.value ? darkTheme : null));
 </script>
@@ -434,9 +419,7 @@ const theme = computed(() => (isDark.value ? darkTheme : null));
     <n-loading-bar-provider>
       <n-dialog-provider>
         <n-notification-provider>
-          <n-message-provider>
-            <App />
-          </n-message-provider>
+          <n-message-provider><App /></n-message-provider>
         </n-notification-provider>
       </n-dialog-provider>
     </n-loading-bar-provider>
@@ -448,7 +431,7 @@ const theme = computed(() => (isDark.value ? darkTheme : null));
 
 <v-click>
 
-> 💡 **要点**：theme 传 `null`（或 undefined）= 浅色模式；传 `darkTheme` = 暗色模式；传自定义对象 = 完全自定义主题。
+> 💡 theme 传 `null` = 浅色；传 `darkTheme` = 暗色；传自定义对象 = 完全自定义。
 
 </v-click>
 
@@ -503,26 +486,8 @@ transition: fade-out
 <v-click>
 
 ```vue
-<script setup lang="ts">
-import { ref } from "vue";
-import { NButton } from "naive-ui";
-
-const loading = ref(false);
-
-async function handleSubmit() {
-  loading.value = true;
-  try {
-    await fetch("/api/submit", { method: "POST" });
-  } finally {
-    loading.value = false;
-  }
-}
-</script>
-
 <template>
-  <n-button type="primary" :loading="loading" @click="handleSubmit">
-    提交订单
-  </n-button>
+  <n-button type="primary" :loading="loading">提交</n-button>
   <n-button type="success">成功</n-button>
   <n-button type="warning" ghost>警告</n-button>
   <n-button type="error" round>危险</n-button>
@@ -534,12 +499,12 @@ async function handleSubmit() {
 
 <v-click>
 
-| Prop      | 取值                                       | 说明           |
-| --------- | ------------------------------------------ | -------------- |
-| `type`    | default / primary / success / warning / error / info / tertiary | 颜色语义 |
-| `size`    | tiny / small / medium / large              | 尺寸           |
-| `ghost` `dashed` `round` `circle` `text` `quaternary` | boolean | 形态变体 |
-| `loading` `disabled`     | boolean                  | 状态           |
+| Prop                                  | 取值                                              |
+| ------------------------------------- | ------------------------------------------------- |
+| `type`                                | default / primary / success / warning / error / info / tertiary |
+| `size`                                | tiny / small / medium / large                     |
+| `ghost` `dashed` `round` `circle` `text` | boolean（形态变体）                          |
+| `loading` `disabled`                  | boolean（状态）                                   |
 
 </v-click>
 
@@ -593,20 +558,12 @@ transition: fade-out
 
 <v-click>
 
-**1. 安装 unplugin 依赖**
-
 ```bash
 pnpm add -D unplugin-vue-components unplugin-auto-import
 ```
 
-</v-click>
-
-<v-click>
-
-**2. 配置 vite.config.ts**
-
 ```ts
-import { defineConfig } from "vite";
+// vite.config.ts
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { NaiveUiResolver } from "unplugin-vue-components/resolvers";
@@ -614,15 +571,9 @@ import { NaiveUiResolver } from "unplugin-vue-components/resolvers";
 export default defineConfig({
   plugins: [
     AutoImport({
-      imports: [
-        "vue",
-        {
-          "naive-ui": [
-            "useDialog", "useMessage",
-            "useNotification", "useLoadingBar",
-          ],
-        },
-      ],
+      imports: ["vue", {
+        "naive-ui": ["useDialog", "useMessage", "useNotification", "useLoadingBar"],
+      }],
     }),
     Components({ resolvers: [NaiveUiResolver()] }),
   ],
@@ -633,7 +584,7 @@ export default defineConfig({
 
 <v-click>
 
-> 💡 **效果**：模板里直接写 `<n-button>`，自动 import；脚本里直接调 `useMessage()`，自动 import。
+> 💡 模板里直接写 `<n-button>`，脚本里直接调 `useMessage()`，自动 import。
 
 </v-click>
 
@@ -685,21 +636,15 @@ transition: fade-out
 
 <v-click>
 
-| 分组             | 代表组件                                                     |
-| ---------------- | ------------------------------------------------------------ |
-| **Common**       | Button / Icon / Tag / Avatar / Badge / Divider / Typography  |
-| **Layout**       | Layout / Grid / Space / Flex / Card / Page Header            |
-| **Navigation**   | Menu / Tabs / Breadcrumb / Steps / Anchor / BackTop / Pagination |
-| **Feedback**     | Alert / Message / Dialog / Notification / LoadingBar / Progress / Spin / Result |
-| **Data Display** | Table / Tree / List / Calendar / Image / Statistic / Descriptions / Empty |
-| **Data Entry**   | Form / Input / Select / DatePicker / Switch / Slider / Upload / Cascader / Rate |
-| **Others**       | Affix / Auto Complete / Collapse / Drawer / Modal / Popover / Tooltip / Watermark |
-
-</v-click>
-
-<v-click text-xs class="mt-4">
-
-> 💡 **设计原则**：高频组件（Button / Input / DataTable）API 极简，低频组件（Tree / Cascader / Transfer）功能完整。
+| 分组             | 代表组件                                              |
+| ---------------- | ----------------------------------------------------- |
+| **Common**       | Button / Icon / Tag / Avatar / Badge                  |
+| **Layout**       | Layout / Grid / Space / Flex / Card                   |
+| **Navigation**   | Menu / Tabs / Breadcrumb / Steps                      |
+| **Feedback**     | Alert / Message / Dialog / Notification / LoadingBar  |
+| **Data Display** | Table / Tree / List / Calendar                        |
+| **Data Entry**   | Form / Input / Select / DatePicker / Switch / Upload  |
+| **Others**       | Drawer / Modal / Popover / Tooltip                    |
 
 </v-click>
 
@@ -749,15 +694,10 @@ label-placement / model / rules 三要素
 
 ```vue
 <script setup lang="ts">
-import { reactive, ref } from "vue";
 import type { FormInst, FormRules } from "naive-ui";
 
 const formRef = ref<FormInst | null>(null);
-const form = reactive({
-  name: "",
-  email: "",
-  age: 18,
-});
+const form = reactive({ name: "", email: "" });
 
 const rules: FormRules = {
   name: { required: true, message: "请输入姓名", trigger: "blur" },
@@ -765,18 +705,13 @@ const rules: FormRules = {
     { required: true, message: "请输入邮箱", trigger: "blur" },
     { type: "email", message: "邮箱格式不正确", trigger: "blur" },
   ],
-  age: { type: "number", min: 1, max: 120, message: "1-120", trigger: "blur" },
 };
 </script>
 
 <template>
-  <n-form ref="formRef" :model="form" :rules="rules" label-placement="left" label-width="80">
-    <n-form-item label="姓名" path="name">
-      <n-input v-model:value="form.name" />
-    </n-form-item>
-    <n-form-item label="邮箱" path="email">
-      <n-input v-model:value="form.email" />
-    </n-form-item>
+  <n-form ref="formRef" :model="form" :rules="rules" label-placement="left">
+    <n-form-item label="姓名" path="name"><n-input v-model:value="form.name" /></n-form-item>
+    <n-form-item label="邮箱" path="email"><n-input v-model:value="form.email" /></n-form-item>
   </n-form>
 </template>
 ```
@@ -835,13 +770,11 @@ async function handleSubmit() {
     await formRef.value?.validate();
     await api.createUser(form);
     message.success("创建成功");
-  } catch (errors) {
-    console.warn("校验未通过", errors);
-  }
+  } catch (e) { console.warn("校验未通过", e); }
 }
 
 function handleReset() {
-  formRef.value?.restoreValidation();   // 清除红框
+  formRef.value?.restoreValidation();   // 仅清除红框
   Object.assign(form, initialForm);     // 手动重置值
 }
 ```
@@ -850,18 +783,12 @@ function handleReset() {
 
 <v-click>
 
-**自定义校验器（异步可用）**
+**自定义校验器**
 
 ```ts
-const checkUsername = async (rule: any, value: string) => {
+const checkUsername = async (rule, value: string) => {
   if (!value) return new Error("用户名必填");
-  const exists = await api.checkUserName(value);
-  if (exists) return new Error("用户名已被占用");
-  return true;
-};
-
-const rules: FormRules = {
-  name: { validator: checkUsername, trigger: "blur" },
+  if (await api.checkUserName(value)) return new Error("已被占用");
 };
 ```
 
@@ -913,39 +840,25 @@ columns 数组定义列结构
 
 ```vue
 <script setup lang="ts">
-import { h, ref } from "vue";
-import { NButton, NDataTable } from "naive-ui";
+import { h } from "vue";
 import type { DataTableColumns } from "naive-ui";
 
-interface User {
-  id: number;
-  name: string;
-  age: number;
-  createdAt: string;
-}
-
-const data = ref<User[]>([
-  { id: 1, name: "Tom", age: 28, createdAt: "2026-05-01" },
-  { id: 2, name: "Jerry", age: 32, createdAt: "2026-04-15" },
-]);
+interface User { id: number; name: string; age: number; }
+const data = ref<User[]>([{ id: 1, name: "Tom", age: 28 }]);
 
 const columns: DataTableColumns<User> = [
   { type: "selection" },
   { title: "ID", key: "id", width: 80, sorter: "default" },
   { title: "姓名", key: "name", sorter: "default" },
   { title: "年龄", key: "age", sorter: (a, b) => a.age - b.age },
-  { title: "创建时间", key: "createdAt", sorter: "default" },
   {
-    title: "操作",
-    key: "actions",
+    title: "操作", key: "actions",
     render: (row) => h(NButton, { size: "small", onClick: () => edit(row) }, "编辑"),
   },
 ];
 </script>
 
-<template>
-  <n-data-table :columns="columns" :data="data" :bordered="false" striped />
-</template>
+<template><n-data-table :columns="columns" :data="data" striped /></template>
 ```
 
 </v-click>
@@ -1004,49 +917,31 @@ transition: fade-out
 
 **服务端分页**
 
-```vue
-<script setup lang="ts">
+```ts
 const pagination = reactive({
-  page: 1,
-  pageSize: 10,
-  itemCount: 0,
-  showSizePicker: true,
-  pageSizes: [10, 20, 50, 100],
-  onChange: (page: number) => {
-    pagination.page = page;
-    load();
-  },
-  onUpdatePageSize: (pageSize: number) => {
-    pagination.pageSize = pageSize;
-    pagination.page = 1;
-    load();
+  page: 1, pageSize: 10, itemCount: 0,
+  showSizePicker: true, pageSizes: [10, 20, 50, 100],
+  onChange: (page: number) => { pagination.page = page; load(); },
+  onUpdatePageSize: (size: number) => {
+    pagination.pageSize = size; pagination.page = 1; load();
   },
 });
 
 async function load() {
-  const { list, total } = await api.queryUsers({
-    page: pagination.page,
-    pageSize: pagination.pageSize,
-  });
-  data.value = list;
-  pagination.itemCount = total;
+  const { list, total } = await api.queryUsers(pagination);
+  data.value = list; pagination.itemCount = total;
 }
-</script>
+```
 
-<template>
-  <n-data-table :columns="columns" :data="data" :pagination="pagination" remote />
-</template>
+```vue
+<n-data-table :columns="columns" :data="data" :pagination="pagination" remote />
 ```
 
 </v-click>
 
 <v-click>
 
-**虚拟滚动（大数据集）**
-
-```vue
-<n-data-table :columns="columns" :data="bigData" :max-height="400" virtual-scroll />
-```
+**虚拟滚动**：`<n-data-table virtual-scroll :max-height="400" />` —— 10K+ 行丝滑
 
 </v-click>
 
@@ -1105,13 +1000,10 @@ useMessage / useDialog / useNotification / useLoadingBar
 **useMessage（轻提示，顶部短暂显示）**
 
 ```ts
-import { useMessage } from "naive-ui";
-
 const message = useMessage();
 message.success("保存成功");
 message.warning("当前网络不稳定");
 message.error("请求失败");
-message.info("操作未保存");
 message.loading("处理中...", { duration: 0 });
 ```
 
@@ -1122,15 +1014,11 @@ message.loading("处理中...", { duration: 0 });
 **useDialog（模态对话框，强制确认）**
 
 ```ts
-import { useDialog } from "naive-ui";
-
 const dialog = useDialog();
-
 dialog.warning({
   title: "危险操作",
   content: "删除后不可恢复，确认删除？",
-  positiveText: "删除",
-  negativeText: "取消",
+  positiveText: "删除", negativeText: "取消",
   onPositiveClick: async () => {
     await api.delete(id);
     message.success("已删除");
@@ -1193,16 +1081,10 @@ transition: fade-out
 **useNotification（右上角通知）**
 
 ```ts
-import { useNotification } from "naive-ui";
-
 const notification = useNotification();
-
 notification.info({
-  title: "系统消息",
-  content: "您有 3 条新待办",
-  meta: "5 秒前",
-  duration: 0,
-  keepAliveOnHover: true,
+  title: "系统消息", content: "您有 3 条新待办",
+  meta: "5 秒前", duration: 0, keepAliveOnHover: true,
 });
 ```
 
@@ -1213,29 +1095,17 @@ notification.info({
 **useLoadingBar（顶部进度条，路由切换神器）**
 
 ```ts
-import { useLoadingBar } from "naive-ui";
-
 const loadingBar = useLoadingBar();
-
-router.beforeEach((to, from, next) => {
-  loadingBar.start();
-  next();
-});
-
-router.afterEach(() => {
-  loadingBar.finish();
-});
-
-router.onError(() => {
-  loadingBar.error();
-});
+router.beforeEach((to, from, next) => { loadingBar.start(); next(); });
+router.afterEach(() => loadingBar.finish());
+router.onError(() => loadingBar.error());
 ```
 
 </v-click>
 
 <v-click>
 
-> 💡 **设计原则**：紧急度从低到高 → Message → Notification → Dialog；进度反馈 → LoadingBar（顶部细线）。
+> 💡 紧急度：Message → Notification → Dialog；进度反馈 → LoadingBar。
 
 </v-click>
 
@@ -1312,26 +1182,14 @@ import { createDiscreteApi } from "naive-ui";
 
 const { message, dialog, notification, loadingBar } = createDiscreteApi(
   ["message", "dialog", "notification", "loadingBar"],
-  {
-    configProviderProps: {
-      theme: darkTheme,   // 可独立配置
-    },
-  },
+  { configProviderProps: { theme: darkTheme } },
 );
-
 export { message, dialog, notification, loadingBar };
 ```
-
-</v-click>
-
-<v-click>
-
-**使用**
 
 ```ts
 // axios.ts
 import { message } from "@/utils/discrete";
-
 axios.interceptors.response.use(undefined, (err) => {
   message.error(err.message || "请求失败");
   return Promise.reject(err);
@@ -1342,7 +1200,7 @@ axios.interceptors.response.use(undefined, (err) => {
 
 <v-click>
 
-> 💡 **重要约束**：discrete API 不受 NConfigProvider 影响，使用独立 DOM 容器。不要把同一应用混用 useMessage + discrete message。
+> 💡 discrete API 不受 NConfigProvider 影响，独立 DOM 容器。同一应用不要混用。
 
 </v-click>
 
@@ -1408,7 +1266,6 @@ transition: fade-out
 
 ```vue
 <script setup lang="ts">
-import { NConfigProvider, darkTheme } from "naive-ui";
 import type { GlobalThemeOverrides } from "naive-ui";
 
 const themeOverrides: GlobalThemeOverrides = {
@@ -1416,21 +1273,10 @@ const themeOverrides: GlobalThemeOverrides = {
     primaryColor: "#FF6B35",
     primaryColorHover: "#FF8C5C",
     primaryColorPressed: "#E55A2B",
-    successColor: "#28A745",
     borderRadius: "6px",
-    fontSize: "14px",
   },
-  Button: {
-    textColor: "#FF6B35",
-    fontWeight: "600",
-  },
-  Select: {
-    peers: {
-      InternalSelection: {
-        textColor: "#FF6B35",
-      },
-    },
-  },
+  Button: { textColor: "#FF6B35", fontWeight: "600" },
+  Select: { peers: { InternalSelection: { textColor: "#FF6B35" } } },
 };
 </script>
 
@@ -1495,23 +1341,14 @@ ref + computed 实现运行时切换
 
 ```vue
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { NConfigProvider, darkTheme } from "naive-ui";
-
-type ThemeMode = "light" | "dark" | "brand";
-
-const mode = ref<ThemeMode>("light");
-
+import { darkTheme } from "naive-ui";
+const mode = ref<"light" | "dark" | "brand">("light");
 const theme = computed(() => (mode.value === "dark" ? darkTheme : null));
-
 const themeOverrides = computed(() => {
   switch (mode.value) {
-    case "light":
-      return { common: { primaryColor: "#18A058" } };
-    case "dark":
-      return { common: { primaryColor: "#63E2B7" } };
-    case "brand":
-      return { common: { primaryColor: "#FF6B35", borderRadius: "12px" } };
+    case "light": return { common: { primaryColor: "#18A058" } };
+    case "dark":  return { common: { primaryColor: "#63E2B7" } };
+    case "brand": return { common: { primaryColor: "#FF6B35" } };
   }
 });
 </script>
@@ -1521,7 +1358,6 @@ const themeOverrides = computed(() => {
     <n-button @click="mode = 'light'">浅色</n-button>
     <n-button @click="mode = 'dark'">暗色</n-button>
     <n-button @click="mode = 'brand'">品牌色</n-button>
-    <App />
   </n-config-provider>
 </template>
 ```
@@ -1590,22 +1426,17 @@ transition: fade-out
 
 ```vue
 <script setup lang="ts">
-import { ref, computed } from "vue";
-import { NConfigProvider, zhCN, enUS, dateZhCN, dateEnUS } from "naive-ui";
+import { zhCN, enUS, dateZhCN, dateEnUS } from "naive-ui";
 
 const lang = ref<"zh" | "en">("zh");
-
 const locale = computed(() => (lang.value === "zh" ? zhCN : enUS));
 const dateLocale = computed(() => (lang.value === "zh" ? dateZhCN : dateEnUS));
 </script>
 
 <template>
   <n-config-provider :locale="locale" :date-locale="dateLocale">
-    <n-button @click="lang = lang === 'zh' ? 'en' : 'zh'">
-      切换 / Switch
-    </n-button>
+    <n-button @click="lang = lang === 'zh' ? 'en' : 'zh'">切换 / Switch</n-button>
     <n-date-picker type="date" />
-    <App />
   </n-config-provider>
 </template>
 ```
@@ -1614,7 +1445,7 @@ const dateLocale = computed(() => (lang.value === "zh" ? dateZhCN : dateEnUS));
 
 <v-click>
 
-> 💡 **locale 与 dateLocale 是两个独立 prop** —— locale 控制组件内置文字（如「确定 / 取消」），dateLocale 控制日期组件的月份星期。
+> 💡 locale 控制组件内置文字，dateLocale 控制日期组件的月份星期。
 
 </v-click>
 
@@ -1678,17 +1509,12 @@ transition: fade-out
 **Vite SSR / Vue 原生 SSR**
 
 ```ts
-import { renderToString } from "vue/server-renderer";
 import { setup } from "@css-render/vue3-ssr";
 
 async function render(app: App) {
   const { collect } = setup(app);
   const html = await renderToString(app);
-  const styleTag = collect();   // 收集 CSS-in-JS 注入的样式
-  return `
-    <head>${styleTag}</head>
-    <body><div id="app">${html}</div></body>
-  `;
+  return `<head>${collect()}</head><body><div id="app">${html}</div></body>`;
 }
 ```
 
@@ -1698,19 +1524,11 @@ async function render(app: App) {
 
 **Nuxt 3 集成（推荐）**
 
-```bash
-pnpm add -D nuxtjs-naive-ui
-```
-
 ```ts
-// nuxt.config.ts
+// nuxt.config.ts —— pnpm add -D nuxtjs-naive-ui
 export default defineNuxtConfig({
   modules: ["nuxtjs-naive-ui"],
-  build: {
-    transpile: process.env.NODE_ENV === "production"
-      ? ["naive-ui", "vueuc", "@css-render/vue3-ssr", "@juggle/resize-observer"]
-      : ["@juggle/resize-observer"],
-  },
+  build: { transpile: ["naive-ui", "vueuc", "@css-render/vue3-ssr"] },
 });
 ```
 
@@ -1718,7 +1536,7 @@ export default defineNuxtConfig({
 
 <v-click>
 
-> 💡 **要点**：CSS-in-JS 的 SSR 需要 collect() 把 server 端注入的 CSS 输出到 HTML head，否则首屏 FOUC（无样式闪烁）。
+> 💡 CSS-in-JS 的 SSR 需要 collect() 输出到 HTML head，否则首屏 FOUC。
 
 </v-click>
 
@@ -1783,13 +1601,7 @@ transition: fade-out
 **获取组件实例**
 
 ```ts
-import type {
-  FormInst,
-  DataTableInst,
-  InputInst,
-  SelectInst,
-  UploadInst,
-} from "naive-ui";
+import type { FormInst, DataTableInst, InputInst } from "naive-ui";
 
 const formRef = ref<FormInst | null>(null);
 const tableRef = ref<DataTableInst | null>(null);
@@ -1798,12 +1610,7 @@ const inputRef = ref<InputInst | null>(null);
 onMounted(() => {
   inputRef.value?.focus();
   tableRef.value?.clearSorter();
-  tableRef.value?.scrollTo({ top: 0 });
 });
-
-async function submit() {
-  await formRef.value?.validate();
-}
 ```
 
 </v-click>
@@ -1813,14 +1620,9 @@ async function submit() {
 **主题 token 类型推导**
 
 ```ts
-import type { GlobalThemeOverrides } from "naive-ui";
-
 // IDE 自动补全所有可覆盖的 token
 const theme: GlobalThemeOverrides = {
-  common: {
-    primaryColor: "#FF6B35",
-    // ^^^ Hover 显示完整类型，写错立刻报错
-  },
+  common: { primaryColor: "#FF6B35" },  // Hover 显示完整类型
 };
 ```
 
@@ -1888,10 +1690,7 @@ transition: fade-out
 ```vue
 <n-modal v-model:show="visible" preset="card" title="编辑用户" style="width: 500px">
   <n-form :model="form">…</n-form>
-  <template #footer>
-    <n-button @click="visible = false">取消</n-button>
-    <n-button type="primary" @click="handleSubmit">保存</n-button>
-  </template>
+  <template #footer><n-button type="primary" @click="handleSubmit">保存</n-button></template>
 </n-modal>
 ```
 
@@ -1902,10 +1701,8 @@ transition: fade-out
 **NDrawer（侧边抽屉）**
 
 ```vue
-<n-drawer v-model:show="drawerVisible" :width="400" placement="right">
-  <n-drawer-content title="筛选条件" closable>
-    <n-form :model="filters">…</n-form>
-  </n-drawer-content>
+<n-drawer v-model:show="visible" :width="400" placement="right">
+  <n-drawer-content title="筛选条件" closable>…</n-drawer-content>
 </n-drawer>
 ```
 
@@ -1916,11 +1713,9 @@ transition: fade-out
 **NPopover（轻量浮层）**
 
 ```vue
-<n-popover placement="top" trigger="hover" :width="200">
-  <template #trigger>
-    <n-button>悬停查看</n-button>
-  </template>
-  <p>这是一段提示内容</p>
+<n-popover placement="top" trigger="hover">
+  <template #trigger><n-button>悬停</n-button></template>
+  <p>提示内容</p>
 </n-popover>
 ```
 
@@ -1982,26 +1777,20 @@ transition: fade-out
 
 <v-click>
 
-| 库                          | 作用                                         |
-| --------------------------- | -------------------------------------------- |
-| **@vicons/ionicons5**       | Ionicons 5 图标包（ionicons.com）            |
-| **@vicons/antd**            | Ant Design 图标包                            |
-| **@vicons/material**        | Material Design 图标包                       |
-| **@vicons/tabler**          | Tabler Icons 图标包                          |
-| **@vicons/fluent**          | Fluent UI 图标包                             |
-| **vfonts**                  | Lato 主字体 + Fira Code 代码字体             |
-| **nuxtjs-naive-ui**         | Nuxt 3 集成模块（社区维护）                  |
-| **naive-ui-admin**          | 开源后台模板（jekip 团队）                   |
-| **vue-naive-admin**         | 现代化后台模板（zclzone）                    |
-| **pinx-admin**              | TypeScript 后台模板（pinx-docs）             |
-| **NaiveAdmin**              | 商业版后台框架                               |
-| **@bluryar/naive-ui-themes**| 主题切换工具库                               |
+| 库                           | 作用                                              |
+| ---------------------------- | ------------------------------------------------- |
+| **@vicons/\***               | 图标聚合（ionicons5/antd/material/tabler/fluent） |
+| **vfonts**                   | Lato 主字体 + Fira Code 代码字体                  |
+| **nuxtjs-naive-ui**          | Nuxt 3 集成模块（社区维护）                       |
+| **naive-ui-admin**           | 开源后台模板                                      |
+| **vue-naive-admin**          | 现代化后台模板                                    |
+| **@bluryar/naive-ui-themes** | 主题切换工具库                                    |
 
 </v-click>
 
 <v-click text-xs class="mt-4">
 
-> 💡 **图标方案**：Naive UI 不绑定图标库 —— 推荐 @vicons/* 系列，按需引入任意图标集合。
+> 💡 Naive UI 不绑定图标库 —— 推荐 @vicons/\* 系列，按需引入任意图标集合。
 
 </v-click>
 
@@ -2062,14 +1851,9 @@ useMessage 报错 / NConfigProvider 缺失
 **坑 1：useMessage is undefined**
 
 ```ts
-// ❌ 没有 NMessageProvider 包根
-const App = createApp(MyApp);  // MyApp 里直接 useMessage()
-// → 控制台报错：injection key not found / message is undefined
-
-// ✅ 必须包根 NMessageProvider
-<n-message-provider>
-  <MyApp />
-</n-message-provider>
+// ❌ 没有 NMessageProvider 包根 → injection key not found
+// ✅ 必须包根
+<n-message-provider><MyApp /></n-message-provider>
 ```
 
 </v-click>
@@ -2079,16 +1863,10 @@ const App = createApp(MyApp);  // MyApp 里直接 useMessage()
 **坑 2：在 axios interceptor 调 useMessage**
 
 ```ts
-// ❌ setup 外调用
-axios.interceptors.response.use(undefined, (err) => {
-  const message = useMessage();   // 报错：inject must be called from setup
-});
-
+// ❌ setup 外调用 → inject must be called from setup
 // ✅ 用 createDiscreteApi
 import { message } from "@/utils/discrete";
-axios.interceptors.response.use(undefined, (err) => {
-  message.error(err.message);
-});
+axios.interceptors.response.use(undefined, (err) => message.error(err.message));
 ```
 
 </v-click>
@@ -2178,14 +1956,9 @@ NDataTable render / 字体丢失 / SSR 闪烁
 
 ```ts
 // ❌ render 闭包捕获了「初始 row」
-const columns = data.value.map((row) => ({
-  render: () => h("span", row.name),    // row 不变
-}));
-
+const columns = data.value.map((row) => ({ render: () => h("span", row.name) }));
 // ✅ render 接收当前 row 参数
-const columns = [
-  { render: (row) => h("span", row.name) },
-];
+const columns = [{ render: (row) => h("span", row.name) }];
 ```
 
 </v-click>
@@ -2194,14 +1967,10 @@ const columns = [
 
 **坑 5：默认字体丢失 / 中文字体异常**
 
-Naive UI 默认用 Lato 字体（vfonts/Lato.css），中文系统下可能 fallback 到衬线字体。
-
 ```ts
-// 解决：覆盖 common.fontFamily
+// 默认 Lato 字体在中文系统下 fallback 到衬线字体，覆盖 common.fontFamily：
 const themeOverrides = {
-  common: {
-    fontFamily: '"Inter", "PingFang SC", "Microsoft YaHei", sans-serif',
-  },
+  common: { fontFamily: '"Inter", "PingFang SC", "Microsoft YaHei", sans-serif' },
 };
 ```
 
@@ -2211,10 +1980,8 @@ const themeOverrides = {
 
 **坑 6：SSR 首屏样式闪烁（FOUC）**
 
-CSS-in-JS 默认运行时生成样式，SSR 必须 collect → 注入到 HTML head。
-
 ```ts
-import { setup } from "@css-render/vue3-ssr";
+// CSS-in-JS 默认运行时生成样式，SSR 必须 collect → 注入到 HTML head
 const { collect } = setup(app);
 const styleTag = collect();   // 拼到 HTML <head>
 ```
@@ -2293,9 +2060,7 @@ transition: fade-out
 **项目初始化**
 
 - ✅ 入口包好全部 Provider（Config / Message / Dialog / Notification / LoadingBar）
-- ✅ 安装 vfonts，import Lato.css + FiraCode.css
 - ✅ themeOverrides 覆盖 fontFamily 加入中文字体
-- ✅ 按需引入用 NaiveUiResolver + AutoImport（useMessage 等 Composable）
 
 </v-click>
 
@@ -2303,10 +2068,9 @@ transition: fade-out
 
 **表单 + 表格**
 
-- ✅ Form 配 `FormRules` 类型，prop 改用 `path`（不是 prop）
-- ✅ DataTable columns 用 `DataTableColumns<T>` 泛型推导
-- ✅ render 函数接收 row 参数，不要依赖闭包
-- ✅ 大数据集启用 `virtual-scroll`，10K+ 行也丝滑
+- ✅ Form 用 `FormRules` 类型，字段名用 `path`
+- ✅ DataTable columns 用 `DataTableColumns<T>` 泛型
+- ✅ render 函数接收 row 参数，大数据集启用 `virtual-scroll`
 
 </v-click>
 
@@ -2314,9 +2078,9 @@ transition: fade-out
 
 **主题与暗色**
 
-- ✅ themeOverrides 用 computed 包裹，支持动态切换
-- ✅ darkTheme 配合 VueUse useDark 实现暗色 + 持久化
-- ✅ axios / router 用 createDiscreteApi 调 message / loadingBar
+- ✅ themeOverrides 用 computed 包裹支持动态切换
+- ✅ darkTheme + VueUse useDark 实现暗色 + 持久化
+- ✅ axios / router 用 createDiscreteApi
 
 </v-click>
 
@@ -2370,22 +2134,17 @@ transition: fade-out
 **优点**
 
 - 100% TypeScript 从源码到 props 到主题全链路类型安全
-- 90+ 组件覆盖企业后台 + C 端 + 数据可视化场景
 - 主题系统 JS 对象 + CSS-in-JS，运行时动态切换无限灵活
-- 零样式 import，CSS-in-JS 自动注入
-- 虚拟列表默认开启，大数据场景丝滑
+- 零样式 import，虚拟列表默认开启，大数据场景丝滑
 - 设计语言现代清新，Vue 3 UI 库颜值之最
-- 尤雨溪官方推荐，Vue 团队成员主导
-- 4 个 Composable API 设计优雅，符合 Vue 3 哲学
+- 尤雨溪官方推荐，4 个 Composable API 设计优雅
 
 **缺点**
 
-- 中文生态弱于 Element Plus（文档 / 教程 / Stack Overflow 资源少）
-- Provider 嵌套写法对新手不友好（容易忘记导致 useMessage 报错）
-- CSS-in-JS 运行时开销（虽然只有 ~10KB gzipped）
-- SSR 配置比纯 CSS UI 库稍复杂（FOUC 问题需要 collect）
-- 国内大厂采用率低于 Element Plus / Ant Design Vue
-- 默认中文字体支持不佳（需要手动覆盖 fontFamily）
+- 中文生态弱于 Element Plus（文档 / 教程 / SO 资源少）
+- Provider 嵌套写法对新手不友好
+- CSS-in-JS 运行时开销 + SSR 配置稍复杂
+- 国内大厂采用率低，默认中文字体支持不佳
 
 </v-clicks>
 
@@ -2451,9 +2210,8 @@ transition: fade-out
 
 **第 1 周：核心组件熟练**
 
-- 通读官方文档 Common + Data Entry + Data Display 三大分组
-- 跟着官方示例改例子（每个组件 demo 都能在线编辑）
-- 实现一个 CRUD 页面（DataTable + Form + Modal 三件套）
+- 通读 Common + Data Entry + Data Display 三大分组
+- 实现 CRUD 页面（DataTable + Form + Modal 三件套）
 
 </v-click>
 
@@ -2461,9 +2219,7 @@ transition: fade-out
 
 **第 2 周：Provider + Composable**
 
-- 入口包好四个 Provider（Message / Dialog / Notification / LoadingBar）
-- 熟练 useMessage / useDialog / useNotification / useLoadingBar
-- 用 createDiscreteApi 处理 axios / router 场景
+- 熟练四件套 + createDiscreteApi 处理 axios / router 场景
 
 </v-click>
 
@@ -2471,20 +2227,14 @@ transition: fade-out
 
 **第 3-4 周：主题 + 企业级整合**
 
-- 跑通 GlobalThemeOverrides + 动态切换
-- 接 darkTheme + VueUse useDark 实现暗色模式
+- 跑通 GlobalThemeOverrides + 动态切换 + darkTheme
 - 接入 Vue Router + Pinia + Vite + UnoCSS
-- 实现登录 / 权限 / 菜单 / 表单 / 表格全套
 
 </v-click>
 
 <v-click>
 
-**长期：源码 + 主题系统深入**
-
-- 阅读 NConfigProvider / DataTable / Form 等核心组件源码
-- 理解 css-render（07akioni 团队的 CSS-in-JS 引擎）原理
-- 参与 issue / PR，理解 Naive UI 设计取舍
+**长期**：阅读核心组件源码，理解 css-render 引擎原理
 
 </v-click>
 
@@ -2549,9 +2299,8 @@ transition: fade-out
 
 **官方资源**
 
-- 📖 [官方文档](https://www.naiveui.com/) —— 中英双语
+- 📖 [官方文档](https://www.naiveui.com/) —— 中英双语，每个组件 demo 可在线编辑
 - 💻 [GitHub](https://github.com/tusen-ai/naive-ui) —— 18K+ star
-- 🎮 [在线 Playground](https://www.naiveui.com/) —— 每个组件 demo 可在线编辑
 - 🐦 [07akioni 推特](https://twitter.com/07akioni) —— 维护者动态
 
 </v-click>
@@ -2560,9 +2309,8 @@ transition: fade-out
 
 **生态项目**
 
-- [@vicons/](https://www.xicons.org/) —— 图标聚合（Ionicons / Antd / Material / Tabler / Fluent）
-- [vfonts](https://www.npmjs.com/package/vfonts) —— 字体包
-- [css-render](https://css-render.org/) —— CSS-in-JS 引擎
+- [@vicons/](https://www.xicons.org/) —— 图标聚合（Ionicons / Antd / Material 等）
+- [vfonts](https://www.npmjs.com/package/vfonts) / [css-render](https://css-render.org/) —— 字体包 / CSS-in-JS 引擎
 - [nuxtjs-naive-ui](https://github.com/07akioni/nuxtjs-naive-ui) —— Nuxt 3 集成
 
 </v-click>
@@ -2571,9 +2319,8 @@ transition: fade-out
 
 **配套技术栈**
 
-- Vue Router 4 + Pinia + Vite + UnoCSS = 黄金组合
+- Vue Router + Pinia + Vite + UnoCSS = 黄金组合
 - VueUse + axios + ECharts = 实用三件套
-- vee-validate / unplugin-vue-router = 进阶选配
 
 </v-click>
 
@@ -2642,10 +2389,8 @@ Naive UI — Vue 3 现代设计型组件库
 - NConfigProvider 必须包根，四个 Provider 嵌套是必经之路
 - 100% TypeScript，GlobalThemeOverrides 让主题类型安全
 - 主题用 JS 对象 + CSS-in-JS，运行时切换无需重新编译
-- useMessage / useDialog / useNotification / useLoadingBar 四件套
-- createDiscreteApi 解决 setup 外调用 Composable 的问题
-- DataTable 默认虚拟滚动，10K+ 行也丝滑
-- 中文字体必须覆盖 fontFamily，否则 Lato 字体 fallback
+- 四件套 + createDiscreteApi 解决 setup 外调用问题
+- DataTable 默认虚拟滚动，中文字体必须覆盖 fontFamily
 
 </div>
 

@@ -95,18 +95,15 @@ Resumability 是真创新，但代价是序列化约束 + 生态规模较小
 **优点**
 - 启动 JS ~1KB 常数级——大应用 TTI 显著优于 React/Vue/Svelte
 - Optimizer 自动拆 chunk，无需手动 React.lazy / dynamic import
-- JSX 语法零迁移成本（React 开发者直接上手）
-- Signals 响应式精准，无 Virtual DOM diff 开销
-- Qwik City 全栈一体化（路由 + RPC + Form）
-- 多端 Adapter 完整，Edge 部署友好
+- JSX 语法零迁移成本，Signals 响应式精准无 VDOM diff 开销
+- Qwik City 全栈一体化（路由 + RPC + Form），Adapter 多端完整
 - TypeScript 类型推导一流，server$ 自动 RPC
 
 **缺点**
 - 序列化约束有学习曲线（closures 必须 const + 可序列化）
 - `$` 后缀心智模型独特，调试 chunk 加载较反直觉
 - 生态规模远小于 React 生态（UI 库 / 教程 / 招聘）
-- 实时交互（如重型 SPA）优势不如静态 + 偶发交互场景明显
-- 部分边缘情况需要 `noSerialize()` 标记，违反框架直觉
+- 边缘情况需要 `noSerialize()`，实时交互优势不如静态场景明显
 - Builder.io 单一商业主体——长期投入需观察
 
 </v-clicks>
@@ -284,29 +281,11 @@ export const Counter = component$(() => {
 
 <v-click>
 
-**`$` 不是装饰，是命令**——告诉 Optimizer：「这个函数请拆成独立 chunk」。
-
-</v-click>
-
-<v-click>
-
-Optimizer 编译后大致变成：
+**`$` 不是装饰，是命令**——告诉 Optimizer：「这个函数请拆成独立 chunk」。Optimizer 编译后：
 
 ```ts
-// 主 chunk
 export const Counter = componentQrl(qrl('./chunk-A.js', 'Counter_onMount'))
-
-// chunk-A.js（仅 SSR 时执行）
-export const Counter_onMount = () => {
-  const count = useSignal(0)
-  return qrl('./chunk-B.js', 'Counter_onRender', [count])
-}
-
-// chunk-B.js（用户点击时才下载）
-export const Counter_onRender = () => {
-  const [count] = useLexicalScope()
-  return <button on:click="./chunk-C.js#handler" />
-}
+// chunk-A.js: SSR 渲染；chunk-B.js: 用户点击时才下载 handler
 ```
 
 </v-click>
@@ -319,22 +298,17 @@ transition: slide-up
 
 每个 `$` 标记都是一个 chunk 边界：
 
-| `$` 函数 | 拆分时机 | 加载时机 |
-|---|---|---|
-| `component$()` | 组件级 | 组件首次渲染时 |
-| `onClick$()` / `onScroll$()` | 事件级 | 用户触发事件时 |
-| `useTask$()` | 任务级 | SSR 时 + 跟踪状态变化时 |
-| `useVisibleTask$()` | 任务级 | 元素可见时（IntersectionObserver） |
-| `server$()` | 函数级 | RPC 调用时（仅 fetch，代码不进 client） |
-| `useResource$()` | 资源级 | useResource 触发时 |
-| `$()` 包装的任意函数 | 自定义 | 调用时 |
+| `$` 函数 | 加载时机 |
+|---|---|
+| `component$()` | 组件首次渲染时 |
+| `onClick$()` / `onScroll$()` | 用户触发事件时 |
+| `useTask$()` | SSR + 跟踪状态变化时 |
+| `useVisibleTask$()` | 元素可见时（IntersectionObserver） |
+| `server$()` | RPC 调用时（代码不进 client） |
 
 <v-click>
 
-**对比手动拆分**：
-- React：`const Foo = React.lazy(() => import('./Foo'))` 手写、组件级
-- Vue：`defineAsyncComponent(() => import('./Foo'))` 手写、组件级
-- **Qwik：每个 `$` 自动是 chunk**，事件级粒度（手工做不到）
+**对比**：React `React.lazy` / Vue `defineAsyncComponent` 需手写、组件级；**Qwik 每个 `$` 自动是 chunk**，事件级粒度。
 
 </v-click>
 
@@ -344,35 +318,27 @@ transition: slide-up
 
 # 闭包捕获约束
 
-`$` 标记的函数捕获的变量必须满足：
+`$` 标记的函数捕获的变量必须 const + 可序列化：
 
 ```ts
 component$(() => {
-  // ✅ const + 可序列化
-  const name = 'Qwik'
-  const obj = { count: 0 }
-
-  // ❌ let（Optimizer 报错）
-  let badName = 'oops'
-
-  // ❌ 函数（不可序列化）
-  const callback = () => console.log('hi')
+  const name = 'Qwik'                      // ✅ const + 可序列化
+  const obj = { count: 0 }                 // ✅
+  let badName = 'oops'                     // ❌ let（Optimizer 报错）
+  const callback = () => console.log('hi') // ❌ 函数（不可序列化）
 
   return (
     <button onClick$={() => {
-      console.log(name)        // ✅ OK
-      console.log(obj.count)   // ✅ OK
-      callback()               // ❌ 序列化失败
-    }}>
-      Click
-    </button>
+      console.log(name, obj.count)  // ✅ OK
+      callback()                    // ❌ 序列化失败
+    }}>Click</button>
   )
 })
 ```
 
 <v-click>
 
-**为什么**：Optimizer 把闭包变量序列化进 HTML（`q:func` 区域），客户端 chunk 加载后通过 `useLexicalScope()` 恢复。函数对象无法 JSON 化——所以**只能捕获 const + serializable**。
+**为什么**：Optimizer 把闭包变量序列化进 HTML（`q:func` 区域），客户端 chunk 加载后通过 `useLexicalScope()` 恢复。函数对象无法 JSON 化——只能捕获 const + serializable。
 
 </v-click>
 
@@ -424,20 +390,12 @@ transition: slide-up
 import { component$, useStore } from '@builder.io/qwik'
 
 export const Form = component$(() => {
-  const state = useStore({
-    user: { name: 'Alice', age: 30 },
-    items: [] as string[],
-  })
-
+  const state = useStore({ user: { name: 'Alice', age: 30 }, items: [] as string[] })
   return (
     <div>
-      <input
-        value={state.user.name}
-        onInput$={(_, el) => state.user.name = el.value}
-      />
-      <p>Age: {state.user.age}</p>
+      <input value={state.user.name}
+        onInput$={(_, el) => state.user.name = el.value} />
       <button onClick$={() => state.items.push('new')}>Add</button>
-      <ul>{state.items.map(i => <li>{i}</li>)}</ul>
     </div>
   )
 })
@@ -445,14 +403,11 @@ export const Form = component$(() => {
 
 <v-click>
 
-**`useStore` vs `useSignal`**：
-
 | 维度 | `useSignal` | `useStore` |
 |---|---|---|
-| 类型 | 单值（含 `.value`） | 对象 / 数组 |
+| 类型 | 单值（`.value`） | 对象 / 数组 |
 | 嵌套响应 | 不需要 | **默认深层响应** |
-| 适用场景 | 计数器 / 文本 / 单值 | 表单 / 集合 / 复杂状态 |
-| 关闭深响应 | - | `{ deep: false }` |
+| 适用场景 | 计数器 / 单值 | 表单 / 集合 / 复杂状态 |
 
 </v-click>
 
@@ -463,33 +418,27 @@ transition: slide-up
 # Signals：useComputed$ 与 useResource$
 
 ```ts
-import { component$, useSignal, useComputed$, useResource$, Resource } from '@builder.io/qwik'
+import { useComputed$, useResource$, Resource } from '@builder.io/qwik'
 
 export const UserCard = component$(() => {
   const userId = useSignal(1)
-
-  // 同步派生值（基于 signal）
+  // 同步派生值
   const doubled = useComputed$(() => userId.value * 2)
 
   // 异步资源（fetch / 数据库）
   const userResource = useResource$(async ({ track, cleanup }) => {
-    const id = track(() => userId.value)   // 跟踪 userId 变化时重新执行
+    const id = track(() => userId.value)  // 跟踪变化时重新执行
     const ctrl = new AbortController()
-    cleanup(() => ctrl.abort())              // 上次请求自动取消
+    cleanup(() => ctrl.abort())            // 上次请求自动取消
     const res = await fetch(`/api/user/${id}`, { signal: ctrl.signal })
     return res.json()
   })
 
   return (
-    <div>
-      <p>doubled = {doubled.value}</p>
-      <Resource
-        value={userResource}
-        onPending={() => <p>Loading...</p>}
-        onRejected={(err) => <p>Error: {err.message}</p>}
-        onResolved={(user) => <p>{user.name}</p>}
-      />
-    </div>
+    <Resource value={userResource}
+      onPending={() => <p>Loading...</p>}
+      onRejected={(err) => <p>Error: {err.message}</p>}
+      onResolved={(user) => <p>{user.name}</p>} />
   )
 })
 ```
@@ -501,8 +450,7 @@ transition: slide-up
 # Tasks：useTask$
 
 ```ts
-import { component$, useSignal, useTask$ } from '@builder.io/qwik'
-import { isServer } from '@builder.io/qwik'
+import { useTask$, isServer } from '@builder.io/qwik'
 
 export const Search = component$(() => {
   const query = useSignal('')
@@ -510,15 +458,9 @@ export const Search = component$(() => {
 
   useTask$(({ track, cleanup }) => {
     const q = track(() => query.value)
+    if (isServer) { debounced.value = q; return }  // SSR 立即跑
 
-    // SSR 立即跑（首次渲染）
-    if (isServer) {
-      debounced.value = q
-      return
-    }
-
-    // 客户端防抖
-    const id = setTimeout(() => debounced.value = q, 500)
+    const id = setTimeout(() => debounced.value = q, 500)  // 客户端防抖
     cleanup(() => clearTimeout(id))
   })
 
@@ -528,7 +470,7 @@ export const Search = component$(() => {
 
 <v-click>
 
-**`useTask$` 特点**：SSR + 客户端都跑、阻塞首次渲染、tracked signal 变化时重跑、`cleanup` 清理副作用。
+**特点**：SSR + 客户端都跑、阻塞首次渲染、tracked signal 变化时重跑、`cleanup` 清理副作用。
 
 </v-click>
 
@@ -539,35 +481,30 @@ transition: slide-up
 # Tasks：useVisibleTask$（谨慎使用）
 
 ```ts
-import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik'
+import { useVisibleTask$ } from '@builder.io/qwik'
 
 export const Clock = component$(() => {
   const time = useSignal('')
-
   useVisibleTask$(({ cleanup }) => {
     const id = setInterval(() => {
       time.value = new Date().toLocaleTimeString()
     }, 1000)
     cleanup(() => clearInterval(id))
   })
-
   return <p>{time.value}</p>
 })
 ```
 
 <v-click>
 
-**`useVisibleTask$` 特点**：
-- **只在客户端跑**（SSR 完全跳过）
-- 元素进入视口（IntersectionObserver）后触发
-- **强制下载 chunk** → 损失 lazy boundary 收益
+**特点**：只在客户端跑（SSR 跳过）；元素进入视口（IntersectionObserver）后触发；**强制下载 chunk** → 损失 lazy boundary 收益。
 
 </v-click>
 
 <v-click>
 
 ::: warning 滥用是 Qwik 第一大坑
-官方明确说「last resort」。每个 `useVisibleTask$` 都让客户端**必须下载并执行**一段 JS——破坏 Resumability 优势。优先考虑 `useTask$` / 事件 handler / `useOn`。
+官方明确说「last resort」。每个 `useVisibleTask$` 都让客户端**必须下载并执行**一段 JS——破坏 Resumability。优先考虑 `useTask$` / 事件 handler / `useOn`。
 :::
 
 </v-click>
@@ -581,30 +518,21 @@ transition: slide-up
 替代 `useVisibleTask$` 的更轻量方案：
 
 ```ts
-import { component$, useOn, useOnDocument, useOnWindow, $ } from '@builder.io/qwik'
+import { useOn, useOnDocument, useOnWindow, $ } from '@builder.io/qwik'
 
 export const ShortcutListener = component$(() => {
-  // host 元素上的事件
-  useOn('click', $((e) => console.log('host clicked', e)))
-
-  // document 事件
-  useOnDocument('keydown', $((e) => {
+  useOn('click', $((e) => console.log('host clicked', e)))  // host 事件
+  useOnDocument('keydown', $((e) => {                        // document 事件
     if ((e as KeyboardEvent).key === 'Escape') console.log('ESC')
   }))
-
-  // window 事件
-  useOnWindow('resize', $(() => console.log('resized')))
-
+  useOnWindow('resize', $(() => console.log('resized')))    // window 事件
   return <div>Listen everywhere</div>
 })
 ```
 
 <v-click>
 
-**优势**：
-- 事件 handler 仍是 lazy chunk（用户触发才下载）
-- **不会**强制下载组件代码
-- 适合「想监听全局事件，但不想丢失 Resumability」的场景
+**优势**：事件 handler 仍是 lazy chunk（用户触发才下载）；**不会**强制下载组件代码；适合「监听全局事件 + 不丢 Resumability」的场景。
 
 </v-click>
 
@@ -615,23 +543,19 @@ transition: slide-up
 # Server Functions：server$
 
 ```ts
-import { component$, useSignal, $, server$ } from '@builder.io/qwik'
+import { server$ } from '@builder.io/qwik'
 
-// 仅服务端执行的函数（客户端拿到一个 RPC stub）
+// 仅服务端执行（客户端拿到 RPC stub）
 export const getServerTime = server$(async function () {
   // this = RequestEvent，可访问 cookies / env / headers
-  console.log('client IP:', this.clientConn?.ip)
   return new Date().toISOString()
 })
 
 export default component$(() => {
   const time = useSignal('')
-
   return (
-    <button onClick$={$(async () => {
-      time.value = await getServerTime()
-    })}>
-      Fetch server time: {time.value}
+    <button onClick$={async () => { time.value = await getServerTime() }}>
+      {time.value || 'Fetch'}
     </button>
   )
 })
@@ -639,11 +563,7 @@ export default component$(() => {
 
 <v-click>
 
-**机制**：
-- 服务端：直接调用函数
-- 客户端：编译成 `fetch('/qwik-rpc', { body: {...} })` 自动 POST
-- **服务端代码 0 字节进客户端 bundle**（包括函数体 + 依赖）
-- 端到端类型推导（client 端 `getServerTime` 的返回类型仍是 `Promise<string>`）
+**机制**：客户端编译成 `fetch('/qwik-rpc', ...)` 自动 POST。服务端代码 **0 字节进客户端 bundle**（包括函数体 + 依赖），端到端类型推导。
 
 </v-click>
 
@@ -655,7 +575,6 @@ transition: slide-up
 
 ```ts
 // src/routes/products/[id]/index.tsx
-import { component$ } from '@builder.io/qwik'
 import { routeLoader$ } from '@builder.io/qwik-city'
 
 export const useProduct = routeLoader$(async ({ params }) => {
@@ -664,24 +583,14 @@ export const useProduct = routeLoader$(async ({ params }) => {
 })
 
 export default component$(() => {
-  const product = useProduct()
-  // product.value 类型自动推导为 { name: string; price: number }
-  return (
-    <div>
-      <h1>{product.value.name}</h1>
-      <p>¥{product.value.price}</p>
-    </div>
-  )
+  const product = useProduct()  // value 类型自动推导
+  return <div><h1>{product.value.name}</h1><p>¥{product.value.price}</p></div>
 })
 ```
 
 <v-click>
 
-**特点**：
-- 路由级 / layout 级声明
-- 服务端执行（导航前），结果序列化进 HTML
-- 客户端 `useProduct()` 拿到 readonly Signal，**不重新 fetch**
-- 类型从 loader 返回值反向推到 component 端
+**特点**：路由级 / layout 级声明；服务端导航前执行，结果序列化进 HTML；客户端拿到 readonly Signal，**不重新 fetch**；类型从 loader 反向推到 component。
 
 </v-click>
 
@@ -693,26 +602,19 @@ transition: slide-up
 
 ```ts
 // src/routes/users/index.tsx
-import { component$ } from '@builder.io/qwik'
 import { routeAction$, Form, zod$, z } from '@builder.io/qwik-city'
 
 export const useAddUser = routeAction$(
   async (data, { redirect, fail }) => {
-    if (await db.exists(data.email)) {
-      return fail(400, { error: 'Email taken' })
-    }
+    if (await db.exists(data.email)) return fail(400, { error: 'Email taken' })
     await db.users.create(data)
     throw redirect(302, '/users')
   },
-  zod$({
-    name: z.string().min(2),
-    email: z.string().email(),
-  })
+  zod$({ name: z.string().min(2), email: z.string().email() })
 )
 
 export default component$(() => {
   const action = useAddUser()
-
   return (
     <Form action={action}>
       <input name="name" />
@@ -735,24 +637,18 @@ transition: slide-up
 |---|---|---|
 | 声明位置 | **必须**在 `src/routes/.../index.tsx` 或 `layout.tsx` | **任意** `src/*` |
 | 作用域 | 路由内 | 全局可调用 |
-| URL | 该路由的 `?qaction=...` | `/q-action/...` |
-| 典型用途 | 该页面的 form 提交 | 跨页面操作（登出 / 切换主题） |
-| 推荐顺序 | **优先用** | 全局逻辑才用 |
+| URL | `?qaction=...` | `/q-action/...` |
+| 典型用途 | 页面 form 提交 | 跨页面操作（登出 / 切换主题） |
 
 <v-click>
 
 ```ts
-// globalAction$ 示例：登出，任意页面可调
 // src/actions/logout.ts
 export const useLogout = globalAction$(async (_, { cookie, redirect }) => {
   cookie.delete('session', { path: '/' })
   throw redirect(302, '/login')
 })
 ```
-
-</v-click>
-
-<v-click>
 
 ::: tip Form 组件 = 渐进增强
 `<Form action={action}>` 无 JS 时走标准表单 POST，有 JS 时拦截成 SPA 提交——一份代码两个场景。
@@ -770,32 +666,18 @@ transition: slide-up
 src/routes/
 ├── layout.tsx              ← 全局布局
 ├── index.tsx               ← /
-├── about/
-│   └── index.tsx           ← /about
-├── products/
-│   ├── index.tsx           ← /products
-│   └── [id]/
-│       └── index.tsx       ← /products/:id
-├── docs/
-│   ├── [...slug]/
-│   │   └── index.tsx       ← /docs/* (catch-all)
-│   └── layout.tsx          ← /docs/* 局部布局
-└── api/
-    └── hello/
-        └── index.ts        ← API endpoint (GET/POST handler)
+├── products/[id]/index.tsx ← /products/:id
+├── docs/[...slug]/index.tsx ← /docs/* (catch-all)
+└── api/hello/index.ts      ← API endpoint
 ```
 
 <v-click>
 
-**特殊文件名**：
-
 | 文件 | 用途 |
 |---|---|
 | `index.tsx` / `index.mdx` | 页面 |
-| `index.ts` | API endpoint（导出 `onGet` / `onPost`） |
-| `layout.tsx` | 嵌套布局 + middleware |
-| `layout!.tsx` | 跳过父布局 |
-| `(group)/` | 不影响 URL 的路由分组 |
+| `index.ts` | API endpoint（`onGet` / `onPost`） |
+| `layout.tsx` / `layout!.tsx` | 嵌套布局 / 跳过父布局 |
 | `[param]` / `[...catchAll]` | 动态参数 / catch-all |
 
 </v-click>
@@ -807,7 +689,6 @@ transition: slide-up
 # Link / useLocation / useNavigate
 
 ```tsx
-import { component$ } from '@builder.io/qwik'
 import { Link, useLocation, useNavigate } from '@builder.io/qwik-city'
 
 export default component$(() => {
@@ -821,12 +702,7 @@ export default component$(() => {
       <Link href="/heavy" prefetch={false}>Heavy（不预取）</Link>
       <Link href="/login" reload>Login（强刷新）</Link>
 
-      {/* 路由信息 */}
-      <p>Path: {loc.url.pathname}</p>
-      <p>Param: {loc.params.id}</p>
-      <p>Loading: {loc.isNavigating ? 'yes' : 'no'}</p>
-
-      {/* 命令式导航 */}
+      <p>Path: {loc.url.pathname} | Loading: {loc.isNavigating ? 'yes' : 'no'}</p>
       <button onClick$={() => nav('/products/1')}>Go</button>
     </div>
   )
@@ -836,7 +712,7 @@ export default component$(() => {
 <v-click>
 
 ::: tip 预取策略
-`<Link>` 默认 hover 时预取目标页 JS chunk——用户点击时基本「秒开」。`prefetch={false}` 关闭、`prefetch="js"` 仅预取 JS。
+`<Link>` 默认 hover 预取目标页 chunk——点击「秒开」。`prefetch={false}` 关闭，`prefetch="js"` 仅预取 JS。
 :::
 
 </v-click>
@@ -890,21 +766,14 @@ transition: slide-up
 |---|---|---|---|
 | 启动 JS | **~1 KB 常数** | 数十-数百 KB | 数十 KB |
 | Hydration | **无（Resumability）** | 渐进式 | 渐进式 |
-| 语法 | JSX | JSX | Vue SFC |
-| 响应式 | Signals | useState / RSC | ref / reactive |
-| 数据加载 | routeLoader$ / server$ | RSC / Server Actions | useFetch / routeRules |
-| 文件路由 | `src/routes/` | `app/` | `pages/` / `app/` |
+| 语法 / 响应式 | JSX / Signals | JSX / useState | Vue SFC / ref |
+| 数据加载 | routeLoader$ / server$ | RSC / Server Actions | useFetch |
 | 渲染策略 | SSR + SSG | RSC + PPR | SSR + SSG + ISR |
 | 生态规模 | 小 | **巨大** | 中等 |
-| 学习曲线 | 中等（$ 心智） | 高（RSC 心智） | 低 |
 
 <v-click>
 
-**怎么选**：
-- **重 SSR、初始 TTI 关键** → Qwik（启动量级跨级别小）
-- **React 生态依赖 + 团队熟 RSC** → Next.js
-- **Vue 生态偏好** → Nuxt
-- **中型电商 / SaaS** → Qwik / Next.js 都可
+**怎么选**：重 SSR + TTI 关键 → Qwik；React 生态依赖 → Next.js；Vue 偏好 → Nuxt。
 
 </v-click>
 
@@ -917,20 +786,14 @@ transition: slide-up
 | 维度 | Qwik | SvelteKit | Astro | SolidStart |
 |---|---|---|---|---|
 | 核心理念 | Resumability | 编译时优化 | Islands 部分水合 | 细粒度响应式 |
-| 默认状态 | 全应用零 Hydration | 全应用 Hydration | 默认静态、组件级 Island | 全应用 Hydration |
-| 模板 | JSX | Svelte SFC | `.astro` + 多框架 | JSX |
-| 响应式 | Signals | Runes ($state) | 框架自带 | Signals |
-| Bundle | **最小** | 极小 | **静态页 0 JS** | 极小 |
-| 适合 | 中大型 SSR 应用 | 中型应用 | 内容站 | 中型应用 |
+| 默认状态 | 零 Hydration | 全应用 Hydration | 静态 + Island | 全应用 Hydration |
+| 模板 / 响应式 | JSX / Signals | SFC / Runes | `.astro` 多框架 | JSX / Signals |
+| Bundle / 适合 | **最小** / 中大型 SSR | 极小 / 中型 | **静态 0 JS** / 内容站 | 极小 / 中型 |
 
 <v-click>
 
 ::: tip 三种「减少 JS」思路
-- **Astro**：默认 0 JS，按 Island 加（页面驱动）
-- **Qwik**：默认全交互，按事件加（用户驱动）
-- **Svelte/Solid**：编译期优化，整体小但仍 Hydrate（框架驱动）
-
-各有优势场景——Qwik 优势最明显是**重 SSR + 偶发交互**的大页面。
+**Astro** 默认 0 JS、按 Island 加（页面驱动）；**Qwik** 默认全交互、按事件加（用户驱动）；**Svelte/Solid** 编译期优化、整体小但仍 Hydrate。Qwik 优势最明显是**重 SSR + 偶发交互**的大页面。
 :::
 
 </v-click>
@@ -942,15 +805,11 @@ transition: slide-up
 # 常见陷阱：noSerialize
 
 ```ts
-import { component$, useStore, noSerialize, useVisibleTask$ } from '@builder.io/qwik'
+import { noSerialize, useVisibleTask$ } from '@builder.io/qwik'
 import type { NoSerialize } from '@builder.io/qwik'
 
 interface State {
-  // ❌ 直接放 WebSocket 实例：序列化报错
-  // ws?: WebSocket
-
-  // ✅ 用 NoSerialize 包装（运行时实例，不序列化）
-  ws?: NoSerialize<WebSocket>
+  ws?: NoSerialize<WebSocket>   // ✅ 用 NoSerialize 包装，不序列化
 }
 
 export const Chat = component$(() => {
@@ -958,7 +817,7 @@ export const Chat = component$(() => {
 
   useVisibleTask$(({ cleanup }) => {
     const ws = new WebSocket('wss://...')
-    state.ws = noSerialize(ws)   // 标记为「不序列化」
+    state.ws = noSerialize(ws)
     cleanup(() => ws.close())
   })
 
@@ -968,13 +827,8 @@ export const Chat = component$(() => {
 
 <v-click>
 
-**何时用 noSerialize**：
-- WebSocket / EventSource 实例
-- 第三方库的运行时对象（Chart.js / Leaflet map）
-- DOM 元素引用
-- 包含函数的对象
-
-**代价**：刷新页面后 `noSerialize` 字段为 `undefined`——必须重新创建。
+**何时用**：WebSocket / 第三方库运行时对象（Chart.js / Leaflet）/ DOM 引用 / 含函数的对象。
+**代价**：刷新后 `noSerialize` 字段为 `undefined`——必须重新创建。
 
 </v-click>
 
@@ -988,31 +842,20 @@ transition: slide-up
 component$(() => {
   // ❌ 错误：捕获了函数对象
   const handler = (e: Event) => console.log(e)
-
-  return <button onClick$={handler}>Click</button>
-  //                       ^^^^^^^ 序列化失败
+  return <button onClick$={handler}>Click</button>  // 序列化失败
 })
 
-// ✅ 正确：内联 / 用 $() 包装独立函数
-component$(() => {
-  return <button onClick$={(e) => console.log(e)}>Click</button>
-})
+// ✅ 内联
+component$(() => <button onClick$={(e) => console.log(e)}>Click</button>)
 
-// ✅ 正确：独立 $() 函数（可复用）
-import { $ } from '@builder.io/qwik'
+// ✅ 独立 $() 函数（可复用）
 const logEvent = $((e: Event) => console.log(e))
-
-component$(() => {
-  return <button onClick$={logEvent}>Click</button>
-})
+component$(() => <button onClick$={logEvent}>Click</button>)
 ```
 
 <v-click>
 
-**核心规则**：
-- 闭包捕获的变量必须是 **const + 可 JSON 化**
-- 函数对象必须是 **`$()` 包装的 QRL**（编译后是 chunk 引用，不是函数本体）
-- 跨组件传递 handler → 提到模块顶层 `export const fn = $(...)` 或 inline
+**核心规则**：闭包捕获变量必须 **const + 可 JSON 化**；函数对象必须 **`$()` 包装的 QRL**（编译后是 chunk 引用）；跨组件传 handler → 模块顶层 `export const fn = $(...)`。
 
 </v-click>
 
@@ -1025,28 +868,16 @@ transition: slide-up
 ```ts
 // ❌ 反例：用 useVisibleTask$ 做能用事件 handler 解决的事
 component$(() => {
-  const open = useSignal(false)
-
   useVisibleTask$(() => {
-    // 用 useVisibleTask 注册点击外部关闭逻辑 → 强制下载 chunk
-    document.addEventListener('click', (e) => {
-      if (!menuRef.value?.contains(e.target as Node)) open.value = false
-    })
+    // 强制下载 chunk，破坏 Resumability
+    document.addEventListener('click', (e) => { /* ... */ })
   })
-
   return <div>...</div>
 })
 
 // ✅ 正例：用 useOnDocument（仍是 lazy）
-import { useOnDocument, $ } from '@builder.io/qwik'
-
 component$(() => {
-  const open = useSignal(false)
-
-  useOnDocument('click', $((e) => {
-    if (open.value && /* 检查 e.target */) open.value = false
-  }))
-
+  useOnDocument('click', $((e) => { /* ... */ }))
   return <div>...</div>
 })
 ```
@@ -1054,7 +885,7 @@ component$(() => {
 <v-click>
 
 **判定标准**：
-- 必须组件 mount 后立刻跑（动画、第三方库初始化）→ `useVisibleTask$`
+- 必须 mount 后立刻跑（动画、第三方库初始化）→ `useVisibleTask$`
 - 监听事件 → `useOn` / `useOnDocument` / `useOnWindow`
 - SSR + 客户端都跑 → `useTask$`
 
@@ -1070,24 +901,17 @@ transition: slide-up
 // ❌ 解构 store 字段：解构后的值不再响应
 component$(() => {
   const state = useStore({ count: 0 })
-  const { count } = state   // count 是普通 number，丢失订阅
-
+  const { count } = state   // 普通 number，丢失订阅
   return <p>{count}</p>     // 不会响应 state.count 变化
 })
 
 // ✅ 直接读字段
 component$(() => {
   const state = useStore({ count: 0 })
-  return <p>{state.count}</p>   // OK
+  return <p>{state.count}</p>
 })
 
-// ❌ 传整个 signal 给子组件做 props
-component$(() => {
-  const count = useSignal(0)
-  return <Child sig={count} />   // ⚠️ Qwik 推荐传 value
-})
-
-// ✅ 传 value，子组件按需读
+// ✅ 传 value，子组件按需读（不要直接传 signal）
 component$(() => {
   const count = useSignal(0)
   return <Child count={count.value} />
@@ -1109,24 +933,17 @@ transition: slide-up
 # 测试：Vitest + Playwright
 
 ```bash
-# 单测：Vitest（默认）
-pnpm add -D vitest @builder.io/qwik/testing
-
-# E2E：Playwright
-pnpm add -D @playwright/test
+pnpm add -D vitest @builder.io/qwik/testing  # 单测
+pnpm add -D @playwright/test                  # E2E
 ```
 
 ```ts
-// my-counter.test.tsx
 import { createDOM } from '@builder.io/qwik/testing'
-import { test, expect } from 'vitest'
-import { Counter } from './counter'
 
 test('counter increments', async () => {
   const { screen, render, userEvent } = await createDOM()
   await render(<Counter />)
   expect(screen.outerHTML).toContain('Count: 0')
-
   await userEvent('button', 'click')
   expect(screen.outerHTML).toContain('Count: 1')
 })
@@ -1134,10 +951,7 @@ test('counter increments', async () => {
 
 <v-click>
 
-**E2E 建议**：
-- Qwik 应用 SSR 后**不需要等 Hydration**——Playwright `goto` 后立即可点
-- 注意 chunk 是 lazy 加载，首次点击可能多 ~100ms 拉 chunk
-- `await page.waitForLoadState('networkidle')` 可等所有预取完成
+**E2E 建议**：SSR 后不需等 Hydration，`goto` 后立即可点；首次点击可能多 ~100ms 拉 chunk；`waitForLoadState('networkidle')` 等预取完成。
 
 </v-click>
 
@@ -1213,36 +1027,15 @@ transition: slide-up
 # 下一步学习路径
 
 ```
-入门
-├── 看完 qwik.dev/docs Introduction
-├── 写一个 Counter + Todo
-└── 理解 useSignal / useStore / $ 后缀
-
-进阶
-├── Qwik City 路由 + routeLoader$ + routeAction$
-├── server$ RPC 模式
-├── 部署到 Cloudflare / Vercel
-└── Qwik Insights + 预取策略
-
-实战
-├── 重写一个内容站 / Dashboard
-├── 集成第三方库（用 noSerialize）
-├── 性能 profile + bundle 分析
-└── E2E 测试（Playwright）
-
-延伸
-├── Qwik 2.0 RC 试用（Signals v2）
-├── 阅读 Optimizer 源码
-└── Builder.io 可视化编辑器集成
+入门：qwik.dev/docs Introduction → Counter + Todo → useSignal / $ 心智
+进阶：Qwik City 路由 + routeLoader$ + routeAction$ → server$ RPC → Cloudflare 部署
+实战：内容站 / Dashboard → 第三方库（noSerialize）→ bundle 分析 → Playwright E2E
+延伸：Qwik 2.0 RC（Signals v2）→ Optimizer 源码 → Builder.io 集成
 ```
 
 <v-click>
 
-**官方资源**：
-- 文档：[qwik.dev](https://qwik.dev)
-- Tutorial：[qwik.dev/tutorial](https://qwik.dev/tutorial)
-- Playground：[qwik.dev/playground](https://qwik.dev/playground)
-- Discord：官方社区最活跃
+**官方资源**：[qwik.dev](https://qwik.dev) / [tutorial](https://qwik.dev/tutorial) / [playground](https://qwik.dev/playground) / Discord 官方社区最活跃。
 
 </v-click>
 

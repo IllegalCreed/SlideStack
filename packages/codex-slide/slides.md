@@ -320,15 +320,13 @@ transition: slide-up
 | --- | --- |
 | 退出 | `Ctrl+C` 两次 / `/quit` |
 | 中断当前回复 | `Esc` |
-| 清空会话 | `/clear` |
-| 压缩对话历史 | `/compact` |
-| 恢复上次会话 | `codex resume --last` |
-| 恢复指定会话 | `codex resume <session-id>` |
+| 清空会话 / 压缩 | `/clear` / `/compact` |
+| 恢复上次 / 指定会话 | `codex resume --last` / `<session-id>` |
 | 列出历史会话 | `codex resume` |
 
 <v-click>
 
-会话超长触发 `context_length_exceeded` 错误时，**`/compact`** 会让 Codex 自己总结历史并替换原对话，token 压力立刻缓解。
+`context_length_exceeded` 时，**`/compact`** 让 Codex 自总结历史并替换原对话，立刻缓解 token 压力。
 
 </v-click>
 
@@ -538,12 +536,9 @@ transition: slide-up
 ```toml
 approval_policy = { granular = {
     sandbox_approval = true,
-    rules = true,
-    mcp_elicitations = false,
     request_permissions = true,
     skill_approval = true
 } }
-
 approvals_reviewer = "auto_review"   # user / auto_review
 ```
 
@@ -552,10 +547,9 @@ approvals_reviewer = "auto_review"   # user / auto_review
 | 字段 | 含义 |
 | --- | --- |
 | `sandbox_approval` | 切 sandbox 模式时审批 |
-| `rules` | 修改规则时审批 |
-| `mcp_elicitations` | MCP 询问时审批 |
 | `request_permissions` | 权限提升时审批 |
 | `skill_approval` | 触发 skill 时审批 |
+| `rules` / `mcp_elicitations` | 修改规则 / MCP 询问审批 |
 
 </v-clicks>
 
@@ -711,7 +705,7 @@ codex --image ./design.png "按图实现"
 transition: slide-up
 ---
 
-# Slash 命令
+# Slash 命令 (1/2)
 
 | 命令 | 作用 |
 | --- | --- |
@@ -721,6 +715,15 @@ transition: slide-up
 | `/approvals` | 切审批模式 |
 | `/sandbox` | 切 sandbox 模式 |
 | `/init` | 生成 `AGENTS.md` 骨架 |
+
+---
+transition: slide-up
+---
+
+# Slash 命令 (2/2)
+
+| 命令 | 作用 |
+| --- | --- |
 | `/clear` | 清空会话 |
 | `/compact` | 总结后压缩对话 |
 | `/cost` | 显示 token 用量 + 费用 |
@@ -811,7 +814,6 @@ anthropic_remote      ✓ connected   (5 tools)
 | Server | 提供工具 |
 | --- | --- |
 | `@modelcontextprotocol/server-github` | Issue / PR / Repo |
-| `@modelcontextprotocol/server-filesystem` | 受限文件读写 |
 | `@modelcontextprotocol/server-postgres` | Postgres 查询 |
 | `@upstash/context7-mcp` | 最新库文档 |
 | `chrome-devtools-mcp` | 浏览器操作 |
@@ -1163,14 +1165,12 @@ transition: slide-up
 
 | 维度 | Codex CLI | Claude Code |
 | --- | --- | --- |
-| 模型 | GPT / o-series 默认 + 任意 provider | Anthropic Opus / Sonnet / Haiku |
+| 模型 | GPT / o-series + 任意 provider | Anthropic Opus / Sonnet / Haiku |
 | 上下文 | ~200K（按模型） | 200K / 1M |
 | 项目说明 | `AGENTS.md` | `CLAUDE.md` |
 | 子目录覆盖 | ✓（override.md） | ✗ |
 | Sandbox | 三层独立配置 | 权限规则 |
-| 多 Provider | ✓ | ✗（仅 Anthropic） |
-| 开源 | ✓（Apache-2.0） | ✗ |
-| 中国可用 | 需自备网络 | 需自备网络 |
+| 多 Provider / 开源 | ✓ / Apache-2.0 | ✗ / ✗ |
 
 ---
 transition: slide-up
@@ -1182,16 +1182,14 @@ transition: slide-up
 | --- | --- | --- |
 | Profiles | ✓ | ✗（单 settings） |
 | Skills | ✗ | ✓（成熟） |
-| Hooks | 配置存在，功能受限 | ✓（成熟） |
-| MCP | ✓ | ✓ |
-| Subagents | ✓（multi_agent） | ✓（多类型） |
+| Hooks | 受限 | ✓ |
+| Subagents | ✓（multi_agent） | ✓ |
 | Memory | ✓（默认关） | ✓（默认开） |
 | 编辑机制 | `apply_patch`（diff） | `Edit`（string replace） |
-| Web 端 | chatgpt.com/codex | claude.ai/code |
 
 <v-click>
 
-**两者差异本质**：Codex 走「配置驱动」路线（toml 文件），Claude Code 走「指令驱动」路线（skills 生态）。
+**本质**：Codex 走「配置驱动」（toml），Claude Code 走「指令驱动」（skills）。
 
 </v-click>
 
@@ -1252,9 +1250,7 @@ env_key = "OPENROUTER_API_KEY"
 
 <v-click>
 
-> ⚠️ **Azure 国内 region 暂未开放**
->
-> 微软在大陆有 Azure 实例，但 Azure OpenAI 在国内 region 不可用。需配置国际 region。
+> ⚠️ **Azure 国内 region 暂未开放** —— Azure OpenAI 在国内 region 不可用，需配置国际 region。
 
 </v-click>
 
@@ -1399,22 +1395,22 @@ transition: slide-up
 | `rate_limit_error` | 触发速率限制 |
 | `context_length_exceeded` | 上下文窗口满 |
 | `sandbox_denied` | 文件 / 命令超出 sandbox 范围 |
-| `approval_required` | 用户拒绝某个工具调用 |
-| `patch_apply_failed` | apply_patch 应用失败（冲突 / 路径错） |
+| `patch_apply_failed` | apply_patch 应用失败 |
 | `mcp_connection_failed` | MCP server 启动失败 |
-| `model_not_available` | 模型 ID 在当前 provider 不存在 |
 | `provider_error` | provider API 报错 |
 
-<v-click>
+---
+transition: slide-up
+---
 
-**对应处理**：
+# 错误处理对策
 
 - `authentication_error` → `codex login` 重 OAuth
 - `context_length_exceeded` → `/compact` 或换长上下文模型
 - `patch_apply_failed` → 让 Codex 重读文件后再 patch
 - `sandbox_denied` → 切 `workspace-write` 或加 `writable_roots`
-
-</v-click>
+- `rate_limit_error` → 等待重试或切 provider
+- `mcp_connection_failed` → 检查 server 路径 / `env` 配置
 
 ---
 transition: slide-up
@@ -1450,12 +1446,7 @@ transition: slide-up
 
 <v-click>
 
-**关键演进**：
-
-- **Rust 重写** → 启动快 + 内存省
-- **Sandbox / Approval** → 默认即安全
-- **AGENTS.md** → 与 Claude Code 错位的项目说明标准
-- **multi-provider** → 不锁死 OpenAI
+**关键演进**：Rust 重写 → Sandbox/Approval → AGENTS.md → multi-provider
 
 </v-click>
 
@@ -1467,29 +1458,13 @@ transition: slide-up
 
 <v-clicks>
 
-**Week 1 — 上手**
+**Week 1 — 上手**：装 + login，写 `AGENTS.md`，用 `/init` 改小 bug
 
-- 装 + login + 第一次对话
-- 写 `AGENTS.md`，体会 Codex 如何遵守规范
-- 用 `/init` + 让 Codex 改一个小 bug
+**Week 2 — 进阶**：切模型、调 `reasoning_effort`、试 `--full-auto`
 
-**Week 2 — 进阶**
+**Week 3 — 扩展**：装 MCP server（GitHub / Context7）、配 profiles、试 `/review`
 
-- 切换模型（gpt-5.5 / o3 / o4-mini）感受差异
-- 调 `reasoning_effort` 看效果差异
-- 试 `--full-auto` 跑完整任务
-
-**Week 3 — 扩展**
-
-- 装 1-2 个 MCP server（GitHub / Context7）
-- 配 profiles 切换开发 / 评审两套配置
-- 试 `/review` 评审 PR
-
-**Week 4 — 工作流**
-
-- 配 `permissions` 细粒度权限
-- spawn subagent 做并行任务
-- CI 集成 `codex exec`
+**Week 4 — 工作流**：细粒度 `permissions`、spawn subagent、CI 集成 `codex exec`
 
 </v-clicks>
 
@@ -1503,12 +1478,11 @@ transition: slide-up
 | --- | --- |
 | 官方文档 | [developers.openai.com/codex](https://developers.openai.com/codex) |
 | GitHub | [openai/codex](https://github.com/openai/codex) |
-| CLI 参考 | [developers.openai.com/codex/cli/reference](https://developers.openai.com/codex/cli/reference) |
-| AGENTS.md | [developers.openai.com/codex/guides/agents-md](https://developers.openai.com/codex/guides/agents-md) |
-| 最佳实践 | [developers.openai.com/codex/learn/best-practices](https://developers.openai.com/codex/learn/best-practices) |
+| CLI 参考 | [codex/cli/reference](https://developers.openai.com/codex/cli/reference) |
+| AGENTS.md | [codex/guides/agents-md](https://developers.openai.com/codex/guides/agents-md) |
+| 最佳实践 | [codex/learn/best-practices](https://developers.openai.com/codex/learn/best-practices) |
 | Prompting 指南 | [Codex Prompting Guide](https://developers.openai.com/cookbook/examples/gpt-5/codex_prompting_guide) |
-| Web / 桌面 | [chatgpt.com/codex](https://chatgpt.com/codex) |
-| 状态页 | [status.openai.com](https://status.openai.com/) |
+| Web / 状态页 | [chatgpt.com/codex](https://chatgpt.com/codex) / [status.openai.com](https://status.openai.com/) |
 
 ---
 layout: center

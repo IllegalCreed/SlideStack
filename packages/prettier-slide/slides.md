@@ -228,11 +228,7 @@ layoutClass: gap-x-16
 
   - 检查格式：`--check`
   - 指定配置文件：`--config .prettierrc`
-  - 忽略配置文件：`--no-config`
-  - 指定文件全名：`--stdin-filepath x.js`
   - 忽略未知类型：`--ignore-unknown`
-
-<br>
 
 </div>
 
@@ -635,17 +631,11 @@ layoutClass: gap-x-16 grid-rows-[100px_1fr_40px]!
   pnpm add -D prettier-plugin-foo
   ```
 
-  <br>
-
   ```json
   //.prettierrc
-  {
-    "plugins": ["prettier-plugin-foo"]
-  }
+  { "plugins": ["prettier-plugin-foo"] }
   ```
-- **常用插件**
-  - `prettier-plugin-tailwindcss`
-  - `@prettier/plugin-xml`
+- **常用插件**：`prettier-plugin-tailwindcss`、`@prettier/plugin-xml`
 
 </div>
 

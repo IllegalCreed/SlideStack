@@ -108,26 +108,17 @@ transition: fade-out
 
 <v-click>
 
-| 维度          | Element Plus       | Vuetify 3       | Naive UI        | Ant Design Vue   | PrimeVue          |
-| ------------- | ------------------ | --------------- | --------------- | ---------------- | ----------------- |
-| 框架绑定      | **Vue 3**          | Vue 3           | Vue 3           | Vue 3            | Vue 3 / React     |
-| 设计语言      | 中后台通用         | Material 3      | 简约现代        | Ant Design       | 多 Preset 主题    |
-| 组件数量      | **60+**            | 80+             | 70+             | 60+              | 80+               |
-| TS 支持       | **原生**           | 原生            | **原生**        | 原生             | 原生              |
-| 主题方案      | SCSS + CSS vars    | SCSS + Theme    | JS Theme Object | LESS + Token     | CSS vars + Theme  |
-| 包体积        | 中（按需 tree-shake）| 偏大          | 小              | 偏大             | 中                |
-| 国际化        | 66+ 语言           | 50+ 语言        | 30+ 语言        | 20+ 语言         | 50+ 语言          |
-| 主导团队      | **饿了么**         | 社区 / Vuetify  | TuSimple 团队   | **蚂蚁集团**     | PrimeTek          |
-| 中国生态      | **极强**           | 一般            | 强              | 强               | 一般              |
-| 大版本风险    | 低（v2 长期）      | 中（v2→v3 重写）| 低              | 低               | 中                |
+| 维度       | Element Plus    | Vuetify 3    | Naive UI    | Ant Design Vue |
+| ---------- | --------------- | ------------ | ----------- | -------------- |
+| 设计语言   | 中后台通用      | Material 3   | 简约现代    | Ant Design     |
+| 组件数量   | **60+**         | 80+          | 70+         | 60+            |
+| TS 支持    | **原生**        | 原生         | **原生**    | 原生           |
+| 主题方案   | SCSS + CSS vars | SCSS + Theme | JS Theme    | LESS + Token   |
+| 国际化     | 66+ 语言        | 50+          | 30+         | 20+            |
+| 主导团队   | **饿了么**      | 社区         | TuSimple    | **蚂蚁集团**   |
+| 中国生态   | **极强**        | 一般         | 强          | 强             |
 
 </v-click>
-
-<div v-click text-xs text-right>
-
-_Read more about_ [_Vue 3 UI Comparisons_](https://element-plus.org/en-US/)
-
-</div>
 
 <style>
 h1 {
@@ -168,21 +159,13 @@ transition: fade-out
 
 <v-click>
 
-| 版本             | 时间    | 关键事件                                                       |
-| ---------------- | ------- | -------------------------------------------------------------- |
-| Element 1.x      | 2016    | 基于 Vue 1.x，饿了么内部孵化对外开源                           |
-| Element 2.x      | 2017    | 配 Vue 2，国内中后台事实标准，30+ 万 GitHub star               |
-| **Element Plus** | 2020.10 | 基于 Vue 3 Composition + TypeScript 重写，独立仓库新生         |
-| Element Plus 1.x | 2021    | RC 阶段，API 与 Element 大部分兼容                             |
-| Element Plus 2.0 | 2022.1  | 正式版，按需引入 + Tree-shaking 完善                           |
-| Element Plus 2.5 | 2023    | 暗色模式正式版，TypeScript 类型推导加强                        |
-| Element Plus 2.10+| 2024+ | 持续迭代到 2.14+，Volar 完善、a11y 增强、SSR 优化              |
-
-</v-click>
-
-<v-click>
-
-文档主线长期标记为「v2」，npm 包 `element-plus` 内部持续小版本迭代 —— 一份代码贯穿多年。
+| 版本             | 时间    | 关键事件                                          |
+| ---------------- | ------- | ------------------------------------------------- |
+| Element 2.x      | 2017    | 配 Vue 2，国内中后台事实标准                      |
+| **Element Plus** | 2020.10 | 基于 Vue 3 + TypeScript 重写，独立仓库            |
+| Element Plus 2.0 | 2022.1  | 正式版，按需引入 + Tree-shaking 完善              |
+| Element Plus 2.5 | 2023    | 暗色模式正式版，TypeScript 类型推导加强           |
+| Element Plus 2.10+| 2024+ | 持续迭代到 2.14+，Volar 完善、a11y 增强、SSR 优化 |
 
 </v-click>
 
@@ -247,7 +230,7 @@ transition: fade-out
 
 **3. Efficiency（效率）**
 
-简化用户认知 —— 表单一屏可填、Table 一屏可览、表格分页 + 排序 + 筛选三件套零配置启用。
+简化用户认知 —— 表格分页 + 排序 + 筛选三件套零配置启用。
 
 </v-click>
 
@@ -255,7 +238,7 @@ transition: fade-out
 
 **4. Controllability（可控）**
 
-不替用户做决定 —— 删除有确认、提交有 loading、危险操作有二次校验、长操作可中止。
+不替用户做决定 —— 删除有确认、危险操作有二次校验、长操作可中止。
 
 </v-click>
 
@@ -449,29 +432,10 @@ transition: fade-out
 <v-click>
 
 ```vue
-<script setup lang="ts">
-import { ref } from "vue";
-
-const loading = ref(false);
-
-async function handleSubmit() {
-  loading.value = true;
-  try {
-    await fetch("/api/submit", { method: "POST" });
-  } finally {
-    loading.value = false;
-  }
-}
-</script>
-
 <template>
-  <el-button type="primary" :loading="loading" @click="handleSubmit">
-    提交订单
-  </el-button>
+  <el-button type="primary" :loading="loading" @click="submit">提交</el-button>
   <el-button type="success">成功</el-button>
-  <el-button type="warning" plain>警告</el-button>
   <el-button type="danger" round>危险</el-button>
-  <el-button :icon="Edit" circle />
 </template>
 ```
 
@@ -479,12 +443,11 @@ async function handleSubmit() {
 
 <v-click>
 
-| Prop      | 取值                                   | 说明           |
-| --------- | -------------------------------------- | -------------- |
-| `type`    | primary / success / warning / danger / info | 颜色语义 |
-| `size`    | large / default / small                | 尺寸           |
-| `plain` `round` `circle` | boolean              | 形态变体       |
-| `loading` `disabled`     | boolean              | 状态           |
+| Prop                     | 取值                                        |
+| ------------------------ | ------------------------------------------- |
+| `type`                   | primary / success / warning / danger / info |
+| `size`                   | large / default / small                     |
+| `plain` `round` `circle` | 形态变体                                    |
 
 </v-click>
 
@@ -531,21 +494,14 @@ transition: fade-out
 
 <v-click>
 
-| 分组           | 代表组件                                                     |
-| -------------- | ------------------------------------------------------------ |
-| **Basic**      | Button / Icon / Link / Layout / Container / Border / Color / Typography |
-| **Form**       | Form / Input / Select / DatePicker / Switch / Slider / Rate / Upload |
-| **Data**       | Table / Tree / Pagination / Tag / Badge / Avatar / Image / Calendar |
-| **Navigation** | Menu / Tabs / Breadcrumb / Steps / Backtop / Affix / Dropdown |
-| **Feedback**   | Alert / Message / MessageBox / Notification / Loading / Progress |
-| **Overlay**    | Dialog / Drawer / Popover / Popconfirm / Tooltip / ConfigProvider |
-| **Others**     | Card / Carousel / Collapse / Empty / Result / Descriptions / Skeleton |
-
-</v-click>
-
-<v-click text-xs class="mt-4">
-
-> 💡 **设计原则**：高频组件（Button / Input / Table）API 极简，低频组件（Cascader / Transfer）功能完整。
+| 分组           | 代表组件                                              |
+| -------------- | ----------------------------------------------------- |
+| **Basic**      | Button / Icon / Link / Layout / Container             |
+| **Form**       | Form / Input / Select / DatePicker / Switch / Upload  |
+| **Data**       | Table / Tree / Pagination / Tag / Avatar / Calendar   |
+| **Navigation** | Menu / Tabs / Breadcrumb / Steps / Dropdown           |
+| **Feedback**   | Alert / Message / MessageBox / Notification / Loading |
+| **Overlay**    | Dialog / Drawer / Popover / Popconfirm / Tooltip      |
 
 </v-click>
 
@@ -591,23 +547,14 @@ prop / model / rules 三要素
 
 ```vue
 <script setup lang="ts">
-import { reactive, ref } from "vue";
 import type { FormInstance, FormRules } from "element-plus";
 
 const formRef = ref<FormInstance>();
-const form = reactive({
-  name: "",
-  email: "",
-  age: 18,
-});
+const form = reactive({ name: "", email: "" });
 
 const rules = reactive<FormRules<typeof form>>({
   name: [{ required: true, message: "请输入姓名", trigger: "blur" }],
-  email: [
-    { required: true, message: "请输入邮箱", trigger: "blur" },
-    { type: "email", message: "邮箱格式不正确", trigger: "blur" },
-  ],
-  age: [{ type: "number", min: 1, max: 120, message: "1-120", trigger: "blur" }],
+  email: [{ type: "email", message: "邮箱格式不正确", trigger: "blur" }],
 });
 </script>
 
@@ -615,9 +562,6 @@ const rules = reactive<FormRules<typeof form>>({
   <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
     <el-form-item label="姓名" prop="name">
       <el-input v-model="form.name" />
-    </el-form-item>
-    <el-form-item label="邮箱" prop="email">
-      <el-input v-model="form.email" />
     </el-form-item>
   </el-form>
 </template>
@@ -667,21 +611,16 @@ validate / resetFields / 自定义校验器
 
 ```ts
 async function handleSubmit() {
-  if (!formRef.value) return;
   try {
-    await formRef.value.validate();
-    // 校验通过 → 调接口
+    await formRef.value?.validate();
     await api.createUser(form);
     ElMessage.success("创建成功");
   } catch (errors) {
-    // 校验失败 → errors 是 { field: ValidationError[] }
     console.warn("校验未通过", errors);
   }
 }
 
-function handleReset() {
-  formRef.value?.resetFields();   // 重置值 + 清除红框
-}
+formRef.value?.resetFields();   // 重置值 + 清除红框
 ```
 
 </v-click>
@@ -691,15 +630,11 @@ function handleReset() {
 **自定义校验器（异步可用）**
 
 ```ts
-const checkUsername = async (rule: any, value: string, callback: any) => {
-  if (!value) return callback(new Error("用户名必填"));
+const checkUsername = async (rule, value, callback) => {
   const exists = await api.checkUserName(value);
   exists ? callback(new Error("用户名已被占用")) : callback();
 };
-
-const rules = reactive<FormRules<typeof form>>({
-  name: [{ validator: checkUsername, trigger: "blur" }],
-});
+const rules = { name: [{ validator: checkUsername, trigger: "blur" }] };
 ```
 
 </v-click>
@@ -745,22 +680,8 @@ prop + label + sortable 三件套
 
 ```vue
 <script setup lang="ts">
-import { ref, computed } from "vue";
-
-interface User {
-  id: number;
-  name: string;
-  age: number;
-  createdAt: string;
-}
-
-const allData = ref<User[]>([
-  { id: 1, name: "Tom", age: 28, createdAt: "2024-05-01" },
-  { id: 2, name: "Jerry", age: 32, createdAt: "2024-04-15" },
-]);
-
-const selection = ref<User[]>([]);
-const handleSelect = (rows: User[]) => (selection.value = rows);
+interface User { id: number; name: string; age: number }
+const allData = ref<User[]>([{ id: 1, name: "Tom", age: 28 }]);
 </script>
 
 <template>
@@ -768,8 +689,6 @@ const handleSelect = (rows: User[]) => (selection.value = rows);
     <el-table-column type="selection" width="55" />
     <el-table-column prop="id" label="ID" width="80" sortable />
     <el-table-column prop="name" label="姓名" sortable />
-    <el-table-column prop="age" label="年龄" sortable />
-    <el-table-column prop="createdAt" label="创建时间" sortable />
     <el-table-column label="操作" width="160">
       <template #default="{ row }">
         <el-button size="small" @click="edit(row)">编辑</el-button>
@@ -824,9 +743,6 @@ transition: fade-out
 **客户端分页（小数据集）**
 
 ```ts
-const currentPage = ref(1);
-const pageSize = ref(10);
-
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * pageSize.value;
   return allData.value.slice(start, start + pageSize.value);
@@ -835,12 +751,8 @@ const paginatedData = computed(() => {
 
 ```vue
 <el-pagination
-  v-model:current-page="currentPage"
-  v-model:page-size="pageSize"
-  :page-sizes="[10, 20, 50, 100]"
-  :total="allData.length"
-  layout="total, sizes, prev, pager, next, jumper"
-/>
+  v-model:current-page="currentPage" v-model:page-size="pageSize"
+  :total="allData.length" layout="total, sizes, prev, pager, next" />
 ```
 
 </v-click>
@@ -852,15 +764,11 @@ const paginatedData = computed(() => {
 ```ts
 async function load() {
   const { list, total } = await api.queryUsers({
-    page: currentPage.value,
-    pageSize: pageSize.value,
-    sort: sortProp.value,
-    order: sortOrder.value,
+    page: currentPage.value, pageSize: pageSize.value,
+    sort: sortProp.value, order: sortOrder.value,
   });
-  tableData.value = list;
-  totalCount.value = total;
+  tableData.value = list; totalCount.value = total;
 }
-
 watch([currentPage, pageSize, sortProp, sortOrder], load, { immediate: true });
 ```
 
@@ -912,10 +820,7 @@ ElMessage / ElMessageBox / ElNotification
 **ElMessage（轻提示，顶部短暂显示）**
 
 ```ts
-import { ElMessage } from "element-plus";
-
 ElMessage.success("保存成功");
-ElMessage.warning("当前网络不稳定");
 ElMessage.error({ message: "请求失败", duration: 5000 });
 ```
 
@@ -926,15 +831,10 @@ ElMessage.error({ message: "请求失败", duration: 5000 });
 **ElMessageBox（模态对话框，强制确认）**
 
 ```ts
-import { ElMessageBox } from "element-plus";
-
-await ElMessageBox.confirm("删除后不可恢复，确认删除？", "危险操作", {
-  type: "warning",
-  confirmButtonText: "删除",
-  cancelButtonText: "取消",
+await ElMessageBox.confirm("删除后不可恢复？", "危险操作", {
+  type: "warning", confirmButtonText: "删除",
 });
 await api.delete(id);
-ElMessage.success("已删除");
 ```
 
 </v-click>
@@ -944,14 +844,7 @@ ElMessage.success("已删除");
 **ElNotification（通知，右上角浮层）**
 
 ```ts
-import { ElNotification } from "element-plus";
-
-ElNotification.info({
-  title: "系统消息",
-  message: "您有 3 条新待办",
-  position: "top-right",
-  duration: 0,
-});
+ElNotification.info({ title: "系统消息", message: "您有 3 条新待办", duration: 0 });
 ```
 
 </v-click>
@@ -999,12 +892,9 @@ ElDialog / ElDrawer / ElPopover
 **ElDialog（模态对话框）**
 
 ```vue
-<el-dialog v-model="dialogVisible" title="编辑用户" width="500" :before-close="onClose">
+<el-dialog v-model="dialogVisible" title="编辑用户" width="500">
   <el-form :model="form">…</el-form>
-  <template #footer>
-    <el-button @click="dialogVisible = false">取消</el-button>
-    <el-button type="primary" @click="handleSubmit">保存</el-button>
-  </template>
+  <template #footer><el-button type="primary">保存</el-button></template>
 </el-dialog>
 ```
 
@@ -1015,9 +905,7 @@ ElDialog / ElDrawer / ElPopover
 **ElDrawer（侧边抽屉）**
 
 ```vue
-<el-drawer v-model="drawerVisible" title="筛选条件" direction="rtl" size="400">
-  <el-form :model="filters" label-width="80px">…</el-form>
-</el-drawer>
+<el-drawer v-model="drawerVisible" direction="rtl" size="400">…</el-drawer>
 ```
 
 </v-click>
@@ -1084,16 +972,10 @@ transition: fade-out
 ```scss
 @forward "element-plus/theme-chalk/src/common/var.scss" with (
   $colors: (
-    "primary": (
-      "base": #ff6b35,
-    ),
-    "success": (
-      "base": #28a745,
-    ),
+    "primary": ("base": #ff6b35),
+    "success": ("base": #28a745),
   ),
-  $border-radius: (
-    "base": 6px,
-  )
+  $border-radius: ("base": 6px)
 );
 ```
 
@@ -1104,22 +986,14 @@ transition: fade-out
 **2. 在 vite.config.ts 注入到所有 SCSS**
 
 ```ts
-export default defineConfig({
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@use "@/styles/element/index.scss" as *;`,
-      },
-    },
+css: {
+  preprocessorOptions: {
+    scss: { additionalData: `@use "@/styles/element/index.scss" as *;` },
   },
-});
+}
 ```
 
-</v-click>
-
-<v-click>
-
-> 💡 **要点**：`@forward` 必须在引入 Element Plus 之前生效；按需引入时 Resolver 需配 `importStyle: 'sass'`。
+> 💡 按需引入时 Resolver 需配 `importStyle: 'sass'`。
 
 </v-click>
 
@@ -1192,18 +1066,6 @@ applyTheme("#ff6b35");   // 立即生效，无需刷新
 
 <v-click>
 
-**组件级覆盖（局部）**
-
-```vue
-<el-tag style="--el-tag-bg-color: #ff6b35; --el-tag-text-color: white">
-  橙色标签
-</el-tag>
-```
-
-</v-click>
-
-<v-click>
-
 > 💡 **SCSS vs CSS 选型**：固定品牌色用 SCSS（编译期最优）；多主题切换 / 暗色模式用 CSS Variables（运行时灵活）。
 
 </v-click>
@@ -1258,7 +1120,6 @@ transition: fade-out
 **1. 引入暗色样式**
 
 ```ts
-// main.ts
 import "element-plus/dist/index.css";
 import "element-plus/theme-chalk/dark/css-vars.css";
 ```
@@ -1272,19 +1133,12 @@ import "element-plus/theme-chalk/dark/css-vars.css";
 ```vue
 <script setup lang="ts">
 import { useDark, useToggle } from "@vueuse/core";
-
-const isDark = useDark();          // 自动同步 html.dark class + localStorage
+const isDark = useDark();
 const toggleDark = useToggle(isDark);
 </script>
 
 <template>
-  <el-switch
-    v-model="isDark"
-    inline-prompt
-    active-text="🌙"
-    inactive-text="☀️"
-    @change="toggleDark"
-  />
+  <el-switch v-model="isDark" inline-prompt @change="toggleDark" />
 </template>
 ```
 
@@ -1295,11 +1149,7 @@ const toggleDark = useToggle(isDark);
 **3. 自定义暗色变量（可选）**
 
 ```css
-html.dark {
-  --el-bg-color: #1a1a1a;
-  --el-bg-color-overlay: #2a2a2a;
-  --el-text-color-primary: #e0e0e0;
-}
+html.dark { --el-bg-color: #1a1a1a; --el-text-color-primary: #e0e0e0; }
 ```
 
 </v-click>
@@ -1350,9 +1200,7 @@ transition: fade-out
 **全局配置（app.use 方式）**
 
 ```ts
-import ElementPlus from "element-plus";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
-
 app.use(ElementPlus, { locale: zhCn });
 ```
 
@@ -1364,29 +1212,20 @@ app.use(ElementPlus, { locale: zhCn });
 
 ```vue
 <script setup lang="ts">
-import { ref, computed } from "vue";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import en from "element-plus/es/locale/lang/en";
-
 const lang = ref<"zh" | "en">("zh");
 const locale = computed(() => (lang.value === "zh" ? zhCn : en));
 </script>
 
 <template>
   <el-config-provider :locale="locale">
-    <el-button @click="lang = lang === 'zh' ? 'en' : 'zh'">
-      切换语言 / Switch
-    </el-button>
-    <el-date-picker v-model="date" type="date" placeholder="选日期" />
+    <el-date-picker v-model="date" type="date" />
   </el-config-provider>
 </template>
 ```
 
-</v-click>
-
-<v-click>
-
-> 💡 Element Plus 提供 66+ 语言，与 vue-i18n 协同时把语言切换状态共享给 ConfigProvider 即可。
+> 💡 Element Plus 提供 66+ 语言，可与 vue-i18n 共享语言状态。
 
 </v-click>
 
@@ -1436,17 +1275,11 @@ transition: fade-out
 **手动配 SSR 注入**
 
 ```ts
-import { createSSRApp } from "vue";
 import { ID_INJECTION_KEY, ZINDEX_INJECTION_KEY } from "element-plus";
 
-export function createApp() {
-  const app = createSSRApp(App);
-
-  app.provide(ID_INJECTION_KEY, { prefix: 1024, current: 0 });
-  app.provide(ZINDEX_INJECTION_KEY, { current: 0 });
-
-  return { app };
-}
+const app = createSSRApp(App);
+app.provide(ID_INJECTION_KEY, { prefix: 1024, current: 0 });
+app.provide(ZINDEX_INJECTION_KEY, { current: 0 });
 ```
 
 </v-click>
@@ -1455,26 +1288,15 @@ export function createApp() {
 
 **Nuxt 项目：用官方模块（推荐）**
 
-```bash
-pnpm add -D @element-plus/nuxt
-```
-
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
   modules: ["@element-plus/nuxt"],
-  elementPlus: {
-    importStyle: "scss",
-    themes: ["dark"],
-  },
+  elementPlus: { importStyle: "scss", themes: ["dark"] },
 });
 ```
 
-</v-click>
-
-<v-click>
-
-> 💡 ID / Z-Index 注入解决「服务端与客户端生成的 id 不一致导致水合失败」的经典问题。
+> 💡 ID / Z-Index 注入解决「服务端 / 客户端 id 不一致导致水合失败」的问题。
 
 </v-click>
 
@@ -1535,13 +1357,9 @@ const tableRef = ref<TableInstance>();
 const inputRef = ref<InputInstance>();
 
 onMounted(() => {
-  inputRef.value?.focus();                    // input 自动聚焦
-  tableRef.value?.toggleAllSelection();       // 表格全选
+  inputRef.value?.focus();
+  tableRef.value?.toggleAllSelection();
 });
-
-async function submit() {
-  await formRef.value?.validate();
-}
 ```
 
 </v-click>
@@ -1551,11 +1369,8 @@ async function submit() {
 **扩展 RouteMeta / 全局 ConfigProvider**
 
 ```ts
-// types/element-plus.d.ts
 declare module "element-plus" {
-  interface ConfigProviderContext {
-    customNamespace?: string;
-  }
+  interface ConfigProviderContext { customNamespace?: string }
 }
 ```
 
@@ -1609,18 +1424,10 @@ transition: fade-out
 | --------------------------- | ---------------------------------------- |
 | **@element-plus/icons-vue** | 250+ 官方 SVG 图标组件                   |
 | **@element-plus/nuxt**      | Nuxt 3 官方集成模块                      |
-| **unplugin-element-plus**   | Vite / Webpack / Rollup 按需样式插件     |
 | **unplugin-vue-components** | 组件自动注册（配 ElementPlusResolver）   |
 | **unplugin-auto-import**    | API 自动 import（ElMessage / ElLoading） |
-| **element-plus-admin**      | 完整后台模板（社区项目）                 |
-| **vue-pure-admin**          | 现代化后台模板（vbenjs 团队）            |
+| **vue-pure-admin**          | 现代化后台模板                           |
 | **element-plus-x**          | AI 大模型 Web 端组件库（聊天 / 流式）    |
-
-</v-click>
-
-<v-click text-xs class="mt-4">
-
-> 💡 中后台模板基本都基于 Element Plus + Vue Router + Pinia + Vite 的「黄金组合」。
 
 </v-click>
 
@@ -1686,14 +1493,10 @@ Components({
 
 **坑 2：ElMessage 没有自动 import**
 
-`unplugin-vue-components` 只扫描模板 `<el-xxx>`，不会处理脚本里的 `ElMessage.success()`。
+`unplugin-vue-components` 只扫描模板 `<el-xxx>`，不处理脚本里的 `ElMessage`。
 
 ```ts
-// vite.config.ts
-AutoImport({
-  resolvers: [ElementPlusResolver()],
-  imports: ["vue", "vue-router"],     // 顺便把 Vue API 也自动 import
-});
+AutoImport({ resolvers: [ElementPlusResolver()], imports: ["vue"] });
 ```
 
 </v-click>
@@ -1702,12 +1505,10 @@ AutoImport({
 
 **坑 3：自定义命名空间样式丢失**
 
-改了 ConfigProvider 的 namespace 后，组件 class 变成 `my-button` 但 CSS 还是 `el-button`。
+改了 namespace 后 class 变 `my-button` 但 CSS 仍是 `el-button`。
 
 ```scss
-@forward "element-plus/theme-chalk/src/mixins/config.scss" with (
-  $namespace: "my"
-);
+@forward "element-plus/theme-chalk/src/mixins/config.scss" with ($namespace: "my");
 ```
 
 </v-click>
@@ -1764,16 +1565,10 @@ Dialog 嵌套 Form 校验 / Table 列宽不一致
 
 **坑 4：Dialog 关闭后 Form 状态残留**
 
-`v-model="visible"` 控制显示后，关闭再打开，input 里还有旧值。
+关闭再打开，input 里还有旧值 —— 监听 `@closed` 手动 reset。
 
 ```vue
-<el-dialog v-model="visible" @closed="handleClosed">…</el-dialog>
-
-<script setup>
-function handleClosed() {
-  formRef.value?.resetFields();   // 关闭后重置表单
-}
-</script>
+<el-dialog v-model="visible" @closed="formRef?.resetFields()">…</el-dialog>
 ```
 
 </v-click>
@@ -1782,14 +1577,12 @@ function handleClosed() {
 
 **坑 5：Table 列宽不一致 / 表头错位**
 
-容器宽度变化时 Table 不重新计算列宽，导致表头和 body 错位。
+容器宽度变化时 Table 不会自动重新计算列宽。
 
 ```ts
-import { nextTick } from "vue";
-
 watch(sidebarCollapsed, async () => {
   await nextTick();
-  tableRef.value?.doLayout();    // 强制重新计算列宽
+  tableRef.value?.doLayout();
 });
 ```
 
@@ -1799,17 +1592,7 @@ watch(sidebarCollapsed, async () => {
 
 **坑 6：MessageBox 在 setup 顶层调用**
 
-ElMessageBox.confirm() 在 setup 顶层执行会立刻弹窗，应该放事件回调。
-
-```ts
-// ❌ setup 顶层
-const ok = await ElMessageBox.confirm("…");
-
-// ✅ 事件回调
-async function handleDelete() {
-  await ElMessageBox.confirm("…");
-}
-```
+`ElMessageBox.confirm()` 在 setup 顶层会立刻弹窗 —— 必须放事件回调。
 
 </v-click>
 
@@ -1871,7 +1654,7 @@ transition: fade-out
 
 - ✅ 必用按需引入 + AutoImport，bundle 减半
 - ✅ 主题 SCSS 走 `importStyle: 'sass'`，别走 css 路径
-- ✅ tsconfig 加 `"types": ["element-plus/global"]`，让 Volar 识别全局组件
+- ✅ tsconfig 加 `"types": ["element-plus/global"]`
 
 </v-click>
 
@@ -1881,8 +1664,7 @@ transition: fade-out
 
 - ✅ Form 配 `FormRules<typeof form>` 泛型，类型推导原生
 - ✅ Dialog 关闭后 `resetFields()`，避免状态残留
-- ✅ Table 服务端分页统一用 watch（page / size / sort / filter）触发 load
-- ✅ 大表格用 `lazy` + `default-sort` 减少首屏渲染
+- ✅ Table 服务端分页统一用 watch 触发 load
 
 </v-click>
 
@@ -1891,8 +1673,7 @@ transition: fade-out
 **主题与暗色**
 
 - ✅ SCSS 定义品牌色基线，CSS Variables 提供暗色 / 用户偏好
-- ✅ VueUse `useDark` 一行实现暗色切换，不用造轮子
-- ✅ ConfigProvider 全局配 size / locale / button，减少重复 prop
+- ✅ VueUse `useDark` 一行实现暗色切换
 
 </v-click>
 
@@ -1944,20 +1725,17 @@ transition: fade-out
 
 **优点**
 
-- 60+ 组件覆盖企业后台几乎所有场景，开箱即用
-- 中文社区资源极其丰富，文档 / issue / 教程 / 模板海量
-- 主题系统双层（SCSS + CSS Variables）满足编译期 + 运行时双重需求
+- 60+ 组件覆盖企业后台几乎所有场景
+- 中文社区资源极其丰富，文档 / issue / 教程海量
+- 主题系统双层（SCSS + CSS Variables）满足编译期 + 运行时
 - TypeScript 原生支持，Volar 体验一流
-- v2 自 2022 年发布至今稳定，企业选型放心
-- Nuxt / SSR 官方支持，全栈场景可用
-- 国际化 66+ 语言，超过大多数同类库
+- v2 自 2022 年稳定，Nuxt / SSR 官方支持
 
 **缺点**
 
 - 设计语言偏中后台通用风，C 端产品颜值不够
-- 默认主题国内外审美差异（国内觉得稳妥，国外觉得过时）
 - 部分高级组件（Tree-Select / Cascader）API 偏复杂
-- Tree-shaking 后 bundle 仍偏大（依赖 lodash / dayjs / async-validator）
+- Tree-shaking 后 bundle 仍偏大（依赖 lodash / dayjs）
 - 移动端适配较弱，不如 vant 等专门移动库
 
 </v-clicks>
@@ -2012,7 +1790,6 @@ transition: fade-out
 **第 1 周：核心组件熟练**
 
 - 通读官方文档 Basics + Form + Data 三大分组
-- 跟着官方 Playground 改例子（最快入门方式）
 - 写一个 CRUD 页面（Table + Form + Dialog 三件套）
 
 </v-click>
@@ -2022,8 +1799,7 @@ transition: fade-out
 **第 2 周：主题 + 交互精进**
 
 - 跑通 SCSS 主题定制 + CSS Variables 切换
-- 实现暗色模式 + 用户偏好持久化
-- 实现国际化（中英切换）
+- 实现暗色模式 + 国际化（中英切换）
 
 </v-click>
 
@@ -2033,16 +1809,12 @@ transition: fade-out
 
 - 接入 Vue Router + Pinia + Vite + UnoCSS
 - 实现登录 / 权限 / 菜单 / 面包屑全套
-- 接 ECharts / VxeTable 等专业图表 / 表格组件
 
 </v-click>
 
 <v-click>
 
-**长期：源码 + 贡献**
-
-- 阅读 Form / Table 等核心组件源码
-- 参与 issue / PR，理解组件库设计取舍
+**长期：源码 + 贡献** —— 阅读 Form / Table 核心组件源码，参与 issue / PR。
 
 </v-click>
 
@@ -2111,7 +1883,6 @@ transition: fade-out
 
 - [vue-pure-admin](https://github.com/pure-admin/vue-pure-admin) —— 现代化方案
 - [vue-vben-admin](https://github.com/vbenjs/vue-vben-admin) —— 高级方案
-- [element-plus-admin](https://github.com/kailong321200875/vue-element-plus-admin) —— 经典方案
 
 </v-click>
 
@@ -2119,9 +1890,8 @@ transition: fade-out
 
 **配套技术栈**
 
-- Vue Router 4 + Pinia + Vite + UnoCSS = 黄金组合
+- Vue Router + Pinia + Vite + UnoCSS = 黄金组合
 - VueUse + dayjs + ECharts = 实用三件套
-- vee-validate / unplugin-vue-router = 进阶选配
 
 </v-click>
 

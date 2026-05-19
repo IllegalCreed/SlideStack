@@ -94,9 +94,7 @@ level: 2
 - **原生多模态**：image + video + audio + pdf 全 native
 - **Implicit Cache 自动 75% 折扣** + Explicit Cache 1h+ TTL
 - **Google 工具生态**：search / maps / url_context / code_execution 内置
-- **Live API 含视频帧**：GPT Realtime 没有
-- **Vertex AI 企业版**：合规 / SLA / 私有部署
-- **Flash 价格极低**：$0.075/M 输入
+- **Live API 含视频帧** / **Vertex 企业版** / **Flash 价格极低**
 
 </v-clicks>
 
@@ -169,22 +167,16 @@ transition: slide-up
 
 # 价格速查（2026）
 
-| Model | Input $/M | Output $/M | Cache $/M | Storage $/M/h |
-|---|---|---|---|---|
-| 2.5 Pro (<=200K) | $1.25 | $5 | $0.31 | $1 |
-| 2.5 Pro (>200K) | $2.50 | $10 | $0.625 | $1 |
-| 2.5 Flash | $0.30 | $1.20 | $0.075 | $0.1875 |
-| 2.5 Flash-Lite | $0.075 | $0.30 | $0.019 | - |
+| Model | Input $/M | Output $/M | Cache $/M |
+|---|---|---|---|
+| 2.5 Pro (<=200K) | $1.25 | $5 | $0.31 |
+| 2.5 Pro (>200K) | $2.50 | $10 | $0.625 |
+| 2.5 Flash | $0.30 | $1.20 | $0.075 |
+| 2.5 Flash-Lite | $0.075 | $0.30 | $0.019 |
 
 <v-click>
 
-**Free Tier 配额**（个人开发，每分钟 / 每天）：
-
-| Model | RPM | RPD | TPM |
-|---|---|---|---|
-| 2.5 Pro | 5 | 25 | 250K |
-| 2.5 Flash | 10 | 250 | 250K |
-| 2.5 Flash-Lite | 30 | 1500 | 1M |
+**Free Tier 配额**（RPM / RPD / TPM）：Pro `5 / 25 / 250K`，Flash `10 / 250 / 250K`，Flash-Lite `30 / 1500 / 1M`。
 
 </v-click>
 
@@ -226,15 +218,12 @@ transition: slide-up
 ```python
 # Python
 from google import genai
-
 client = genai.Client()  # 自动读 GOOGLE_API_KEY
-
 response = client.models.generate_content(
     model="gemini-2.5-flash",
     contents="用 Python 写个 quicksort",
 )
-print(response.text)
-print(f"用量: {response.usage_metadata}")
+print(response.text, response.usage_metadata)
 ```
 
 ```typescript
@@ -521,7 +510,6 @@ transition: slide-up
 | 折扣 | **75%** | **90%**（更大） | 50% |
 | 写入费 | 无 | **25% 额外** | 无 |
 | TTL | 5min / 1h+ | 5min ephemeral | 5-15min |
-| 最小尺寸 | 32K (Flash) | 1024 tokens | 1024 tokens |
 
 <v-clicks>
 
@@ -692,11 +680,7 @@ transition: slide-up
 response = client.models.generate_content(
     model="gemini-2.5-pro",
     contents="证明：对任意正整数 n，n^2 - n 是偶数",
-    config={
-        "thinking_config": {
-            "thinking_budget": 8192,
-        },
-    },
+    config={"thinking_config": {"thinking_budget": 8192}},
 )
 
 print(f"思考 tokens: {response.usage_metadata.thoughts_token_count}")
@@ -704,11 +688,7 @@ print(f"思考 tokens: {response.usage_metadata.thoughts_token_count}")
 
 <v-clicks>
 
-| 值 | 行为 |
-|---|---|
-| `0` | **禁用思考**（直答模式） |
-| `-1` | **无上限**（让模型自己决定） |
-| 数字 | 上限（1024 / 8192 / 32768 ...） |
+`thinking_budget` 取值：`0`（禁用，直答）/ `-1`（无上限）/ 数字（上限 1024 / 8192 / 32768 ...）。
 
 **三家对比**：Claude `thinking.budget_tokens` 数值 / GPT `reasoning_effort` 枚举 / Gemini `thinking_budget` 数值。日常对话用 `0`，数学算法用 `8192+`。
 
@@ -885,30 +865,22 @@ transition: slide-up
 ```python
 config={
     "tools": [{"function_declarations": [weather_fn, search_fn]}],
-    "tool_config": {
-        "function_calling_config": {
-            "mode": "AUTO",      # AUTO / ANY / NONE
-            "allowed_function_names": ["weather"],
-        },
-    },
+    "tool_config": {"function_calling_config": {
+        "mode": "AUTO",      # AUTO / ANY / NONE
+        "allowed_function_names": ["weather"],
+    }},
 }
 
 # 处理返回的 function call
 for part in response.candidates[0].content.parts:
     if part.function_call:
-        fn_name = part.function_call.name
-        args = part.function_call.args
-        result = my_handlers[fn_name](**args)
+        result = my_handlers[part.function_call.name](**part.function_call.args)
         # 把结果发回模型继续对话
 ```
 
 <v-click>
 
-| mode | 行为 |
-|---|---|
-| `AUTO` | 模型自己决定调不调 |
-| `ANY` | **强制必调** |
-| `NONE` | 禁止调（即便注册了） |
+`mode`：`AUTO`（模型决定）/ `ANY`（**强制必调**）/ `NONE`（禁止调）。
 
 </v-click>
 
@@ -979,21 +951,14 @@ transition: slide-up
 | 维度 | AI Studio API | Vertex AI |
 |---|---|---|
 | 鉴权 | API key | GCP ADC（OAuth / SA） |
-| Endpoint | `generativelanguage.googleapis.com` | `<region>-aiplatform.googleapis.com` |
 | SLA | 无 | Enterprise |
-| Region | 全球自动 | 按 region 配 |
 | Batches | NO | **OK**（50% 价） |
 | 私有 endpoint | NO | OK |
 | IAM / 微调 / 审计 | NO | OK |
-| 价格 | 标准 | 同标准 |
 
 ```python
-# Vertex AI 初始化（其他代码不变）
+# Vertex AI 初始化（其他代码不变，鉴权用 gcloud auth application-default login）
 client = genai.Client(vertexai=True, project="my-gcp", location="us-central1")
-```
-
-```bash
-gcloud auth application-default login    # 无需 API key
 ```
 
 ---
@@ -1007,9 +972,7 @@ transition: slide-up
 | 上下文 | **2M Pro / 1M Flash** | 200K / 1M | 128K / 256K |
 | 原生视频 | **OK mp4 直传** | NO | NO（需抽帧） |
 | 原生音频 | **OK 一步分析** | NO | NO（两步） |
-| 内置 Web Search | OK google_search | NO（需 MCP） | OK web_search |
 | 内置 Maps | **OK google_maps** | NO | NO |
-| Code Execution | OK code_execution | NO（需 MCP） | OK code_interpreter |
 | Implicit Cache | **OK 自动 75%** | NO（手动 90%） | OK 自动 50% |
 | Live 含视频帧 | **OK** | NO | NO（仅文+音） |
 | MCP | 社区 | **官方一类** | 社区 |
@@ -1085,11 +1048,8 @@ Gemini 在大陆**不可直接访问**
 # OpenRouter 统一接口（伪 OpenAI 协议）
 from openai import OpenAI
 client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key="sk-or-xxx")
-
-response = client.chat.completions.create(
-    model="google/gemini-2.5-pro",
-    messages=[{"role": "user", "content": "hello"}],
-)
+response = client.chat.completions.create(model="google/gemini-2.5-pro",
+    messages=[{"role": "user", "content": "hello"}])
 ```
 
 <v-click>
@@ -1107,7 +1067,6 @@ transition: slide-up
 | HTTP | google.rpc.Code | 含义 |
 |---|---|---|
 | 400 | INVALID_ARGUMENT | 参数错（model ID / mime / safety） |
-| 401 | UNAUTHENTICATED | API key 错 / 过期 |
 | 403 | PERMISSION_DENIED | model 无权限 / 配额超 |
 | 429 | RESOURCE_EXHAUSTED | 超 RPM / TPM |
 | 500 / 503 | INTERNAL / UNAVAILABLE | Google 内部错（重试） |
@@ -1119,10 +1078,8 @@ for attempt in range(3):
     try:
         return client.models.generate_content(**kwargs)
     except errors.APIError as e:
-        if e.status_code == 429:
-            time.sleep(2 ** attempt)
-        elif e.status_code == 400:
-            raise
+        if e.status_code == 429: time.sleep(2 ** attempt)
+        elif e.status_code == 400: raise
 ```
 
 ---
@@ -1321,7 +1278,6 @@ transition: slide-up
 
 | 模型 | 时间 | 主要变化 |
 |---|---|---|
-| Gemini 1.0 | 2023 末 | 首发（Bard 改名） |
 | Gemini 1.5 | 2024 中 | **1M 上下文**（业界首） |
 | Gemini 2.0 | 2024 末 | 全多模态 + Live API |
 | Gemini 2.5 | 2025 | **Thinking + Pro 2M + Implicit Cache** |
@@ -1329,12 +1285,7 @@ transition: slide-up
 
 <v-clicks>
 
-**资源**：
-
-- 官方 Cookbook：`github.com/google-gemini/cookbook`
-- AI Studio Playground：`aistudio.google.com`
-- API Reference：`ai.google.dev/api`
-- Vertex AI 文档：`cloud.google.com/vertex-ai/docs`
+**资源**：Cookbook `github.com/google-gemini/cookbook` / Playground `aistudio.google.com` / API `ai.google.dev/api` / Vertex `cloud.google.com/vertex-ai/docs`
 
 </v-clicks>
 

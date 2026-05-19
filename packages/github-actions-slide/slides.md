@@ -528,24 +528,18 @@ name: "Setup pnpm + Node"
 description: "装 pnpm + Node + 复原 cache"
 
 inputs:
-  node-version:
-    required: false
-    default: "22"
-  pnpm-version:
-    required: false
-    default: "9"
+  node-version: { default: "22" }
+  pnpm-version: { default: "9" }
 
 outputs:
   store-path:
-    description: "pnpm store 路径"
     value: ${{ steps.store.outputs.path }}
 
 runs:
   using: "composite"
   steps:
     - uses: pnpm/action-setup@v4
-      with:
-        version: ${{ inputs.pnpm-version }}
+      with: { version: "${{ inputs.pnpm-version }}" }
     - uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
@@ -562,46 +556,29 @@ transition: slide-up
 # Reusable Workflow
 
 ```yaml
-# .github/workflows/build.yml
+# .github/workflows/build.yml （被调用方）
 on:
   workflow_call:
     inputs:
-      environment:
-        required: true
-        type: string
+      environment: { required: true, type: string }
     secrets:
-      DEPLOY_TOKEN:
-        required: true
-    outputs:
-      url:
-        value: ${{ jobs.deploy.outputs.url }}
+      DEPLOY_TOKEN: { required: true }
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    outputs:
-      url: ${{ steps.deploy.outputs.url }}
     steps:
-      - id: deploy
-        run: |
-          URL=$(./deploy.sh ${{ inputs.environment }})
-          echo "url=$URL" >> $GITHUB_OUTPUT
+      - run: ./deploy.sh ${{ inputs.environment }}
 ```
 
 ```yaml
-# caller
+# caller：secrets: inherit 把全部 secrets 透传给 callee
 jobs:
   staging:
     uses: ./.github/workflows/build.yml
     with: { environment: staging }
     secrets: inherit
 ```
-
-<v-click>
-
-`secrets: inherit` 把 caller 全部 secrets 透传给 callee（callee 仍需在 `on.workflow_call.secrets:` 显式列出）。
-
-</v-click>
 
 ---
 transition: slide-up
@@ -728,27 +705,22 @@ transition: slide-up
 # Permissions：最小权限
 
 ```yaml
-# Workflow 顶层默认（推荐：空 = 全禁）
-permissions: {}
+permissions: {}                # 顶层置空 = 全禁（推荐）
 
 jobs:
   release:
     permissions:
-      contents: write          # 推 tag
-      pull-requests: write     # 评论 PR
+      contents: write          # 推 tag / 建 release
       id-token: write          # OIDC 联邦
     runs-on: ubuntu-latest
 ```
 
 | 权限 | 默认 | 用途 |
 | --- | --- | --- |
-| `contents` | read | git pull / push tag / 创建 release |
+| `contents` | read | git pull / push tag / release |
 | `pull-requests` | none | 评论 PR / 改 label |
-| `issues` | none | 评论 issue |
 | `id-token` | none | OIDC 联邦认证（AWS/GCP/Azure） |
 | `packages` | read | ghcr.io 拉/推 |
-| `actions` | none | 跨 workflow 调度 |
-| `pages` | none | GitHub Pages 部署 |
 
 ---
 transition: slide-up
@@ -826,24 +798,18 @@ jobs:
     services:
       postgres:
         image: postgres:15
-        env:
-          POSTGRES_PASSWORD: test
-        ports:
-          - 5432:5432
+        env: { POSTGRES_PASSWORD: test }
+        ports: ["5432:5432"]
         options: >-
           --health-cmd "pg_isready -U postgres"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-interval 10s --health-retries 5
       redis:
         image: redis:7
         ports: ["6379:6379"]
-
     steps:
       - run: |
           DATABASE_URL=postgres://postgres:test@localhost:5432/test \
-          REDIS_URL=redis://localhost:6379 \
-          pnpm test
+          REDIS_URL=redis://localhost:6379 pnpm test
 ```
 
 <v-click>

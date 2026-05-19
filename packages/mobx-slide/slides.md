@@ -62,23 +62,12 @@ transition: fade-out
 
 <v-click>
 
-- **observable 派**：把 state 标记为 observable，读写自动被追踪
-- **自动依赖追踪**：computed / autorun / observer 自动订阅它们读取的 observable
-- **transparent reactivity**：写代码像操作普通对象，响应式由库内部处理
+- **observable 派**：state 标记为 observable，读写自动追踪
 - **三个核心原语**：observable（状态）+ computed（派生）+ reaction（副作用）
-- **零样板代码**：无 action type、无 selector、无 dispatch，直接改属性
-- **类友好**：与 OOP 风格无缝结合（也支持 plain object / factory function）
-- **多框架**：React（mobx-react-lite）、Vue、Angular 都能用，核心库框架无关
+- **零样板代码**：无 action type / selector / dispatch，直接改属性
+- **类友好 + 多框架**：与 OOP 风格无缝结合，React / Vue / Angular 都能用
 
 </v-click>
-
-<br>
-
-<div v-click text-xs>
-
-_Read more about_ [_The gist of MobX_](https://mobx.js.org/the-gist-of-mobx.html)
-
-</div>
 
 <style>
 h1 {
@@ -121,22 +110,18 @@ transition: fade-out
 
 # MobX 的定位与生态
 
-老牌响应式派的代表，observable 派 vs flux 派
+老牌响应式派代表，observable 派 vs flux 派
 
 <v-click>
 
-| 维度          | MobX 6              | Redux Toolkit 2       | Zustand 5             | Jotai 2           | Pinia 3           |
-| ------------- | ------------------- | --------------------- | --------------------- | ----------------- | ----------------- |
-| 框架绑定      | **多框架**          | React (vanilla 可用)   | React (vanilla 可用)  | React             | Vue 3 官方        |
-| API 风格      | **observable / 类** | Slice + Hook          | hook + flux           | atom 原子化       | Composition       |
-| 状态模型      | **mutable observable** | immutable slice    | immutable single      | 多 atom           | 多 store          |
-| 写法          | **直接改属性**      | dispatch action       | set((s) =&gt; ...)        | setAtom           | store.x = y       |
-| 派生          | **computed getter** | reselect / Memo       | 手写 selector         | 派生 atom         | getter            |
-| 异步          | flow / async + action | Thunk / RTK Query   | 普通 async            | async atom        | action 内 await   |
-| Provider      | 无需                 | 需要                 | 无需                  | 可选              | 需要              |
-| 包体积        | ~16 KB              | ~10 KB                | ~1 KB                 | ~3 KB             | ~1.5 KB           |
-| TypeScript    | 装饰器 / 工厂        | **完整推导**         | curried 推导          | 优秀（自动）       | 原生推导          |
-| DevTools      | MobX DevTools       | **Redux DevTools**    | Redux DevTools        | Jotai DevTools    | Vue DevTools      |
+| 维度       | MobX 6                 | Redux Toolkit 2     | Zustand 5             | Jotai 2     | Pinia 3      |
+| ---------- | ---------------------- | ------------------- | --------------------- | ----------- | ------------ |
+| 框架绑定   | **多框架**             | React (vanilla 可用) | React (vanilla 可用)  | React       | Vue 3 官方   |
+| API 风格   | **observable / 类**    | Slice + Hook        | hook + flux           | atom 原子化 | Composition  |
+| 状态模型   | **mutable observable** | immutable slice     | immutable single      | 多 atom     | 多 store     |
+| 写法       | **直接改属性**         | dispatch action     | set((s) =&gt; ...)    | setAtom     | store.x = y  |
+| 派生       | **computed getter**    | reselect / Memo     | 手写 selector         | 派生 atom   | getter       |
+| 包体积     | ~16 KB                 | ~10 KB              | ~1 KB                 | ~3 KB       | ~1.5 KB      |
 
 </v-click>
 
@@ -318,9 +303,7 @@ pnpm add mobx
 | 版本   | 状态                       |
 | ------ | -------------------------- |
 | 6.15+  | **当前主线**（无装饰器依赖）|
-| 6.x    | 现代版本，工厂函数 API     |
 | 4 / 5  | 老版本，强装饰器依赖       |
-| 3.x    | 完全废弃                   |
 
 </v-click>
 
@@ -348,9 +331,7 @@ import { makeAutoObservable } from "mobx";
 
 class Counter {
   count = 0;
-  constructor() {
-    makeAutoObservable(this);
-  }
+  constructor() { makeAutoObservable(this) }
   increment() { this.count++ }
 }
 ```
@@ -422,32 +403,20 @@ import { makeAutoObservable } from "mobx";
 class TodoStore {
   todos: { id: number; text: string; done: boolean }[] = [];
   filter: "all" | "active" | "done" = "all";
-
   constructor() {
-    // 把当前实例的所有字段 / getter / 方法自动标记
-    makeAutoObservable(this);
+    makeAutoObservable(this);  // 字段→observable / 方法→action / getter→computed
   }
-
-  // 字段 → observable（todos / filter）
-  addTodo(text: string) {
-    // 方法 → action（自动包装）
-    this.todos.push({ id: Date.now(), text, done: false });
-  }
-
+  addTodo(text: string) { this.todos.push({ id: Date.now(), text, done: false }) }
   toggle(id: number) {
     const todo = this.todos.find((t) => t.id === id);
     if (todo) todo.done = !todo.done;  // 直接 mutate，自动触发更新
   }
-
-  // getter → computed（自动缓存）
   get filtered() {
     if (this.filter === "active") return this.todos.filter((t) => !t.done);
     if (this.filter === "done") return this.todos.filter((t) => t.done);
     return this.todos;
   }
 }
-
-export const todoStore = new TodoStore();
 ```
 
 </v-click>
@@ -515,41 +484,19 @@ import { makeObservable, observable, action, computed } from "mobx";
 
 class BaseStore {
   loading = false;
-  constructor() {
-    makeObservable(this, {
-      loading: observable,
-      setLoading: action,
-    });
-  }
+  constructor() { makeObservable(this, { loading: observable, setLoading: action }) }
   setLoading(v: boolean) { this.loading = v }
 }
 
 class UserStore extends BaseStore {
   user: { id: number; name: string } | null = null;
-
   constructor() {
     super();
     // 继承场景：必须用 makeObservable（不能 makeAutoObservable）
-    makeObservable(this, {
-      user: observable,
-      isLoggedIn: computed,
-      setUser: action,
-      login: action,
-    });
+    makeObservable(this, { user: observable, isLoggedIn: computed, setUser: action });
   }
-
-  get isLoggedIn() {
-    return this.user !== null;
-  }
-
+  get isLoggedIn() { return this.user !== null }
   setUser(user: { id: number; name: string }) { this.user = user }
-
-  async login(id: number) {
-    this.setLoading(true);
-    const user = await fetch(`/api/users/${id}`).then((r) => r.json());
-    this.setUser(user);
-    this.setLoading(false);
-  }
 }
 ```
 
@@ -619,23 +566,18 @@ transition: fade-out
 <v-click>
 
 ```ts
-import { action, makeAutoObservable, runInAction } from "mobx";
+import { action, makeAutoObservable } from "mobx";
 
 class CounterStore {
   count = 0;
   history: number[] = [];
-
-  constructor() {
-    makeAutoObservable(this);  // increment / decrement 自动标记为 action
-  }
+  constructor() { makeAutoObservable(this) }  // 方法自动标记为 action
 
   increment() {
     this.count++;
     this.history.push(this.count);
     // 一个 action 里所有 mutation 合并为单次通知（事务）
   }
-
-  decrement() { this.count-- }
 }
 ```
 
@@ -643,22 +585,11 @@ class CounterStore {
 
 <v-click>
 
-**外部函数 / 闭包用 action 工厂**
+**外部函数用 `action` 工厂包装**
 
 ```ts
-import { action } from "mobx";
-
-// 包装事件处理器
-const handleClick = action((e: MouseEvent) => {
-  store.count++;
-  store.lastClickX = e.clientX;
-});
-
-// 函数式风格
-const reset = action("reset counter", () => {
-  store.count = 0;
-  store.history = [];
-});
+const handleClick = action((e: MouseEvent) => { store.count++ });
+const reset = action("reset counter", () => { store.count = 0 });
 ```
 
 </v-click>
@@ -721,57 +652,38 @@ transition: fade-out
 <v-click>
 
 ```ts
-import { makeObservable, observable, action } from "mobx";
-
 class TimerStore {
   seconds = 0;
-
   constructor() {
     makeObservable(this, {
       seconds: observable,
       tick: action.bound,  // 自动绑定 this
     });
   }
-
-  tick() {
-    this.seconds++;  // 即使作为 callback 传递，this 也是 TimerStore 实例
-  }
-}
-
-const timer = new TimerStore();
-// 直接传方法引用，this 不丢
-setInterval(timer.tick, 1000);
-```
-
-</v-click>
-
-<v-click>
-
-**makeAutoObservable + 选项**
-
-```ts
-class TimerStore {
-  seconds = 0;
-  constructor() {
-    // autoBind: true 让所有 action 都自动 bound
-    makeAutoObservable(this, {}, { autoBind: true });
-  }
   tick() { this.seconds++ }
 }
+
+setInterval(timer.tick, 1000);  // 直接传方法引用，this 不丢
 ```
 
 </v-click>
 
 <v-click>
 
-**或者用箭头函数字段（推荐）**
+**`makeAutoObservable` 全局 autoBind**
 
 ```ts
-class TimerStore {
-  seconds = 0;
-  constructor() { makeAutoObservable(this) }
-  tick = () => { this.seconds++ };  // 箭头函数天然 bound
-}
+makeAutoObservable(this, {}, { autoBind: true });  // 所有 action 自动 bound
+```
+
+</v-click>
+
+<v-click>
+
+**箭头函数字段（无需 MobX 介入）**
+
+```ts
+tick = () => { this.seconds++ };  // 箭头函数天然 bound
 ```
 
 </v-click>
@@ -842,44 +754,21 @@ transition: fade-out
 <v-click>
 
 ```ts
-import { makeAutoObservable } from "mobx";
-
 class CartStore {
   items: { name: string; price: number; qty: number }[] = [];
   taxRate = 0.1;
+  constructor() { makeAutoObservable(this) }  // 所有 getter 自动 computed
 
-  constructor() {
-    makeAutoObservable(this);  // 所有 getter 自动 computed
-  }
-
-  // 派生：总数
-  get totalCount() {
-    return this.items.reduce((s, item) => s + item.qty, 0);
-  }
-
-  // 派生：小计
-  get subtotal() {
-    return this.items.reduce((s, item) => s + item.price * item.qty, 0);
-  }
-
+  get totalCount() { return this.items.reduce((s, i) => s + i.qty, 0) }
+  get subtotal() { return this.items.reduce((s, i) => s + i.price * i.qty, 0) }
   // 派生可以基于其他派生
-  get total() {
-    return this.subtotal * (1 + this.taxRate);
-  }
-
-  addItem(item: { name: string; price: number; qty: number }) {
-    this.items.push(item);
-  }
+  get total() { return this.subtotal * (1 + this.taxRate) }
 }
 ```
 
-</v-click>
-
-<v-click>
-
 ```tsx
 // 组件直接读 totalCount / total，computed 自动缓存
-<span>Total ({cartStore.totalCount} items): ${cartStore.total}</span>
+<span>Total ({cart.totalCount} items): ${cart.total}</span>
 ```
 
 </v-click>
@@ -946,12 +835,7 @@ transition: fade-out
 **autorun：跑一次 + 依赖变化时重跑**
 
 ```ts
-import { autorun } from "mobx";
-
-const dispose = autorun(() => {
-  console.log(`Count is ${counterStore.count}`);
-});
-// 立即跑一次 → 之后 count 变就重跑
+const dispose = autorun(() => console.log(`Count is ${store.count}`));
 dispose();  // 清理订阅
 ```
 
@@ -962,10 +846,8 @@ dispose();  // 清理订阅
 **reaction：分离「追踪」和「副作用」**
 
 ```ts
-import { reaction } from "mobx";
-
 const dispose = reaction(
-  () => counterStore.count,                    // tracker：只追这个
+  () => store.count,                                   // tracker：只追这个
   (count, prev) => console.log(`${prev} → ${count}`),  // effect
 );
 // 不立即跑，count 变化才跑（除非 fireImmediately: true）
@@ -978,14 +860,8 @@ const dispose = reaction(
 **when：一次性条件等待**
 
 ```ts
-import { when } from "mobx";
-
-// callback 形式
-when(() => userStore.isLoggedIn, () => router.push("/dashboard"));
-
-// Promise 形式（异步友好）
-await when(() => store.dataReady);
-console.log("data is ready!");
+when(() => user.isLoggedIn, () => router.push("/dashboard"));  // callback 形式
+await when(() => store.dataReady);                              // Promise 形式
 ```
 
 </v-click>
@@ -1078,37 +954,24 @@ mobx-react-lite 让函数组件订阅 observable
 
 ```tsx
 import { observer } from "mobx-react-lite";
-import { counterStore } from "./stores/counter";
 
 // observer 包装：组件自动订阅渲染中读到的 observable
-export const Counter = observer(() => {
-  return (
-    <div>
-      <span>Count: {counterStore.count}</span>
-      <button onClick={() => counterStore.increment()}>+1</button>
-    </div>
-  );
-});
+export const Counter = observer(() => (
+  <div>
+    <span>Count: {counterStore.count}</span>
+    <button onClick={() => counterStore.increment()}>+1</button>
+  </div>
+));
 ```
 
 </v-click>
 
 <v-click>
 
-**Observer 组件：局部包装**
+**Observer 组件：局部包装（非 observer 父组件内）**
 
 ```tsx
-import { Observer } from "mobx-react-lite";
-
-function Layout() {
-  return (
-    <div>
-      <Header />
-      {/* 只让这部分订阅 */}
-      <Observer>{() => <span>{counterStore.count}</span>}</Observer>
-    </div>
-  );
-}
+<Observer>{() => <span>{counterStore.count}</span>}</Observer>
 ```
 
 </v-click>
@@ -1118,15 +981,10 @@ function Layout() {
 **useLocalObservable：组件内 store**
 
 ```tsx
-import { useLocalObservable, observer } from "mobx-react-lite";
-
-const Form = observer(() => {
-  const state = useLocalObservable(() => ({
-    name: "",
-    setName(v: string) { this.name = v },
-  }));
-  return <input value={state.name} onChange={(e) => state.setName(e.target.value)} />;
-});
+const state = useLocalObservable(() => ({
+  name: "",
+  setName(v: string) { this.name = v },
+}));
 ```
 
 </v-click>
@@ -1211,13 +1069,8 @@ transition: fade-out
 **❌ 反模式：父组件解构传给子**
 
 ```tsx
-// 父组件读 store.user.name，子组件已经拿到字符串
-const Parent = observer(() => {
-  return <Child name={counterStore.user.name} />;  // 名字字符串
-});
-
-// 子组件即使是 observer，也无法订阅 user.name（已经是 string）
-const Child = ({ name }) => <h1>{name}</h1>;
+const Parent = observer(() => <Child name={store.user.name} />);
+const Child = ({ name }) => <h1>{name}</h1>;  // 拿到字符串，无法订阅
 ```
 
 </v-click>
@@ -1227,22 +1080,15 @@ const Child = ({ name }) => <h1>{name}</h1>;
 **✅ 正确：传引用，子组件自己 deref**
 
 ```tsx
-const Parent = observer(() => {
-  return <Child user={counterStore.user} />;  // 传整个 user
-});
-
-// 子组件 observer 包装后，读 user.name 时建立订阅
-const Child = observer(({ user }) => <h1>{user.name}</h1>);
-//                ↑ 必须 observer 包装
+const Parent = observer(() => <Child user={store.user} />);
+const Child = observer(({ user }) => <h1>{user.name}</h1>);  // 必须 observer
 ```
 
 </v-click>
 
 <v-click>
 
-**为什么？**
-
-observer 只追踪「自己 render 期间读到的 observable」。Parent 读了 `name` 字符串，subscribe 的是 Parent；Child 拿到字符串，没办法 subscribe。
+observer 只追踪「自己 render 期间读到的 observable」：Parent 读了 `name` 字符串，订阅的是 Parent；Child 拿到字符串，无法订阅。
 
 </v-click>
 
@@ -1323,24 +1169,11 @@ transition: fade-out
 **方式 1：async + await + runInAction（标准 ES）**
 
 ```ts
-import { makeAutoObservable, runInAction } from "mobx";
-
-class UserStore {
-  user: User | null = null;
-  loading = false;
-
-  constructor() { makeAutoObservable(this) }
-
-  async fetchUser(id: number) {
-    this.loading = true;
-    const res = await fetch(`/api/users/${id}`);
-    const user = await res.json();
-    // await 之后是新的执行栈，不在 action 内 → 必须包 runInAction
-    runInAction(() => {
-      this.user = user;
-      this.loading = false;
-    });
-  }
+async fetchUser(id: number) {
+  this.loading = true;
+  const user = await fetch(`/api/users/${id}`).then(r => r.json());
+  // await 之后是新执行栈，不在 action 内 → 必须包 runInAction
+  runInAction(() => { this.user = user; this.loading = false });
 }
 ```
 
@@ -1351,25 +1184,13 @@ class UserStore {
 **方式 2：flow + generator（MobX 推荐）**
 
 ```ts
-import { makeAutoObservable, flow } from "mobx";
-
-class UserStore {
-  user: User | null = null;
-  loading = false;
-
-  // generator function：每个 yield 后自动包装 action
-  *fetchUser(id: number) {
-    this.loading = true;
-    const res = (yield fetch(`/api/users/${id}`)) as Response;
-    this.user = (yield res.json()) as User;
-    this.loading = false;
-  }
-
-  constructor() {
-    // makeAutoObservable 自动把 generator 识别为 flow
-    makeAutoObservable(this);
-  }
+// generator function：每个 yield 后自动包装 action
+*fetchUser(id: number) {
+  this.loading = true;
+  this.user = (yield fetch(`/api/users/${id}`).then(r => r.json())) as User;
+  this.loading = false;
 }
+// makeAutoObservable 会自动识别 generator 为 flow
 ```
 
 </v-click>
@@ -1452,22 +1273,11 @@ transition: fade-out
 <v-click>
 
 ```ts
-// stores/RootStore.ts
-import { UserStore } from "./UserStore";
-import { CartStore } from "./CartStore";
-import { UiStore } from "./UiStore";
-
+// stores/RootStore.ts —— 互相注入，sub-store 拿到 root 引用
 export class RootStore {
-  userStore: UserStore;
-  cartStore: CartStore;
-  uiStore: UiStore;
-
-  constructor() {
-    // 互相注入，每个 store 可以拿到 root 引用
-    this.userStore = new UserStore(this);
-    this.cartStore = new CartStore(this);
-    this.uiStore = new UiStore(this);
-  }
+  userStore = new UserStore(this);
+  cartStore = new CartStore(this);
+  uiStore = new UiStore(this);
 }
 ```
 
@@ -1477,23 +1287,14 @@ export class RootStore {
 
 ```ts
 // stores/CartStore.ts
-import { makeAutoObservable } from "mobx";
-import type { RootStore } from "./RootStore";
-
 export class CartStore {
   items: CartItem[] = [];
-  // 持有 root 引用，可以访问其他 store
   constructor(private root: RootStore) {
     makeAutoObservable(this, { root: false });  // 排除 root（避免循环）
   }
-
   checkout() {
-    // 跨 store 调用：cart → user
-    if (!this.root.userStore.isLoggedIn) {
-      this.root.uiStore.showLoginModal();  // cart → ui
-      return;
-    }
-    // ...
+    // 跨 store 调用：cart → user / ui
+    if (!this.root.userStore.isLoggedIn) return this.root.uiStore.showLoginModal();
   }
 }
 ```
@@ -1583,14 +1384,10 @@ transition: fade-out
 
 ```tsx
 // stores/StoreContext.tsx
-import { createContext, useContext, useMemo } from "react";
-import { RootStore } from "./RootStore";
-
 const StoreContext = createContext<RootStore | null>(null);
 
-export const StoreProvider = ({ children }: { children: React.ReactNode }) => {
-  // useMemo 确保 RootStore 只创建一次
-  const store = useMemo(() => new RootStore(), []);
+export const StoreProvider = ({ children }) => {
+  const store = useMemo(() => new RootStore(), []);  // 只创建一次
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 };
 
@@ -1606,12 +1403,8 @@ export function useStore() {
 <v-click>
 
 ```tsx
-// main.tsx
-<StoreProvider>
-  <App />
-</StoreProvider>
+<StoreProvider><App /></StoreProvider>
 
-// 任意组件
 const Header = observer(() => {
   const { userStore } = useStore();
   return <span>{userStore.user?.name ?? "Guest"}</span>;
@@ -1697,23 +1490,15 @@ transition: fade-out
 <v-click>
 
 ```ts
-import { observable, makeObservable } from "mobx";
-
 class Store {
-  // 1. deep（默认）：递归 observable，对象内部字段也被追踪
-  data = { user: { name: "" } };
-
-  // 2. ref：只追引用变化，对象内部字段不追
-  hugeReadOnlyData: HugeJSON | null = null;
-
-  // 3. shallow：浅 observable，外层 array/object 追踪，内部不追
-  todos: { id: number; text: string }[] = [];
-
+  data = { user: { name: "" } };                  // 1. deep（默认）：递归 observable
+  hugeReadOnlyData: HugeJSON | null = null;       // 2. ref：只追引用变化
+  todos: { id: number; text: string }[] = [];     // 3. shallow：仅外层追踪
   constructor() {
     makeObservable(this, {
-      data: observable,              // deep
-      hugeReadOnlyData: observable.ref,  // 只追引用
-      todos: observable.shallow,     // 数组 push/splice 追踪，但 item.text 改不追
+      data: observable,
+      hugeReadOnlyData: observable.ref,           // 只追整体替换
+      todos: observable.shallow,                  // push 追，item.text 改不追
     });
   }
 }
@@ -1723,14 +1508,10 @@ class Store {
 
 <v-click>
 
-**选择规则**
-
-| 注解               | 行为                          | 适用场景                       |
-| ------------------ | ----------------------------- | ------------------------------ |
-| `observable`       | 递归 observable               | 默认，大多数情况                 |
-| `observable.ref`   | 只追引用                      | 大型只读数据、Date、Set/Map 引用 |
-| `observable.shallow` | 一层 observable             | 不可变 item 的数组             |
-| `observable.struct` | 结构相等不触发               | 频繁更新但结果可能相同的 computed|
+| 注解                 | 行为              | 适用场景                |
+| -------------------- | ----------------- | ----------------------- |
+| `observable.ref`     | 只追引用          | 大型只读数据、Date     |
+| `observable.shallow` | 一层 observable   | 不可变 item 的数组     |
 
 </v-click>
 
@@ -1808,11 +1589,9 @@ transition: fade-out
 
 <v-click>
 
-**Legacy 装饰器（旧版 MobX 4/5、TypeScript experimentalDecorators）**
+**Legacy 装饰器（MobX 4/5、TS experimentalDecorators）**
 
 ```ts
-import { observable, action, computed } from "mobx";
-
 class Store {
   @observable count = 0;
   @computed get double() { return this.count * 2 }
@@ -1824,36 +1603,22 @@ class Store {
 
 <v-click>
 
-**Stage-3 装饰器（TC39 标准，MobX 6.x 支持）**
+**Stage-3 装饰器（TC39，必须加 `accessor` 关键字）**
 
 ```ts
-import { observable, action, computed } from "mobx";
-
-class Store {
-  @observable accessor count = 0;    // 注意：必须加 accessor 关键字
-  @computed get double() { return this.count * 2 }
-  @action increment() { this.count++ }
-}
+class Store { @observable accessor count = 0 }
 ```
 
 </v-click>
 
 <v-click>
 
-**推荐方案：makeObservable（无需装饰器）**
+**推荐：makeObservable（无需装饰器）**
 
 ```ts
 class Store {
   count = 0;
-  constructor() {
-    makeObservable(this, {
-      count: observable,
-      double: computed,
-      increment: action,
-    });
-  }
-  get double() { return this.count * 2 }
-  increment() { this.count++ }
+  constructor() { makeObservable(this, { count: observable }) }
 }
 ```
 
@@ -1935,14 +1700,10 @@ transition: fade-out
 <v-click>
 
 ```ts
-import { configure } from "mobx";
-
-// app 入口（main.tsx / index.ts）顶部调用
 configure({
-  enforceActions: "always",          // 所有 mutation 必须在 action 内
+  enforceActions: "always",          // mutation 必须在 action 内
   computedRequiresReaction: true,    // computed 必须在 observer 里读
   reactionRequiresObservable: true,  // reaction 必须读到 observable
-  observableRequiresReaction: true,  // observable 必须有 observer 订阅
   disableErrorBoundaries: true,      // 不吞错误，方便测试
 });
 ```
@@ -1955,16 +1716,14 @@ configure({
 | ----------------------------- | --------- | ------------ |
 | `enforceActions`              | `observed` | `always`     |
 | `computedRequiresReaction`    | `false`    | `true`       |
-| `observableRequiresReaction`  | `false`    | `true`       |
 | `reactionRequiresObservable`  | `false`    | `true`       |
 | `disableErrorBoundaries`      | `false`    | `true`（测试）|
-| `useProxies`                  | `always`   | 保持默认     |
 
 </v-click>
 
 <v-click>
 
-> 💡 **建议**：开发期开 strict，所有非规范用法立即报错；生产环境保持一致避免行为差异。
+> 💡 开发期开 strict，所有非规范用法立即报错；生产环境保持一致。
 
 </v-click>
 
@@ -2047,28 +1806,20 @@ transition: fade-out
 
 <v-click>
 
-**安装**
-
-```bash
-pnpm add -D mobx-react-devtools
-# 或 Chrome / Firefox 浏览器扩展：MobX Developer Tools
-```
+**安装**：`pnpm add -D mobx-react-devtools` 或 Chrome / Firefox 扩展「MobX Developer Tools」
 
 </v-click>
 
 <v-click>
 
-**Action / Reaction Log**
+**spy：监听所有 MobX 事件（dev only）**
 
 ```ts
 import { spy } from "mobx";
 
-// 监听所有 MobX 事件（dev only）
 if (import.meta.env.DEV) {
   spy((event) => {
-    if (event.type === "action") {
-      console.log(`[action] ${event.name}`, event.arguments);
-    }
+    if (event.type === "action") console.log(`[action] ${event.name}`, event.arguments);
   });
 }
 ```
@@ -2077,19 +1828,9 @@ if (import.meta.env.DEV) {
 
 <v-click>
 
-**Trace：定位某 reaction 为什么触发**
+**Trace：定位某 reaction / observer 为什么触发**
 
 ```ts
-import { trace } from "mobx";
-
-class Store {
-  get total() {
-    trace();  // 打印当前 computed 的依赖变化追踪
-    return this.items.reduce(...);
-  }
-}
-
-// 或在 observer 内
 const View = observer(() => {
   trace(true);  // true = 触发 debugger 断点
   return <div>{store.total}</div>;
@@ -2184,52 +1925,27 @@ makeAutoObservable 让 TS 推断完美工作
 <v-click>
 
 ```ts
-import { makeAutoObservable } from "mobx";
-
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
+interface User { id: number; name: string; email: string }
 
 class UserStore {
-  // 字段类型 = observable 类型
-  user: User | null = null;
-  loading: boolean = false;
-  errors: string[] = [];
+  user: User | null = null;       // 字段类型 = observable 类型
+  loading = false;
+  constructor() { makeAutoObservable(this) }
 
-  constructor() {
-    makeAutoObservable(this);
-  }
+  get isLoggedIn(): boolean { return this.user !== null }     // getter = computed
+  get displayName(): string { return this.user?.name ?? "Anonymous" }
 
-  // getter 类型 = computed 类型
-  get isLoggedIn(): boolean {
-    return this.user !== null;
-  }
-
-  get displayName(): string {
-    return this.user?.name ?? "Anonymous";
-  }
-
-  // 方法类型 = action 类型
-  setUser(user: User): void {
-    this.user = user;
-  }
+  setUser(user: User): void { this.user = user }              // 方法 = action
 
   async fetchUser(id: number): Promise<void> {
     this.loading = true;
-    const user = (await fetch(`/api/users/${id}`).then((r) => r.json())) as User;
-    runInAction(() => {
-      this.user = user;
-      this.loading = false;
-    });
+    const user = (await fetch(`/api/users/${id}`).then(r => r.json())) as User;
+    runInAction(() => { this.user = user; this.loading = false });
   }
 }
 
-// 实例化后类型完整
 const store = new UserStore();
 store.isLoggedIn;  // boolean
-store.user?.name;  // string | undefined
 ```
 
 </v-click>
@@ -2336,14 +2052,10 @@ transition: fade-out
 
 ```tsx
 "use client";
-import { useState } from "react";
-import { RootStore, StoreContext } from "./RootStore";
-
 export function StoreProvider({ children, initialData }) {
   // useState 初始化函数确保每个浏览器 mount 一个独立 store
   const [store] = useState(() => {
     const s = new RootStore();
-    // 把服务端拉到的数据塞进 store
     s.userStore.hydrate(initialData.user);
     return s;
   });
@@ -2355,34 +2067,14 @@ export function StoreProvider({ children, initialData }) {
 
 <v-click>
 
-**Server Component 拉数据**
+**Server Component 拉数据 + Hydrate 方法**
 
 ```tsx
-// app/page.tsx（RSC）
 async function Page() {
   const user = await fetchUserFromDB();  // 服务端拉数据
-  return (
-    <StoreProvider initialData={{ user }}>
-      <UserDashboard />
-    </StoreProvider>
-  );
+  return <StoreProvider initialData={{ user }}><Dashboard /></StoreProvider>;
 }
-```
-
-</v-click>
-
-<v-click>
-
-**Hydrate 方法**
-
-```ts
-class UserStore {
-  user: User | null = null;
-  constructor() { makeAutoObservable(this) }
-
-  // 用服务端数据初始化
-  hydrate(data: User | null) { this.user = data }
-}
+class UserStore { hydrate(data: User | null) { this.user = data } }
 ```
 
 </v-click>
@@ -2475,21 +2167,12 @@ transition: fade-out
 <v-click>
 
 ```ts
-// CartStore.test.ts
-import { describe, it, expect, beforeEach } from "vitest";
-import { CartStore } from "./CartStore";
-import { configure } from "mobx";
-
 // 测试期开 strict（在测试 setup 文件）
 configure({ enforceActions: "always", disableErrorBoundaries: true });
 
 describe("CartStore", () => {
   let store: CartStore;
-
-  beforeEach(() => {
-    // 每个测试独立实例
-    store = new CartStore();
-  });
+  beforeEach(() => { store = new CartStore() });  // 每个测试独立实例
 
   it("adds item", () => {
     store.addItem({ id: 1, name: "Apple", price: 10, qty: 1 });
@@ -2499,14 +2182,7 @@ describe("CartStore", () => {
 
   it("computes total with tax", () => {
     store.addItem({ id: 1, name: "Apple", price: 100, qty: 2 });
-    expect(store.subtotal).toBe(200);
     expect(store.total).toBeCloseTo(220);  // 10% tax
-  });
-
-  it("clears all items", () => {
-    store.addItem({ id: 1, name: "X", price: 1, qty: 1 });
-    store.clear();
-    expect(store.items.length).toBe(0);
   });
 });
 ```
@@ -2616,41 +2292,25 @@ transition: fade-out
 
 <v-click>
 
-**vs Redux**
-
-- Redux：immutable + 单一 store + 显式 action + 时间旅行
-- MobX：mutable observable + 多 store + 直接 mutate + 响应式自动追踪
-- **选 MobX 当**：团队偏 OOP / 不喜欢样板代码 / 需要 Vue-like 心智
+**vs Redux**：MobX 是 mutable observable + 直接 mutate + 自动追踪，Redux 是 immutable + 显式 action。**选 MobX 当**：团队偏 OOP / 不喜欢样板代码。
 
 </v-click>
 
 <v-click>
 
-**vs Zustand**
-
-- Zustand：~1 KB + hook-only + immutable + 极简
-- MobX：~16 KB + 多框架 + observable + 完整 OOP 模型
-- **选 MobX 当**：大型业务模型 / 多领域 store / class 风格组织
+**vs Zustand**：Zustand ~1 KB + hook-only + 极简；MobX ~16 KB + 多框架 + 完整 OOP。**选 MobX 当**：大型业务模型 / 多领域 store。
 
 </v-click>
 
 <v-click>
 
-**vs Jotai**
-
-- Jotai：原子化（多 atom）+ React-only + 派生自动追踪
-- MobX：店化（多 store）+ 多框架 + observable 派
-- **选 MobX 当**：业务模型清晰 / 不需要 Suspense 集成 / 已用 OOP
+**vs Jotai**：Jotai 原子化（多 atom）+ React-only；MobX 店化（多 store）+ 多框架。**选 MobX 当**：业务模型清晰 / 已用 OOP。
 
 </v-click>
 
 <v-click>
 
-**vs Pinia**
-
-- Pinia：Vue 官方 + Composition + 自动追踪
-- MobX：跨框架 + 类 / 工厂 + observable
-- **MobX 在 Vue 里也可用**，但 Pinia 是 Vue 第一选择
+**vs Pinia**：Pinia 是 Vue 第一选择，MobX 在 Vue 里也可用但非主流。MobX 优势在跨框架 + class 模型。
 
 </v-click>
 
@@ -2762,47 +2422,27 @@ observable + computed + action + persist
 <v-click>
 
 ```ts
-import { makeAutoObservable, reaction } from "mobx";
-
 type CartItem = { id: number; name: string; price: number; qty: number };
 
 export class CartStore {
   items: CartItem[] = [];
   taxRate = 0.1;
-
   constructor() {
     makeAutoObservable(this);
-
-    // localStorage 持久化（autorun 风格）
     const saved = localStorage.getItem("cart");
     if (saved) this.items = JSON.parse(saved);
-
-    reaction(
-      () => JSON.stringify(this.items),
-      (json) => localStorage.setItem("cart", json),
-    );
+    reaction(() => JSON.stringify(this.items), (json) => localStorage.setItem("cart", json));
   }
-
-  // computed：总数量
+  // computed
   get count() { return this.items.reduce((s, i) => s + i.qty, 0) }
-
-  // computed：小计 / 税 / 总价
   get subtotal() { return this.items.reduce((s, i) => s + i.price * i.qty, 0) }
-  get tax() { return this.subtotal * this.taxRate }
-  get total() { return this.subtotal + this.tax }
-
-  // action：增加（已存在则 +1）
+  get total() { return this.subtotal * (1 + this.taxRate) }
+  // action
   add(item: Omit<CartItem, "qty">) {
     const existing = this.items.find((i) => i.id === item.id);
-    if (existing) existing.qty++;
-    else this.items.push({ ...item, qty: 1 });
+    if (existing) existing.qty++; else this.items.push({ ...item, qty: 1 });
   }
-
-  // action：减少 / 删除
   remove(id: number) { this.items = this.items.filter((i) => i.id !== id) }
-
-  // action：清空
-  clear() { this.items = [] }
 }
 ```
 
@@ -2892,31 +2532,9 @@ transition: fade-out
 **❌ 错误：在 setTimeout / fetch callback 内直接 mutate**
 
 ```ts
-class Store {
-  count = 0;
-  constructor() { makeAutoObservable(this) }
-
-  delayedIncrement() {
-    setTimeout(() => {
-      this.count++;  // ❌ 在 callback 内，已经脱离 action 上下文
-      // strict 模式下会报错：mutating state outside of an action
-    }, 1000);
-  }
-}
-```
-
-</v-click>
-
-<v-click>
-
-**✅ 方案 1：runInAction**
-
-```ts
 delayedIncrement() {
   setTimeout(() => {
-    runInAction(() => {
-      this.count++;  // ✅ 显式标记为 action
-    });
+    this.count++;  // ❌ callback 内已脱离 action 上下文，strict 模式报错
   }, 1000);
 }
 ```
@@ -2925,14 +2543,20 @@ delayedIncrement() {
 
 <v-click>
 
-**✅ 方案 2：把 callback 本身用 action 包装**
+**✅ 方案 1：runInAction（适合多步 mutate）**
 
 ```ts
-delayedIncrement() {
-  setTimeout(action(() => {
-    this.count++;  // ✅ callback 本身是 action
-  }), 1000);
-}
+setTimeout(() => runInAction(() => { this.count++ }), 1000);
+```
+
+</v-click>
+
+<v-click>
+
+**✅ 方案 2：把 callback 本身用 action 包装（适合单次）**
+
+```ts
+setTimeout(action(() => { this.count++ }), 1000);
 ```
 
 </v-click>
@@ -3016,32 +2640,24 @@ transition: fade-out
 
 <v-click>
 
-**❌ 错误：组件外 / 顶层解构**
+**❌ 错误：模块顶层 / render 外解构**
 
 ```tsx
 const { user } = store;  // 模块顶层解构
 
-const Header = observer(() => {
-  return <span>{user.name}</span>;  // 用的是「快照」，store.user 变化不会触发更新
-});
+const Header = observer(() => <span>{user.name}</span>);  // 用的是「快照」
 ```
 
 </v-click>
 
 <v-click>
 
-**❌ 错误：组件内但 render 外解构**
+**❌ 错误：在 useEffect 等异步 callback 里读**
 
 ```tsx
 const Header = observer(() => {
-  const user = store.user;  // ✅ 这里 ok，render 函数内
-
-  // ❌ 但这个 callback 在 mount 时执行一次，不会再追踪 user 变化
-  useEffect(() => {
-    console.log(user.name);  // 永远是 mount 时的 name
-  }, []);
-
-  return <span>{user.name}</span>;
+  useEffect(() => { console.log(store.user.name) }, []);  // mount 时执行一次，不再追踪
+  return <span>{store.user.name}</span>;
 });
 ```
 
@@ -3052,10 +2668,7 @@ const Header = observer(() => {
 **✅ 正确：render 内 deref + observer 包装**
 
 ```tsx
-const Header = observer(() => {
-  // 直接在 render 期间读取，建立追踪
-  return <span>{store.user.name}</span>;
-});
+const Header = observer(() => <span>{store.user.name}</span>);
 ```
 
 </v-click>
@@ -3144,16 +2757,9 @@ transition: fade-out
 **❌ 现象：state 变了，UI 没刷新**
 
 ```tsx
-import { store } from "./store";
-
 // 没有 observer 包装！
 export function Counter() {
-  return (
-    <div>
-      <span>{store.count}</span>  {/* 永远显示初始值 */}
-      <button onClick={() => store.increment()}>+1</button>
-    </div>
-  );
+  return <span>{store.count}</span>;  // 永远显示初始值
 }
 ```
 
@@ -3166,14 +2772,7 @@ export function Counter() {
 ```tsx
 import { observer } from "mobx-react-lite";
 
-export const Counter = observer(() => {
-  return (
-    <div>
-      <span>{store.count}</span>  {/* 自动重渲 */}
-      <button onClick={() => store.increment()}>+1</button>
-    </div>
-  );
-});
+export const Counter = observer(() => <span>{store.count}</span>);  // 自动重渲
 ```
 
 </v-click>
@@ -3183,7 +2782,6 @@ export const Counter = observer(() => {
 **调试技巧**
 
 - React DevTools 看组件名 `observer(Counter)` —— 没有就是没包
-- 临时加 `console.log` 在 render 顶部，看是否被重新调用
 - 整个项目「全员 observer」是最简单的策略
 
 </v-click>
@@ -3287,15 +2885,10 @@ src/
 │   ├── RootStore.ts           # 聚合根
 │   ├── UserStore.ts           # 用户领域
 │   ├── CartStore.ts           # 购物车领域
-│   ├── UiStore.ts             # UI 状态（modals / toasts）
 │   ├── StoreContext.tsx       # React Context + Provider
 │   └── index.ts               # 统一导出
-├── hooks/                     # 派生 hook
-│   ├── useUserStore.ts        # () => useStore().userStore
-│   └── useCart.ts             # 组合 cart + user
-├── components/
-│   └── observer 包装的组件
-└── pages/
+├── hooks/useUserStore.ts      # 派生 hook
+└── components/                # observer 包装的组件
 ```
 
 </v-click>
@@ -3304,10 +2897,8 @@ src/
 
 **命名约定**
 
-- store 类：`XxxStore`（`UserStore` / `CartStore`）
-- 实例：`xxxStore`（注入到 RootStore 字段）
-- observable 字段：camelCase（`user` / `loading` / `items`）
-- computed getter：camelCase（`isLoggedIn` / `total` / `filtered`）
+- store 类：`XxxStore`（`UserStore` / `CartStore`），实例：`xxxStore`
+- observable / computed：camelCase（`user` / `items` / `isLoggedIn`）
 - action 方法：动词 camelCase（`addItem` / `login` / `setUser`）
 
 </v-click>
@@ -3416,21 +3007,7 @@ transition: fade-out
 
 <v-click>
 
-**1. 细粒度 observer**
-
-```tsx
-// ❌ 一个大 observer 包整页
-const Page = observer(() => <Layout>{store.everything}</Layout>);
-
-// ✅ 每个数据点独立 observer
-const Page = () => (
-  <Layout>
-    <Header />          {/* observer 包装 */}
-    <Sidebar />         {/* observer 包装 */}
-    <Content />         {/* observer 包装 */}
-  </Layout>
-);
-```
+**1. 细粒度 observer**：把大组件拆成 `<Header />` / `<Sidebar />` / `<Content />`，各自 observer，避免单一大 observer 包整页。
 
 </v-click>
 
@@ -3439,11 +3016,8 @@ const Page = () => (
 **2. 传 reference 而非值**
 
 ```tsx
-// ❌ 父组件 deref，所有兄弟跟着重渲
-<Child name={user.name} />
-
-// ✅ 传引用，子组件自己 deref
-<Child user={user} />
+<Child name={user.name} />  // ❌ 父组件 deref，所有兄弟跟着重渲
+<Child user={user} />        // ✅ 子组件 observer 自己 deref
 ```
 
 </v-click>
@@ -3453,22 +3027,14 @@ const Page = () => (
 **3. observable.ref / shallow 减少深度追踪**
 
 ```ts
-hugeData: HugeJSON = ...;
-constructor() {
-  makeObservable(this, { hugeData: observable.ref });  // 只追整体替换
-}
+makeObservable(this, { hugeData: observable.ref });  // 只追整体替换
 ```
 
 </v-click>
 
 <v-click>
 
-**4. computed.struct 减少无效下游触发**
-
-```ts
-get position() { return { x: this.x, y: this.y } }  // 每次新对象 → 下游 reaction 误触发
-// 加 computed.struct 注解后，结构相同则不触发
-```
+**4. computed.struct**：返回对象的 getter，结构相同则不触发下游 reaction（避免 `{x, y}` 引用变化的误触发）。
 
 </v-click>
 
@@ -3577,24 +3143,16 @@ MobX 周边库矩阵
 | 库                     | 定位                      | 典型场景                       |
 | ---------------------- | ------------------------- | ------------------------------ |
 | **mobx-react-lite**    | React 函数组件绑定        | 函数组件 + observer            |
-| **mobx-react**         | 完整 React 绑定（含 class）| 老项目 / class 组件           |
-| **mobx-state-tree**    | MobX 上的 schema-driven 框架 | 严格领域模型 / snapshot       |
+| **mobx-state-tree**    | schema-driven 框架        | 严格领域模型 / snapshot         |
 | **mobx-utils**         | 实用工具集合              | fromPromise / lazyObservable   |
 | **mobx-keystone**      | MST 的现代替代             | 类风格 + snapshot              |
-| **mobx-persist-store** | 持久化扩展                | localStorage / IndexedDB 自动同步|
-| **mobx-react-form**    | 表单方案                  | 表单 + validation              |
+| **mobx-persist-store** | 持久化扩展                | localStorage 自动同步           |
 
 </v-click>
 
 <v-click>
 
-**MST（MobX State Tree）是关联项目**
-
-- 在 MobX 上构建的「opinionated」框架
-- 引入 type system / snapshot / undo-redo / middleware
-- 适合超大型项目、强领域驱动设计
-- 学习曲线陡，但生产价值高
-- 不展开，参考 [mobx-state-tree.js.org](https://mobx-state-tree.js.org/)
+**MST（MobX State Tree）是关联项目**：在 MobX 上构建的 schema-driven 框架，引入 types / snapshot / undo-redo / middleware，适合超大型项目和强领域驱动设计，学习曲线陡。详见 [mobx-state-tree.js.org](https://mobx-state-tree.js.org/)。
 
 </v-click>
 
@@ -3702,18 +3260,9 @@ MobX 跨框架的可能性
 **Vue：mobx-vue-lite**
 
 ```ts
-import { observable } from "mobx";
-import { useObserver } from "mobx-vue-lite";
-
 const store = observable({ count: 0 });
-
 export default {
-  setup() {
-    return useObserver(() => ({
-      count: store.count,
-      increment: () => store.count++,
-    }));
-  },
+  setup() { return useObserver(() => ({ count: store.count })) },
 };
 ```
 
@@ -3724,15 +3273,9 @@ export default {
 **Angular：mobx-angular**
 
 ```ts
-import { observer } from "mobx-angular";
-
 @observer
-@Component({
-  template: `<span>{{ store.count }}</span>`,
-})
-export class CounterComponent {
-  store = new CounterStore();
-}
+@Component({ template: `<span>{{ store.count }}</span>` })
+export class CounterComponent { store = new CounterStore() }
 ```
 
 </v-click>
@@ -3742,11 +3285,6 @@ export class CounterComponent {
 **纯 JS / vanilla**
 
 ```ts
-import { autorun } from "mobx";
-
-const store = observable({ count: 0 });
-
-// 手动绑定 DOM
 autorun(() => {
   document.getElementById("count").textContent = store.count.toString();
 });
@@ -3847,46 +3385,25 @@ transition: fade-out
 **1. configure 严格模式 + DevTools 隔离**
 
 ```ts
-// main.tsx
-import { configure } from "mobx";
-
 configure({
   enforceActions: "always",
   computedRequiresReaction: import.meta.env.DEV,
-  observableRequiresReaction: import.meta.env.DEV,
   reactionRequiresObservable: import.meta.env.DEV,
 });
-
-if (import.meta.env.DEV) {
-  import("mobx-react-devtools").then(...);
-}
+if (import.meta.env.DEV) import("mobx-react-devtools").then(...);
 ```
 
 </v-click>
 
 <v-click>
 
-**2. localStorage 数据兼容**
-
-- key 加版本前缀（`v1:cart`）
-- 加 try/catch 防止 JSON 解析失败
-- 敏感字段不入 localStorage
+**2. localStorage 数据兼容**：key 加版本前缀（`v1:cart`）、try/catch 防解析失败、敏感字段不入。
 
 </v-click>
 
 <v-click>
 
-**3. SSR 隔离检查**
-
-每个请求一个独立 RootStore，避免泄漏到其他用户。
-
-</v-click>
-
-<v-click>
-
-**4. Bundle 验证**
-
-`pnpm dlx vite-bundle-visualizer`：mobx ~16 KB（gzip），mobx-react-lite ~3 KB。
+**3. SSR 隔离**：每个请求一个独立 RootStore，避免泄漏。**4. Bundle 验证**：mobx ~16 KB + mobx-react-lite ~3 KB（gzip）。
 
 </v-click>
 
@@ -3896,9 +3413,7 @@ if (import.meta.env.DEV) {
 
 ```ts
 spy((event) => {
-  if (event.type === "action" && event.name === "criticalAction") {
-    monitoring.log(event);
-  }
+  if (event.type === "action" && event.name === "criticalAction") monitoring.log(event);
 });
 ```
 
@@ -4014,10 +3529,9 @@ transition: fade-out
 
 **官方资源**
 
-- [MobX 官网](https://mobx.js.org/) — 文档结构清晰，2-3 小时过完核心
+- [MobX 官网](https://mobx.js.org/) — 文档清晰，2-3 小时过完核心
 - [MobX GitHub](https://github.com/mobxjs/mobx) — 28K+ star，活跃维护
-- [mobx-react-lite](https://github.com/mobxjs/mobx-react-lite) — React 函数组件绑定
-- [Egghead.io MobX 课程](https://egghead.io/courses/manage-complex-state-in-react-apps-with-mobx) — Michel Weststrate 亲讲
+- [Egghead.io MobX 课程](https://egghead.io/courses/manage-complex-state-in-react-apps-with-mobx) — 作者亲讲
 
 </v-click>
 
@@ -4026,8 +3540,7 @@ transition: fade-out
 **进阶内容**
 
 - [MobX 6 迁移指南](https://mobx.js.org/migrating-from-4-or-5.html) — 老项目升级
-- [mobx-state-tree 文档](https://mobx-state-tree.js.org/) — schema-driven 升级方案
-- [Tips & Tricks](https://mobx.js.org/defining-data-stores.html) — Store 设计模式
+- [mobx-state-tree 文档](https://mobx-state-tree.js.org/) — schema-driven 方案
 
 </v-click>
 
@@ -4035,8 +3548,7 @@ transition: fade-out
 
 **实战参考**
 
-- [mobx-examples](https://github.com/mobxjs/mobx/tree/main/examples) — 官方示例项目
-- [TodoMVC](https://github.com/mobxjs/mobx-react-todomvc) — 经典 TodoMVC 实现
+- [mobx-examples](https://github.com/mobxjs/mobx/tree/main/examples) — 官方示例
 - [《Pro MobX》by Pavan Podila](https://pro-mobx.com/) — 系统化书籍
 
 </v-click>

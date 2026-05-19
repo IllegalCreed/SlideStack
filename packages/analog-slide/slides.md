@@ -98,18 +98,16 @@ level: 2
 <v-clicks>
 
 **优点**
-- Angular 官方背书，与 Signals / Standalone API / 新控制流 (`@if` / `@for`) 完美契合
+- Angular 官方背书，与 Signals / Standalone API / 新控制流完美契合
 - Vite 替代 Webpack，开发服务器秒级启动，HMR 极快
-- Nitro 后端体系成熟（与 Nuxt 共享），部署 preset 覆盖 Vercel / Netlify / Cloudflare / Node
-- 与现有 Angular CLI 项目兼容，可逐步迁移
+- Nitro 后端体系成熟，部署 preset 覆盖 Vercel / Netlify / Cloudflare / Node
 - 文件路由直觉，告别 `app-routing.module.ts` 集中式声明
-- `@analogjs/content` 提供原生 Markdown 支持（博客 / 文档场景友好）
+- `@analogjs/content` 提供原生 Markdown 支持
 - Vitest 一站式单元测试（不再用 Karma / Jasmine）
 
 **缺点**
 - 仍在快速发展（v2 beta + Angular 21 同步演进），minor 版本偶有 API 调整
 - 生态规模远小于 Next.js / Nuxt，UI 模板 / Admin 套件稀缺
-- 招聘候选人少，主要靠从 Angular CLI 迁移
 - 部分 Angular 库 SSR 兼容性需手动处理（`ssr.noExternal`）
 - 文档体量仍在快速补齐中
 
@@ -271,31 +269,25 @@ my-app/
 │   │   ├── pages/                       # ← 文件路由根
 │   │   │   ├── (home).page.ts           # → /
 │   │   │   ├── about.page.ts            # → /about
-│   │   │   ├── products.page.ts         # → /products（layout）
 │   │   │   ├── products/
 │   │   │   │   ├── (product-list).page.ts   # → /products
 │   │   │   │   └── [productId].page.ts      # → /products/:productId
 │   │   │   └── [...not-found].page.ts   # 404 catch-all
 │   │   ├── app.component.ts             # 根组件（<router-outlet />）
-│   │   └── app.config.ts                # 应用配置（provideFileRouter 等）
+│   │   └── app.config.ts                # 应用配置
 │   ├── server/
-│   │   ├── routes/
-│   │   │   └── api/
-│   │   │       └── v1/users.get.ts      # → /api/v1/users (GET)
-│   │   └── middleware/
-│   │       └── auth.ts                  # 自动注册的服务端中间件
+│   │   ├── routes/api/v1/users.get.ts   # → /api/v1/users (GET)
+│   │   └── middleware/auth.ts           # 服务端中间件
 │   ├── main.ts                          # client entry
-│   ├── main.server.ts                   # server entry（含 provideServerContext）
+│   ├── main.server.ts                   # server entry
 │   └── index.html
-├── public/
 ├── vite.config.ts                       # analog() 插件
-├── tsconfig.json
 └── package.json
 ```
 
 <v-click>
 
-**关键约定**：所有 `.page.ts` 文件**必须用 default export** 导出组件类，会被自动 lazy-load。
+**关键约定**：所有 `.page.ts` 文件**必须用 default export**，会被自动 lazy-load。
 
 </v-click>
 
@@ -309,30 +301,14 @@ transition: slide-up
 import { defineConfig } from 'vite';
 import analog from '@analogjs/platform';
 
-export default defineConfig(({ mode }) => ({
-  publicDir: 'src/public',
-  build: {
-    target: ['es2020'],
-  },
+export default defineConfig(() => ({
+  build: { target: ['es2020'] },
   plugins: [
     analog({
-      // SSR 行为（默认开启）
-      ssr: true,
-
-      // 预渲染特定路由
-      prerender: {
-        routes: ['/', '/about', '/blog'],
-      },
-
-      // Nitro 部署 preset（不填则 Node）
-      nitro: {
-        preset: 'vercel',
-      },
-
-      // 内容支持（@analogjs/content）
-      content: {
-        highlighter: 'prism',
-      },
+      ssr: true,                                  // SSR 行为（默认开启）
+      prerender: { routes: ['/', '/about'] },     // 预渲染特定路由
+      nitro: { preset: 'vercel' },                // Nitro 部署 preset
+      content: { highlighter: 'prism' },          // @analogjs/content
     }),
   ],
 }));
@@ -340,7 +316,7 @@ export default defineConfig(({ mode }) => ({
 
 <v-click>
 
-**`analog()` 插件做了什么**：扫描 `pages/` 生成 Angular Router 配置；注入 Nitro server entry；配置 Vitest preset；处理 `.server.ts` 与 client bundle 边界分离。
+**`analog()` 插件做了什么**：扫描 `pages/` 生成 Router 配置；注入 Nitro server entry；处理 `.server.ts` 与 client bundle 边界分离。
 
 </v-click>
 
@@ -352,18 +328,13 @@ transition: slide-up
 
 ```
 src/app/pages/
-├── (home).page.ts                # → /          （括号 = 仅作 index 标识）
-├── index.page.ts                 # → /          （等价写法）
+├── (home).page.ts                # → /          （括号 = index 标识）
 ├── about.page.ts                 # → /about
 ├── about.team.page.ts            # → /about/team（点号语法）
-├── products.page.ts              # → /products  父布局（含 router-outlet）
 ├── products/
 │   ├── (product-list).page.ts    # → /products
 │   └── [productId].page.ts       # → /products/:productId
-├── (auth).page.ts                # 路由组布局（URL 无 /auth 前缀）
-├── (auth)/
-│   ├── login.page.ts             # → /login
-│   └── signup.page.ts            # → /signup
+├── (auth)/login.page.ts          # → /login（路由组无 URL 前缀）
 └── [...not-found].page.ts        # catch-all（404）
 ```
 
@@ -374,8 +345,7 @@ src/app/pages/
 | `(name).page.ts` | 标记当前目录的 index 路径 |
 | `[param].page.ts` | 动态段，参数名 `param` |
 | `[...slug].page.ts` | catch-all 通配（用于 404） |
-| `(group).page.ts` + 同名文件夹 | 路由组（pathless layout） |
-| `a.b.page.ts` | 等价 `a/b.page.ts` 嵌套 |
+| `(group)/` 文件夹 | 路由组（pathless layout） |
 
 </v-click>
 
@@ -391,20 +361,14 @@ import { Component } from '@angular/core';
 
 @Component({
   standalone: true,
-  template: `
-    <h1>About</h1>
-    <p>Analog 是 Angular 元框架</p>
-  `,
+  template: `<h1>About</h1><p>Analog 是 Angular 元框架</p>`,
 })
 export default class AboutPageComponent {}
 ```
 
 <v-click>
 
-**两条约束**：
-
-- 必须用 `export default class`（默认导出）——文件路由依赖此约定
-- 必须 `standalone: true`——Analog 拥抱 Standalone API，不需要 NgModule
+**两条约束**：必须 `export default class`（文件路由依赖此约定）；必须 `standalone: true`（拥抱 Standalone API）。
 
 </v-click>
 
@@ -419,7 +383,7 @@ import { Component, Input } from '@angular/core';
   template: `<h1>Product {{ productId }}</h1>`,
 })
 export default class ProductPageComponent {
-  @Input() productId!: string;  // 通过 withComponentInputBinding() 注入路由参数
+  @Input() productId!: string;  // 由 withComponentInputBinding() 注入
 }
 ```
 
@@ -433,23 +397,15 @@ transition: slide-up
 
 ```ts
 import { ApplicationConfig } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { withComponentInputBinding } from '@angular/router';
 import { provideFileRouter, requestContextInterceptor } from '@analogjs/router';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideClientHydration } from '@angular/platform-browser';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    // 文件路由（替代 provideRouter(routes)）
     provideFileRouter(withComponentInputBinding()),
-
-    // HTTP Client（SSR 必须用 withFetch）
-    provideHttpClient(
-      withFetch(),
-      withInterceptors([requestContextInterceptor]),
-    ),
-
-    // SSR 客户端 hydration
+    provideHttpClient(withFetch(), withInterceptors([requestContextInterceptor])),
     provideClientHydration(),
   ],
 };
@@ -457,11 +413,11 @@ export const appConfig: ApplicationConfig = {
 
 <v-click>
 
-**关键 provider 解释**：
+**关键 provider**：
 
-- `provideFileRouter()` — 替代 Angular Router `provideRouter(routes)`，自动从 `pages/` 生成路由
-- `withComponentInputBinding()` — 路由参数自动注入到组件 `@Input()`
-- `requestContextInterceptor` — 把 `/api/x` 相对 URL 在服务端自动转完整 URL
+- `provideFileRouter()` — 替代 `provideRouter(routes)`，从 `pages/` 生成路由
+- `withComponentInputBinding()` — 路由参数自动注入到 `@Input()`
+- `requestContextInterceptor` — 服务端把相对 URL 自动转完整 URL
 
 </v-click>
 
@@ -482,26 +438,16 @@ export const routeMeta: RouteMeta = {
   meta: [
     { name: 'description', content: 'Analog 是 Angular 的元框架' },
     { property: 'og:title', content: 'About Analog' },
-    { property: 'og:image', content: '/og.png' },
   ],
 };
 
-@Component({
-  standalone: true,
-  template: `<h1>About</h1>`,
-})
+@Component({ standalone: true, template: `<h1>About</h1>` })
 export default class AboutPageComponent {}
 ```
 
 <v-click>
 
-**`RouteMeta` 支持**：
-
-- `title` — 页面标题（自动写入 `<title>`）
-- `meta` — 标准 / OpenGraph 标签数组
-- `canActivate` / `canMatch` — Angular Router 守卫
-- `providers` — 路由级 provider（服务隔离）
-- `redirectTo` + `pathMatch: 'full'` — 静默重定向，不渲染组件
+**`RouteMeta` 支持**：`title`（自动写入 `<title>`）、`meta`（标准 / OG 标签）、`canActivate` / `canMatch`（Router 守卫）、`providers`（路由级 provider）、`redirectTo`（静默重定向）。
 
 </v-click>
 
@@ -518,27 +464,17 @@ transition: slide-up
 import { PageServerLoad } from '@analogjs/router';
 
 export const load = async ({
-  params,    // 路由参数
-  req,       // h3 Request
-  res,       // h3 Response
-  fetch,     // 同构 fetch
-  event,     // h3 event
+  params, fetch,  // 路由参数 / 同构 fetch
 }: PageServerLoad) => {
   const product = await fetch(`/api/v1/products/${params['productId']}`)
     .then((r) => r.json());
-
   return { product, loadedAt: Date.now() };
 };
 ```
 
 <v-click>
 
-**核心特性**：
-
-- 文件命名 `[name].server.ts`——和 `[name].page.ts` 配对
-- 函数体**仅服务端执行**，client bundle 零字节
-- 返回值自动序列化后通过 SSR transfer state 传给组件
-- 客户端导航时变为 fetch 调用，无需手写 contract
+**核心特性**：文件名 `[name].server.ts`（与 `.page.ts` 配对）；仅服务端执行，client bundle 零字节；返回值通过 SSR transfer state 传给组件；客户端导航时变 fetch 调用。
 
 </v-click>
 
@@ -571,15 +507,7 @@ export default class ProductPageComponent {
 
 <v-click>
 
-**类型推导**：`injectLoad<typeof load>()` 把 server 的 `load` 函数返回类型推到组件——同构数据流，端到端类型安全。
-
-</v-click>
-
-<v-click>
-
-> 💡 **配合 RouteMeta resolver**
->
-> 用 `getLoadResolver(route)` 在 `routeMeta.resolve` 中读取 load 数据，做二次组合。
+**类型推导**：`injectLoad<typeof load>()` 把 server 的 `load` 返回类型推到组件，端到端类型安全。也可用 `getLoadResolver(route)` 在 `routeMeta.resolve` 中二次组合。
 
 </v-click>
 
@@ -596,11 +524,7 @@ transition: slide-up
 import { defineEventHandler } from 'h3';
 
 export default defineEventHandler(async (event) => {
-  // 仅服务端代码
-  return [
-    { id: 1, name: 'Alice' },
-    { id: 2, name: 'Bob' },
-  ];
+  return [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }];
 });
 ```
 
@@ -620,7 +544,6 @@ import { defineEventHandler, readBody } from 'h3';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-  // ... 写入数据库
   return { ok: true, body };
 });
 ```
@@ -669,20 +592,12 @@ transition: slide-up
 
 ```ts
 // src/server/middleware/auth.ts
-import {
-  defineEventHandler,
-  getRequestURL,
-  parseCookies,
-  sendRedirect,
-} from 'h3';
+import { defineEventHandler, getRequestURL, parseCookies, sendRedirect } from 'h3';
 
 export default defineEventHandler(async (event) => {
-  // 仅作用于 /admin/** 路径
   if (getRequestURL(event).pathname.startsWith('/admin')) {
     const cookies = parseCookies(event);
-    const isLoggedIn = cookies['authToken'];
-
-    if (!isLoggedIn) {
+    if (!cookies['authToken']) {
       sendRedirect(event, '/login', 401);
     }
   }
@@ -691,12 +606,7 @@ export default defineEventHandler(async (event) => {
 
 <v-click>
 
-**特点**：
-
-- 自动注册，无需手动 wire-up
-- 按文件名字典序执行
-- 接到 h3 event，与 server routes 共享 API
-- 可读 `process.env` 服务端变量（无需 `VITE_` 前缀）
+**特点**：自动注册（无需手动 wire-up）；按文件名字典序执行；与 server routes 共享 h3 API；可读 `process.env`（无需 `VITE_` 前缀）。
 
 </v-click>
 
@@ -710,32 +620,10 @@ transition: slide-up
 
 ```ts
 analog({
-  // 默认全 SSR
-  ssr: true,
-
-  // 关闭 SSR → 纯 SPA 模式
-  // ssr: false,
-
-  // SSG：构建时预渲染指定路由
-  prerender: {
-    routes: [
-      '/',
-      '/about',
-      '/blog',
-      async () => {
-        // 动态生成路由列表（如博客文章）
-        const posts = await fetch('https://cms.example.com/posts').then((r) => r.json());
-        return posts.map((p: any) => `/blog/${p.slug}`);
-      },
-    ],
-  },
-
-  // 混合渲染：特定路由跳过 SSR
+  ssr: true,                                    // 默认全 SSR；false 即 SPA
+  prerender: { routes: ['/', '/about', '/blog'] },     // SSG 预渲染
   nitro: {
-    routeRules: {
-      '/admin/**': { ssr: false },
-      '/api/**': { cors: true, headers: { 'Access-Control-Allow-Origin': '*' } },
-    },
+    routeRules: { '/admin/**': { ssr: false }, '/api/**': { cors: true } },
   },
 }),
 ```
@@ -744,10 +632,9 @@ analog({
 
 | 模式 | 配置 | 适合 |
 |---|---|---|
-| **SSR** | 默认 | 动态内容、个性化（最常见） |
-| **SPA** | `ssr: false` | 后台 / SaaS / 不需要 SEO |
-| **SSG** | `prerender.routes` | 博客 / 文档 / Marketing |
-| **混合** | `routeRules` | 部分预渲染 + 部分 SSR + 部分 SPA |
+| **SSR / SPA** | 默认 / `ssr: false` | 动态 / 后台 |
+| **SSG** | `prerender.routes` | 博客 / 文档 |
+| **混合** | `routeRules` | 部分预渲染 + 部分 SSR |
 
 </v-click>
 
@@ -760,33 +647,26 @@ transition: slide-up
 Analog 部署能力来自 Nitro，**改一行 preset 即可换平台**
 
 ```ts
-analog({
-  nitro: {
-    preset: 'vercel',   // ← 改这里切换平台
-  },
-}),
+analog({ nitro: { preset: 'vercel' } }),       // ← 改这里切换平台
 ```
 
 <v-click>
 
-| 平台 | preset | 备注 |
-|---|---|---|
-| **Node.js** | `node-server`（默认） | `node dist/analog/server/index.mjs` |
-| **Vercel** | `vercel` | 自动检测 `.vercel/output/` |
-| **Netlify** | `netlify` | Netlify Functions / Edge |
-| **Cloudflare Pages** | `cloudflare-pages` | Workers 运行时 |
-| **Firebase** | `firebase` | Cloud Functions |
-| **Render** | `render-com` | Web Service |
-| **Static** | `static` | 纯静态产物（配合 `prerender`） |
+| 平台 | preset |
+|---|---|
+| **Node.js** | `node-server`（默认） |
+| **Vercel** | `vercel` |
+| **Netlify** | `netlify` |
+| **Cloudflare Pages** | `cloudflare-pages` |
+| **Static** | `static`（配合 `prerender`） |
 
 </v-click>
 
 <v-click>
 
 ```bash
-# 也可以通过环境变量临时切换，不改 vite.config.ts
+# 也可通过环境变量临时切换
 BUILD_PRESET=vercel npm run build
-BUILD_PRESET=cloudflare-pages npm run build
 ```
 
 </v-click>
@@ -842,20 +722,13 @@ transition: slide-up
 import { provideContent, withMarkdownRenderer } from '@analogjs/content';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideContent(withMarkdownRenderer()),
-    // ... 其它 provider
-  ],
+  providers: [provideContent(withMarkdownRenderer()), /* ... */],
 };
 ```
 
 ```ts
 // vite.config.ts
-analog({
-  content: {
-    highlighter: 'prism',   // 或 'shiki'
-  },
-}),
+analog({ content: { highlighter: 'prism' } }),   // 或 'shiki'
 ```
 
 <v-click>
@@ -864,11 +737,8 @@ analog({
 
 ```
 src/content/
-├── blog/
-│   ├── hello-world.md
-│   └── analog-1.0.md
-└── projects/
-    └── my-project.md
+├── blog/hello-world.md
+└── projects/my-project.md
 ```
 
 </v-click>
@@ -885,11 +755,7 @@ import { Component } from '@angular/core';
 import { AsyncPipe } from '@angular/common';
 import { injectContent, MarkdownComponent } from '@analogjs/content';
 
-export interface PostAttributes {
-  title: string;
-  slug: string;
-  description: string;
-}
+export interface PostAttributes { title: string; slug: string; description: string; }
 
 @Component({
   standalone: true,
@@ -897,7 +763,6 @@ export interface PostAttributes {
   template: `
     @if (post$ | async; as post) {
       <h1>{{ post.attributes.title }}</h1>
-      <p>{{ post.attributes.description }}</p>
       <analog-markdown [content]="post.content" />
     }
   `,
@@ -909,7 +774,7 @@ export default class BlogPostComponent {
 
 <v-click>
 
-`injectContent` 默认读 `:slug` 路由参数，匹配 `src/content/<slug>.md`。可用 `{ subdirectory: 'projects' }` 或 `{ customFilename: '...' }` 改路径。
+`injectContent` 默认读 `:slug` 路由参数，匹配 `src/content/<slug>.md`。可用 `{ subdirectory: 'projects' }` 改路径。
 
 </v-click>
 
@@ -925,11 +790,7 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { injectContentFiles } from '@analogjs/content';
 
-export interface PostAttributes {
-  title: string;
-  slug: string;
-  description: string;
-}
+export interface PostAttributes { title: string; slug: string; description: string; }
 
 @Component({
   standalone: true,
@@ -938,11 +799,7 @@ export interface PostAttributes {
     <h1>Blog</h1>
     <ul>
       @for (post of posts; track post.slug) {
-        <li>
-          <a [routerLink]="['/blog', post.slug]">
-            {{ post.attributes.title }}
-          </a>
-        </li>
+        <li><a [routerLink]="['/blog', post.slug]">{{ post.attributes.title }}</a></li>
       }
     </ul>
   `,
@@ -972,23 +829,15 @@ import { load } from './index.server';
   standalone: true,
   template: `
     <h1>Hello {{ name() }}</h1>
-    <p>Count: {{ count() }}</p>
     <p>Double: {{ double() }}</p>
-    <button (click)="increment()">+1</button>
-
-    @if (data().loaded) {
-      <p>服务端数据已加载</p>
-    }
+    @if (data().loaded) { <p>服务端数据已加载</p> }
   `,
 })
 export default class HomeComponent {
   name = signal('Analog');
   count = signal(0);
   double = computed(() => this.count() * 2);
-
-  // load 数据作为 Signal 暴露
   data = toSignal(injectLoad<typeof load>(), { requireSync: true });
-
   increment() { this.count.update((n) => n + 1); }
 }
 ```
@@ -1016,9 +865,8 @@ import { HttpClient } from '@angular/common/http';
   imports: [ReactiveFormsModule],
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()">
-      <input formControlName="email" placeholder="Email" />
-      <input formControlName="message" placeholder="Message" />
-      <button type="submit" [disabled]="form.invalid">提交</button>
+      <input formControlName="email" />
+      <button [disabled]="form.invalid">提交</button>
       @if (success()) { <p>提交成功</p> }
     </form>
   `,
@@ -1027,16 +875,8 @@ export default class ContactPageComponent {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   success = signal(false);
-
-  form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    message: ['', Validators.required],
-  });
-
-  submit() {
-    this.http.post('/api/v1/contact', this.form.value)
-      .subscribe(() => this.success.set(true));
-  }
+  form = this.fb.group({ email: ['', [Validators.required, Validators.email]] });
+  submit() { this.http.post('/api/v1/contact', this.form.value).subscribe(() => this.success.set(true)); }
 }
 ```
 
@@ -1058,18 +898,10 @@ const ContactSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
-
-  // 服务端二次校验（前端 Validators 不可信）
-  const parsed = ContactSchema.safeParse(body);
+  const parsed = ContactSchema.safeParse(body);    // 服务端二次校验
   if (!parsed.success) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Invalid form data',
-      data: parsed.error.flatten(),
-    });
+    throw createError({ statusCode: 400, data: parsed.error.flatten() });
   }
-
-  // 写入数据库 / 发邮件 / ...
   return { ok: true };
 });
 ```
@@ -1093,17 +925,11 @@ transition: slide-up
 | 数据加载 | `load` + `injectLoad` | RSC async component |
 | 数据变更 | API Routes + HttpClient | Server Actions |
 | 构建工具 | Vite | Turbopack / Webpack |
-| Server 层 | Nitro | Next.js 自研 |
 | 部署 | 任意平台（Nitro preset） | Vercel 最优 |
 
 <v-click>
 
-**何时选 Analog**：
-
-- 团队已用 Angular，但想拥抱 Vite + 文件路由
-- 需要 SSR / SSG 但不想踩 `@nguniversal` 配置坑
-- 希望部署平台无锁定（Nitro 多 preset）
-- 已经熟悉 Nuxt / Nitro 心智，想在 Angular 项目复用
+**何时选 Analog**：团队已用 Angular 想拥抱 Vite + 文件路由；需要 SSR / SSG 但不想踩 `@nguniversal` 配置坑；希望部署平台无锁定。
 
 </v-click>
 
@@ -1116,20 +942,16 @@ transition: slide-up
 | 维度 | Analog | Nuxt 4 | SvelteKit | SolidStart |
 |---|---|---|---|---|
 | UI 框架 | Angular | Vue | Svelte | SolidJS |
-| Server 层 | Nitro | Nitro | 自研（adapter） | Vinxi |
-| 数据加载 | `load` 函数 | `useFetch` / `defineLoader` | `+page.server.ts` `load` | `query` + `"use server"` |
+| Server 层 | Nitro | Nitro | 自研 | Vinxi |
+| 数据加载 | `load` | `useFetch` | `+page.server.ts` | `query` + `"use server"` |
 | Markdown | `@analogjs/content` | `@nuxt/content` | mdsvex | 第三方 |
-| 状态成熟度 | 1.x（生产可用） | 4.x 稳定 | 2.x 稳定 | 1.x 稳定 |
+| 成熟度 | 1.x（生产可用） | 4.x 稳定 | 2.x 稳定 | 1.x 稳定 |
 
 <v-click>
 
-**共同点**：
+**共同点**：全部拥抱 Vite + 文件路由 + 服务端数据获取；都基于 Nitro 或类似抽象。
 
-- 全部拥抱 Vite + 文件路由 + 服务端数据获取
-- 部署都基于 Nitro 或类似抽象，跨平台一致
-- 都是"反 Webpack / 反 Vercel 锁定"同盟
-
-**Analog 独特**：唯一的 Angular 生态元框架，与 Signals / RxJS / Standalone API 配套。
+**Analog 独特**：唯一的 Angular 生态元框架，与 Signals / Standalone API 配套。
 
 </v-click>
 
@@ -1216,29 +1038,22 @@ transition: slide-up
 ```ts
 // vite.config.ts
 export default defineConfig({
-  ssr: {
-    noExternal: ['some-package', /^another-package-/],
-  },
+  ssr: { noExternal: ['some-package', /^another-package-/] },
 });
 ```
 
-**解决方案 2**：在组件里用 `isPlatformBrowser` 守卫：
+**解决方案 2**：用 `isPlatformBrowser` 守卫：
 
 ```ts
 import { inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-const platformId = inject(PLATFORM_ID);
-if (isPlatformBrowser(platformId)) {
+if (isPlatformBrowser(inject(PLATFORM_ID))) {
   window.localStorage.getItem('key');
 }
 ```
 
-</v-click>
-
-<v-click>
-
-**经验**：Angular Material / PrimeNG 等大库通常 OK；冷门 UI 库或 chart 库需手动处理。
+经验：Material / PrimeNG 等大库通常 OK；冷门库需手动处理。
 
 </v-click>
 
@@ -1410,14 +1225,12 @@ transition: slide-up
 ```
 入门
 ├── 跑通 npm create analog@latest 默认模板
-├── 读 Getting Started + Routing Overview
 ├── 写一个 CRUD：Products 列表 + 详情 + 新建
 └── 理解 .page.ts default export + Standalone API
 
 进阶
 ├── load 函数 + injectLoad（Server-Side Data Fetching）
 ├── Server Routes：API 端点（GET / POST / 动态参数）
-├── Server Middleware：auth / logging / cors
 ├── RouteMeta + canActivate（路由守卫 + SEO）
 └── Angular Signals + 新控制流配合
 
@@ -1425,24 +1238,12 @@ transition: slide-up
 ├── 混合渲染：routeRules + prerender + ssr: false
 ├── @analogjs/content：博客 / 文档站
 ├── Nitro Preset 切换：Vercel / Netlify / Cloudflare
-├── 表单：Reactive Forms + 服务端 Zod 校验
 └── SSR 兼容性调优：ssr.noExternal + isPlatformBrowser
-
-延伸
-├── 从 Angular CLI 项目迁移实操
-├── 跟进 Analog 2.x beta + Angular 21
-├── Vitest + Playwright 测试组合
-└── Nx workspace 中托管 Analog 应用
 ```
 
 <v-click>
 
-**官方资源**：
-
-- 文档：[analogjs.org](https://analogjs.org)
-- GitHub：[analogjs/analog](https://github.com/analogjs/analog)
-- Examples：[analogjs/analog/tree/main/apps](https://github.com/analogjs/analog/tree/main/apps)
-- Discord：Analog 官方社区
+**官方资源**：[analogjs.org](https://analogjs.org) · [GitHub](https://github.com/analogjs/analog) · Discord 官方社区
 
 </v-click>
 

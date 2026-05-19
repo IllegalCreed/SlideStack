@@ -97,15 +97,13 @@ level: 2
 - Server Functions 端到端类型推导，且服务端代码零字节进 client
 - 与 SolidJS 细粒度响应式无缝集成，状态变化只更新必要 DOM
 - 单一 adapter 配置切换部署平台，Edge / Serverless / Static 一致
-- 渐进增强表单（无 JS 也能工作）
 - 流式 SSR 默认开启，无需 RSC 心智
 
 **缺点**
 - 基于 Vinxi——上下游变动较快，1.0 路线刚稳定
 - 生态规模远小于 Next.js / Nuxt（认证 / UI / Admin 模板少）
-- `query` / `action` 是相对新 API（曾命名 `cache` / `useSubmission`），网上旧教程混乱
+- `query` / `action` 是相对新 API（曾命名 `cache` / `useSubmission`），旧教程混乱
 - 招聘候选人少
-- 文档覆盖面不如 Next.js / Remix 全面
 
 </v-clicks>
 
@@ -341,17 +339,10 @@ transition: slide-up
 ```
 src/routes/
 ├── index.tsx                # /
-├── about.tsx                # /about
-├── users/
-│   ├── index.tsx            # /users
-│   └── [id].tsx             # /users/:id
-├── blog/
-│   └── [...slug].tsx        # /blog/*（catch-all）
-├── (auth)/                  # 路由分组（不影响 URL）
-│   ├── login.tsx            # /login
-│   └── signup.tsx           # /signup
-└── api/
-    └── hello.ts             # /api/hello（API endpoint）
+├── users/[id].tsx           # /users/:id（动态参数）
+├── blog/[...slug].tsx       # /blog/*（catch-all）
+├── (auth)/login.tsx         # /login（分组目录，URL 不含）
+└── api/hello.ts             # /api/hello（API endpoint）
 ```
 
 <v-click>
@@ -444,14 +435,9 @@ transition: slide-up
 import { query, createAsync } from '@solidjs/router'
 
 const getUser = query(async (id: string) => {
-  console.log('fetching', id)
   const r = await fetch(`/api/user/${id}`)
   return r.json()
 }, 'user')   // ← 第二个参数：cache key
-
-// 同一渲染周期内多处调用：只触发一次 fetch
-function HeaderAvatar(props) { return <img src={createAsync(() => getUser(props.id))()?.avatar} /> }
-function Profile(props) { return <h1>{createAsync(() => getUser(props.id))()?.name}</h1> }
 ```
 
 <v-click>
@@ -460,16 +446,14 @@ function Profile(props) { return <h1>{createAsync(() => getUser(props.id))()?.na
 
 - **同 key + 同参数**：自动去重，整个渲染树共享一次结果
 - **失效**：`revalidate(getUser.keyFor(id))` 主动重新拉取
-- **SSR**：服务端跑一次，结果序列化进 HTML，客户端不重复 fetch
-- **`preload`**：在路由匹配的同时启动（不等组件渲染）
+- **SSR**：服务端跑一次，结果序列化进 HTML
+- **`preload`**：路由匹配同时启动（不等组件渲染）
 
 </v-click>
 
 <v-click>
 
-> 💡 **历史名**
->
-> 1.0 之前 `query` 叫 `cache`，遇到旧博客 / Stack Overflow 答案用 `cache` 的，全部用 `query` 替代。
+> 💡 1.0 之前 `query` 叫 `cache`，遇到旧博客需替换。
 
 </v-click>
 
@@ -522,15 +506,11 @@ transition: slide-up
 | 调用方式 | 任何函数（query / action / 工具函数） | 主要在 form action / event handler |
 | 序列化 | JSON / FormData | JSON / FormData / React 类型 |
 | 客户端 stub | fetch POST | RSC 协议 |
-| 错误处理 | throw / return | try/catch |
-| 类型推导 | 完整 TypeScript | 完整 TypeScript |
 | RSC | **无 RSC 心智** | 必须区分 Client / Server Component |
 
 <v-click>
 
-> 💡 **关键差异**
->
-> SolidStart 没有 RSC 心智——组件就是组件。`"use server"` 只标记单个函数，UI 部分完全是 client-side 心智。这是 SolidStart 与 Next.js App Router 最大的范式差异。
+> 💡 SolidStart 没有 RSC 心智——组件就是组件，`"use server"` 只标记单个函数。这是与 Next.js App Router 最大的范式差异。
 
 </v-click>
 
@@ -565,11 +545,7 @@ export const route = {
 
 <v-click>
 
-**优势**：
-
-- `preload` 在路由匹配（hover `<A>` 链接时）就启动 fetch——**无瀑布**
-- 配合 `createAsync` + `<Suspense>`，组件渲染时数据可能已就绪
-- 数据序列化进 SSR HTML，客户端不重复请求
+**优势**：`preload` 在路由匹配（hover `<A>` 时）启动 fetch——**无瀑布**，组件渲染时数据可能已就绪。
 
 </v-click>
 
@@ -619,17 +595,12 @@ const updatePost = action(async (formData: FormData) => { /* ... */ }, 'updatePo
 
 // 单个最近一次提交
 const sub = useSubmission(updatePost)
-sub.pending          // boolean
-sub.input            // 提交的参数（FormData）
-sub.result           // 服务端返回值
-sub.error            // 抛出的错误
-sub.clear()          // 清状态
-sub.retry()          // 重试
+sub.pending   // boolean    sub.input    // FormData
+sub.result    // 返回值     sub.error    // 错误
+sub.clear()   // 清状态     sub.retry()  // 重试
 
 // 所有进行中的提交（乐观 UI 列表）
 const subs = useSubmissions(updatePost)
-subs.pending         // 至少一个 pending
-for (const s of subs) console.log(s.input)
 ```
 
 <v-click>
@@ -638,7 +609,6 @@ for (const s of subs) console.log(s.input)
 
 - 按钮 `disabled={sub.pending}` → 防重复提交
 - 列表项渲染 `useSubmissions` 中的 `input` → 乐观显示
-- `<Show when={sub.error}>` → 错误提示
 
 </v-click>
 
@@ -649,30 +619,24 @@ transition: slide-up
 # action：redirect + revalidate
 
 ```ts
-import { action, redirect, revalidate, json } from '@solidjs/router'
+import { action, redirect, revalidate } from '@solidjs/router'
 
 const addPost = action(async (formData: FormData) => {
   'use server'
   const post = await db.posts.create({ data: { /* ... */ } })
-
-  // 重定向到详情（throw 抛出）
-  throw redirect(`/posts/${post.id}`)
+  throw redirect(`/posts/${post.id}`)   // 重定向（throw）
 }, 'addPost')
 
 const deletePost = action(async (id: string) => {
   'use server'
   await db.posts.delete({ where: { id } })
-
-  // 失效特定 query 让 UI 自动重新拉
-  revalidate(getPosts.key)
+  revalidate(getPosts.key)              // 失效 query 让 UI 重拉
 }, 'deletePost')
 ```
 
 <v-click>
 
-> 💡 **单飞 mutation（single-flight）**
->
-> action 完成后，如果 server 端同一请求里也跑了相关 query，结果会**搭便车**回传到客户端——一次 POST 就能完成"变更 + 拿新数据"，无需第二个 GET。
+> 💡 **单飞 mutation**：action 完成后，server 端同一请求里跑的相关 query 结果会**搭便车**回传——一次 POST 完成"变更 + 取新数据"。
 
 </v-click>
 
@@ -723,22 +687,13 @@ import { getCookie, setCookie } from 'vinxi/http'
 
 export default createMiddleware({
   onRequest: async (event) => {
-    // 读 cookie
-    const theme = getCookie(event.nativeEvent, 'theme')
-
-    // 写 cookie
-    setCookie(event.nativeEvent, 'session', 'abc123', {
-      httpOnly: true,
-      secure: true,
-      maxAge: 60 * 60 * 24,
+    const theme = getCookie(event.nativeEvent, 'theme')      // 读 cookie
+    setCookie(event.nativeEvent, 'session', 'abc123', {       // 写 cookie
+      httpOnly: true, secure: true, maxAge: 60 * 60 * 24,
     })
-
-    // 注入 locals，下游可读
-    event.locals.theme = theme ?? 'light'
+    event.locals.theme = theme ?? 'light'  // 注入 locals
   },
-  onBeforeResponse: (event, response) => {
-    // 修改响应（如加 header）
-  },
+  onBeforeResponse: (event, response) => { /* 修改响应 */ },
 })
 ```
 
@@ -770,20 +725,17 @@ export async function getSession() {
 // 登录
 export const login = action(async (formData: FormData) => {
   'use server'
-  const email = formData.get('email') as string
-  const user = await db.users.findByEmail(email)
+  const user = await db.users.findByEmail(formData.get('email') as string)
   if (!user) return { error: 'No user' }
-
   const session = await getSession()
   await session.update({ userId: user.id })
-
   throw redirect('/dashboard')
 }, 'login')
 ```
 
 <v-click>
 
-**机制**：`useSession` 用对称加密把 session data 塞进 cookie，无需服务端存储（自带 cookie session 模式）。
+**机制**：`useSession` 用对称加密把 session data 塞进 cookie，无需服务端存储。
 
 </v-click>
 
@@ -803,9 +755,7 @@ const getCurrentUser = query(async () => {
 }, 'currentUser')
 
 // 2. 路由 preload + protect
-export const route = {
-  preload: () => getCurrentUser(),
-} satisfies RouteDefinition
+export const route = { preload: () => getCurrentUser() } satisfies RouteDefinition
 
 export default function Dashboard() {
   const user = createAsync(() => getCurrentUser())
@@ -815,8 +765,7 @@ export default function Dashboard() {
 // 3. 退出 action
 export const logout = action(async () => {
   'use server'
-  const session = await getSession()
-  await session.clear()
+  await (await getSession()).clear()
   throw redirect('/login')
 }, 'logout')
 ```
@@ -840,13 +789,7 @@ export async function GET({ params }: APIEvent) {
 }
 
 export async function POST({ request, params }: APIEvent) {
-  const body = await request.json()
-  await db.users.update(params.id, body)
-  return new Response(null, { status: 204 })
-}
-
-export async function DELETE({ params }: APIEvent) {
-  await db.users.delete(params.id)
+  await db.users.update(params.id, await request.json())
   return new Response(null, { status: 204 })
 }
 ```
@@ -854,7 +797,6 @@ export async function DELETE({ params }: APIEvent) {
 <v-click>
 
 文件按 HTTP 方法命名导出：`GET` / `POST` / `PUT` / `PATCH` / `DELETE`。返回标准 `Response`。
-访问：`fetch('/api/users/123')` 或外部 client 调用。
 
 </v-click>
 
@@ -874,11 +816,7 @@ transition: slide-up
 
 <v-click>
 
-**经验**：
-
-- **UI 内部数据** → `query` + `action`（类型最舒服）
-- **第三方调用 / webhook / GraphQL 端点** → API route
-- **同时面向 UI + 外部** → 写 API route，UI 用 `fetch` 包一层 `query`
+**经验**：UI 内部数据用 `query` + `action`；webhook / GraphQL 端点用 API route；两者皆需则写 API route，UI 用 `fetch` 包 `query`。
 
 </v-click>
 
@@ -889,22 +827,18 @@ transition: slide-up
 # 流式 SSR
 
 ```tsx
-// src/routes/index.tsx
 import { Suspense } from 'solid-js'
-import { createAsync } from '@solidjs/router'
 
 export default function Home() {
   return (
     <>
       <h1>Welcome</h1>
-      <Nav />                              {/* 立即发送 */}
-
+      <Nav />                          {/* 立即发送 */}
       <Suspense fallback={<Skeleton />}>
-        <SlowFeed />                       {/* 数据慢，先发 fallback */}
+        <SlowFeed />                   {/* 数据慢，先发 fallback */}
       </Suspense>
-
       <Suspense fallback={<Skeleton />}>
-        <Sidebar />                        {/* 独立流，不阻塞主流 */}
+        <Sidebar />                    {/* 独立流，不阻塞主流 */}
       </Suspense>
     </>
   )
@@ -913,17 +847,7 @@ export default function Home() {
 
 <v-click>
 
-**机制**：
-
-1. 服务器立即 flush `<h1>` + `<Nav />` + `<Skeleton />` HTML
-2. `<SlowFeed />` / `<Sidebar />` 数据 ready → 服务器再发 `<template>` + 内联脚本替换 fallback
-3. 浏览器边接收边渲染——首屏 TTI **不被慢数据阻塞**
-
-</v-click>
-
-<v-click>
-
-**默认开启**，无需配置——Solid 1.7+ + SolidStart 1.0+ 直接支持。
+服务器立即 flush `<h1>` + `<Nav />` + `<Skeleton />`；数据 ready 后再发 `<template>` + 内联脚本替换 fallback——首屏 TTI **不被慢数据阻塞**。**默认开启**，Solid 1.7+ 直接支持。
 
 </v-click>
 
@@ -934,18 +858,11 @@ transition: slide-up
 # 渲染模式：SSR / SSG / SPA
 
 ```ts
-// app.config.ts
-import { defineConfig } from '@solidjs/start/config'
-
 export default defineConfig({
   ssr: true,            // 默认 true（SSR）；false → SPA
-
   server: {
     preset: 'static',   // → SSG（全量预渲染）
-    prerender: {
-      crawlLinks: true, // 自动爬取站内链接全部预渲染
-      routes: ['/sitemap.xml', '/about'],  // 显式列入
-    },
+    prerender: { crawlLinks: true, routes: ['/sitemap.xml', '/about'] },
   },
 })
 ```
@@ -954,10 +871,10 @@ export default defineConfig({
 
 | 模式 | `ssr` | `preset` | 适合 |
 |---|---|---|---|
-| **SSR** | `true` | `vercel` / `node-server` / ... | 动态内容、个性化、最常见 |
+| **SSR** | `true` | `vercel` / `node-server` | 动态内容、个性化、最常见 |
 | **SSG** | `true` | `static` + `prerender` | 博客、文档、Marketing |
 | **SPA** | `false` | 任意 | 后台 / SaaS（不需要 SEO） |
-| **混合** | `true` | 单 route 加 `route.prerender = true` | 部分页面 SSG，其余 SSR |
+| **混合** | `true` | 单 route 加 `route.prerender = true` | 部分 SSG，其余 SSR |
 
 </v-click>
 
@@ -985,13 +902,7 @@ export default function About() {
 
 <v-click>
 
-**典型组合**：
-
-- `/`、`/about`、`/pricing` → 预渲染（静态 HTML）
-- `/dashboard/**` → SSR（每次实时渲染）
-- `/api/**` → 服务端 endpoint
-
-一份代码，混合部署，无需手动切两种构建。
+**典型组合**：`/`、`/about`、`/pricing` → 预渲染；`/dashboard/**` → SSR；`/api/**` → 服务端 endpoint。一份代码，混合部署，无需手动切两种构建。
 
 </v-click>
 
@@ -1002,12 +913,8 @@ transition: slide-up
 # Adapter 体系：preset 切换
 
 ```ts
-// app.config.ts
-export default defineConfig({
-  server: {
-    preset: 'vercel',         // ← 改这一行切换部署平台
-  },
-})
+// app.config.ts —— 改一行切换部署平台
+export default defineConfig({ server: { preset: 'vercel' } })
 ```
 
 <v-click>
@@ -1020,17 +927,9 @@ export default defineConfig({
 | `vercel` / `vercel_edge` | Vercel Serverless / Edge |
 | `netlify` / `netlify_edge` | Netlify Functions / Edge |
 | `cloudflare-pages` / `cloudflare_module` | CF Pages / Workers |
-| `bun` / `deno-server` / `deno-deploy` | Bun / Deno Runtime |
-| `aws-lambda` / `aws-lambda-edge` | AWS Lambda / Lambda@Edge |
-| `static` | 静态站点（SSG） |
+| `bun` / `deno-deploy` / `static` | Bun / Deno / SSG |
 
-</v-click>
-
-<v-click>
-
-> 💡 **零代码切换**
->
-> 同一份代码，只改 `preset` 就能在任意平台跑——Server Functions 自动适配平台原生 HTTP API。
+> 💡 同一份代码改 `preset` 即可切平台——Server Functions 自动适配。
 
 </v-click>
 
@@ -1041,13 +940,10 @@ transition: slide-up
 # Vercel 部署示例
 
 ```bash
-# 1. 改 app.config.ts
-server: { preset: 'vercel' }
+# 1. 改 app.config.ts → server: { preset: 'vercel' }
 
-# 2. push 到 GitHub → Vercel 自动构建
-# 或本地预览：
-pnpm build
-# 产物在 .vercel/output/
+# 2. push 到 GitHub → Vercel 自动构建，或本地预览：
+pnpm build              # 产物在 .vercel/output/
 
 # 3. 用 vercel CLI 部署
 vercel --prod
@@ -1058,8 +954,7 @@ vercel --prod
 **注意事项**：
 
 - 默认 `preset: 'vercel'` 是 Serverless（Node runtime）
-- 用 `'vercel_edge'` 切换 Edge（V8 isolate，启动快但 API 受限）
-- 环境变量：Vercel Dashboard 设置 + 本地 `.env`
+- `'vercel_edge'` → Edge（V8 isolate，启动快但 API 受限）
 - Server Functions 路径会被映射为 `/_server` endpoint
 
 </v-click>
@@ -1071,37 +966,21 @@ transition: slide-up
 # Cloudflare / Bun / Deno
 
 ```ts
-// Cloudflare Pages
-preset: 'cloudflare-pages'
-
-// Cloudflare Workers
-preset: 'cloudflare_module'
-
-// Bun runtime
-preset: 'bun'
-
-// Deno Deploy
-preset: 'deno-deploy'
+preset: 'cloudflare-pages'   // CF Pages
+preset: 'cloudflare_module'  // CF Workers
+preset: 'bun'                // Bun runtime
+preset: 'deno-deploy'        // Deno Deploy
 ```
 
 <v-click>
 
-**Edge 平台限制**：
-
-- 不能用 Node API（`fs` / `child_process` / `crypto.createHash`）
-- 必须用 Web standard（`fetch` / `Request` / `Response` / Web Crypto）
-- 启动毫秒级，但 cold start 不存在（V8 isolate 复用）
-- Cloudflare 有 KV / D1 / R2 / Durable Objects 等绑定
+**Edge 平台限制**：不能用 Node API（`fs` / `child_process`），必须用 Web standard（`fetch` / `Request` / Web Crypto）。Cloudflare 有 KV / D1 / R2 / Durable Objects 绑定。
 
 </v-click>
 
 <v-click>
 
-**经验**：
-
-- 选 Edge 之前，确认所有依赖兼容 Web standard
-- 数据库走 HTTP API（PlanetScale / Neon / Cloudflare D1），不要 TCP 连接
-- 文件存储用 R2 / S3，不要本地文件系统
+**经验**：选 Edge 前确认依赖兼容；数据库走 HTTP API（PlanetScale / Neon / D1）不要 TCP；文件存储用 R2 / S3。
 
 </v-click>
 
@@ -1112,29 +991,22 @@ transition: slide-up
 # 环境变量
 
 ```bash
-# .env / .env.local（git ignore）
-DATABASE_URL=postgres://...
+# .env / .env.local（git ignore）—— 前缀决定可见性
+DATABASE_URL=postgres://...   # 无前缀：只服务端可读
 SESSION_SECRET=long-random-string-at-least-32-bytes
-
-# 前缀决定可见性
-VITE_API_URL=...              # ← VITE_ 前缀：客户端 + 服务端都可读
-SOME_SECRET=...               # ← 无前缀：只服务端可读
+VITE_API_URL=...              # VITE_ 前缀：客户端 + 服务端都可读
 ```
 
 ```ts
 // 服务端代码（"use server" / middleware / API route）
 process.env.DATABASE_URL        // OK
-
 // 客户端代码（组件）
 import.meta.env.VITE_API_URL    // OK（VITE_ 前缀）
-import.meta.env.MODE            // 'development' | 'production'
 ```
 
 <v-click>
 
-> 💡 **安全提醒**
->
-> 无 `VITE_` 前缀的变量**永远不会**进入客户端 bundle——只能在 `"use server"` / middleware / API route 中读 `process.env.XXX`。Server Function 编译会移除这些引用。
+> 💡 无 `VITE_` 前缀的变量**永远不会**进入客户端 bundle——只能在 `"use server"` / middleware / API route 中读 `process.env.XXX`。
 
 </v-click>
 
@@ -1149,19 +1021,12 @@ transition: slide-up
 | UI 库 | SolidJS（Signals） | React（Hooks + RSC） |
 | 数据加载 | `query` + `createAsync` | RSC（async component） |
 | 数据变更 | `action` + `useSubmission` | Server Actions |
-| 服务端代码 | `"use server"` 函数 | RSC + `"use server"` |
 | Client / Server | **无 RSC 心智** | 必须区分 `"use client"` |
-| 文件路由 | `src/routes/` | `app/` |
 | 流式 SSR | 默认开启 | 支持（需 Suspense） |
-| 部署 | Vercel / 全 Nitro preset | Vercel（最优）/ Node / Edge |
 
 <v-click>
 
-**何时选 SolidStart**：
-
-- 性能敏感、UI bundle 想小
-- 不想接受 RSC 心智复杂度
-- 团队 JSX 习惯，但拒绝 React 大生态绑定
+**何时选 SolidStart**：性能敏感 UI bundle 想小；不想接受 RSC 复杂度；团队 JSX 习惯但拒绝 React 大生态绑定。
 
 </v-click>
 
@@ -1175,11 +1040,10 @@ transition: slide-up
 |---|---|---|---|---|
 | UI | SolidJS JSX | Vue SFC | Svelte SFC | 多框架 + Islands |
 | 文件路由 | `src/routes/` | `pages/` / `app/` | `src/routes/` | `src/pages/` |
-| 数据加载 | `query` | `useFetch` / Server API | `+page.server.ts` `load` | `getStaticPaths` / 自动 |
-| 数据变更 | `action` | Server API + `$fetch` | `+page.server.ts` `actions` | Action（实验） |
+| 数据加载 | `query` | `useFetch` | `+page.server.ts` | `getStaticPaths` |
+| 数据变更 | `action` | `$fetch` | `actions` | Action（实验） |
 | 服务端 | `"use server"` | Nitro Server | Server Hooks | Server Endpoints |
-| 流式 SSR | 默认 | 支持 | 支持 | 部分 |
-| 默认 JS | 极小（细粒度） | 中（Vue runtime） | 极小（编译） | **0**（按 Island） |
+| 默认 JS | 极小 | 中（Vue runtime） | 极小（编译） | **0**（Island） |
 
 ---
 transition: slide-up
@@ -1233,11 +1097,7 @@ export default function Page() {
 
 <v-click>
 
-**规则**：
-
-- `createAsync` 的实际值是 Promise，必须在 `<Suspense>` 边界内消费
-- 推荐**根组件**统一套一层 `<Suspense>`——`<Router root={(p) => <Suspense>{p.children}</Suspense>}>`
-- 细粒度局部 `<Suspense>` 用于流式：让快数据先 paint，慢数据后流入
+**规则**：`createAsync` 的值是 Promise，必须在 `<Suspense>` 内消费。推荐根组件套一层 `<Suspense>`，局部 `<Suspense>` 用于流式（快数据先 paint，慢数据后流入）。
 
 </v-click>
 
@@ -1264,18 +1124,14 @@ const handler = async () => {
 
 // ❌ 闭包捕获服务端变量传到客户端
 function Page() {
-  const secret = process.env.SECRET   // 仅服务端可读，但若被客户端组件读 → undefined
+  const secret = process.env.SECRET   // 仅服务端可读 → 客户端为 undefined
   return <p>{secret}</p>
 }
 ```
 
 <v-click>
 
-**规则**：
-
-- `"use server"` 必须是函数体**第一行字面量**
-- `"use server"` 函数的入参 / 返回值必须 JSON 可序列化
-- 服务端独占资源（DB、secrets）只能在 `"use server"` 函数内访问
+**规则**：`"use server"` 必须是函数体第一行字面量；入参 / 返回值必须 JSON 可序列化；服务端独占资源（DB、secrets）只能在 `"use server"` 函数内访问。
 
 </v-click>
 
@@ -1387,27 +1243,11 @@ transition: slide-up
 # 下一步学习路径
 
 ```
-入门
-├── 跑通 pnpm create solid 默认模板
-├── 读完官方 Tutorial（routing / data / forms）
-└── 写一个 CRUD：Posts 列表 + 新建 + 详情
-
-进阶
-├── query + createAsync + preload 三件套
-├── action + useSubmission + revalidate
-├── "use server" + Session + Auth 完整流
-└── Middleware + API routes
-
-实战
-├── 选 Adapter 部署 Vercel / Cloudflare
-├── 流式 SSR + 局部 Suspense
-├── 混合渲染（部分路由 prerender）
-└── 性能调优 + bundle 分析
-
-延伸
-├── Vinxi 内部 / Nitro adapter 源码
-├── 跟进 SolidStart 2.0 路线图
-└── SolidJS 2.0 实验 signals 分支
+入门：跑通模板 → 官方 Tutorial → 写一个 CRUD
+进阶：query + createAsync + preload / action + useSubmission /
+      "use server" + Session + Auth / Middleware + API routes
+实战：Adapter 部署 / 流式 SSR / 混合渲染 / 性能调优
+延伸：Vinxi 源码 / SolidStart 2.0 路线图
 ```
 
 <v-click>
@@ -1415,7 +1255,6 @@ transition: slide-up
 **官方资源**：
 
 - 文档：[start.solidjs.com](https://start.solidjs.com) / [docs.solidjs.com/solid-start](https://docs.solidjs.com/solid-start)
-- Tutorial：[start.solidjs.com](https://start.solidjs.com)
 - 示例：[github.com/solidjs/solid-start/tree/main/examples](https://github.com/solidjs/solid-start/tree/main/examples)
 - Discord：SolidJS 官方社区（#solid-start 频道）
 

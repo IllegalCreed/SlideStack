@@ -114,19 +114,12 @@ transition: slide-up
 
 | 版本 | 时间 | 关键变化 |
 |---|---|---|
-| **1** | 2016.11 | Rich Harris 首个开源版本 |
-| **2** | 2018.4 | 简化语法，移除 magical class bindings |
 | **3** | 2019.4 | 重大重写，`$:` reactive statements、stores |
 | **4** | 2023.6 | TypeScript 重写，移除 IE 支持 |
 | **5** | 2024.10 | **Runes** 系统、`onclick` 事件、Snippets 替代 slots |
-| **SvelteKit 1** | 2022.12 | 替代 Sapper，基于 Vite，文件路由 |
-| **SvelteKit 2** | 2023.12 | 简化 API（throw error/redirect） |
+| **SvelteKit 1 / 2** | 2022.12 / 2023.12 | 替代 Sapper（基于 Vite）/ 简化 API |
 
-<v-click>
-
-**今天主要讲 Svelte 5 + SvelteKit 2**。看到 `let count = 0` 隐式响应、`on:click`、`<slot>`、`export let` 都是 v4 时代写法。
-
-</v-click>
+**今天主要讲 Svelte 5 + SvelteKit 2**。`let count = 0` 隐式响应、`on:click`、`<slot>`、`export let` 都是 v4 写法。
 
 ---
 transition: slide-up
@@ -137,27 +130,16 @@ transition: slide-up
 **编译时把模板转成命令式 DOM 操作，运行时基于 signals 细粒度追踪**
 
 ```
-.svelte 文件
-  ↓ @sveltejs/vite-plugin-svelte
-  ├ <script>  → JS 模块（$state → 响应式 signal）
-  ├ 模板      → 命令式 DOM 操作（template element + addEventListener）
-  └ <style>   → 选择器加 hash（scoped）
-  ↓
-最终产物：极薄运行时 + 仅本组件的 DOM 操作
+.svelte → vite-plugin-svelte → <script> 响应式 signal + 模板命令式 DOM + <style> hash scoped
 ```
-
-<v-click>
 
 对比 React / Vue：
 
 | 维度 | Svelte 5 | Vue 3 | React 19 |
 |---|---|---|---|
 | 模板 | 编译时 → 命令式 DOM | 编译时 patchFlag | JSX 全运行时 |
-| Virtual DOM | **无** | 有 | 有 |
-| Diff | **无** | patch + patchFlag | Fiber Reconciler |
+| Virtual DOM / Diff | 无 / 无 | 有 / patch | 有 / Fiber |
 | 状态变化 | 直接更新 DOM 节点 | 仅 diff 动态部分 | 整组件函数重跑 |
-
-</v-click>
 
 ---
 transition: slide-up
@@ -167,22 +149,11 @@ transition: slide-up
 
 | 维度 | Svelte | React | Vue |
 |---|---|---|---|
-| 自我定位 | **编译器框架** | UI Library | 渐进式 Framework |
-| 编译策略 | **重编译时 + 极薄运行时** | 轻编译时 + 重运行时 | 重编译时 + 中等运行时 |
-| Virtual DOM | **无** | 有 | 有 |
-| 响应式 | Signals（v5） | render + reconcile | Proxy（ref / reactive） |
-| 组件文件 | `.svelte`（HTML 风格） | `.tsx`（JSX in JS） | `.vue`（SFC） |
-| Bundle 体积 | **最小**（<10 KB） | 中等（~45 KB） | 较小（~25 KB） |
+| 定位 / 策略 | 编译器框架 / 重编译 | UI Lib / 轻编译 | 渐进式 / 重编译 |
+| Virtual DOM / 响应式 | 无 / Signals | 有 / render+reconcile | 有 / Proxy |
+| 文件 / Bundle | `.svelte` / <10 KB | `.tsx` / ~45 KB | `.vue` / ~25 KB |
 
-<v-click>
-
-**含义**：
-
-- 模板 → DOM 操作的计算全在**构建时**完成，运行时只剩响应式调度
-- 不需要打包 VDOM / Reconciler 进 bundle —— 体积小的根本原因
-- 代价：**框架升级**（如 v4 → v5）通常需要重新编译所有组件
-
-</v-click>
+**含义**：模板 → DOM 操作全在**构建时**完成；不打包 VDOM / Reconciler（体积小的根本原因）；代价是框架升级需重编译所有组件。
 
 ---
 transition: slide-up
@@ -191,29 +162,19 @@ transition: slide-up
 # 快速开始
 
 ```bash
-# 推荐：SvelteKit 官方全栈起点
+# 推荐：SvelteKit 官方全栈（TS / Vitest / Playwright / Tailwind 等可选）
 pnpm dlx sv create my-app
-# 交互式选 TS / ESLint / Prettier / Vitest / Playwright / Tailwind
 
 # 或：纯 Vite + Svelte（SPA 起点）
 pnpm create vite@latest my-app -- --template svelte-ts
-
 cd my-app && pnpm install && pnpm dev
 ```
 
-<v-click>
-
 ```
-my-app/                          (SvelteKit)
+my-app/  (SvelteKit)
 ├── src/
-│   ├── routes/                  # 文件系统路由
-│   │   ├── +layout.svelte
-│   │   ├── +page.svelte
-│   │   └── +page.ts             # 首页 load function
-│   ├── lib/
-│   │   ├── components/
-│   │   ├── server/              # 仅服务端模块
-│   │   └── index.ts             # $lib 别名
+│   ├── routes/                  # 文件系统路由（+page.svelte / +page.ts / +layout）
+│   ├── lib/                     # components / server / index.ts（$lib 别名）
 │   ├── app.html
 │   └── hooks.server.ts
 ├── svelte.config.js
@@ -221,8 +182,6 @@ my-app/                          (SvelteKit)
 ```
 
 要求 Node 20.19+ / 22.12+（Vite 7 / SvelteKit 2）。
-
-</v-click>
 
 ---
 transition: slide-up
@@ -235,13 +194,10 @@ transition: slide-up
 <script lang="ts">
   // 1. <script>：组件逻辑
   let count = $state(0)
-  const increment = () => count++
 </script>
 
 <!-- 2. 模板：组件 HTML 结构 -->
-<button onclick={increment}>
-  Clicks: {count}
-</button>
+<button onclick={() => count++}>Clicks: {count}</button>
 
 <style>
   /* 3. <style>：默认 scoped */
@@ -249,15 +205,7 @@ transition: slide-up
 </style>
 ```
 
-<v-click>
-
-**三段都不是必需的**：
-
-- 仅模板：`<h1>Hello!</h1>` 就是合法 `.svelte` 文件
-- 仅 `<script>`：纯逻辑模块
-- `.svelte.ts` / `.svelte.js`：带 Runes 的纯逻辑模块
-
-</v-click>
+**三段都不是必需的**：仅模板 `<h1>Hello!</h1>` 合法；仅 `<script>` 纯逻辑模块；`.svelte.ts` 带 Runes 的纯逻辑。
 
 ---
 transition: slide-up
@@ -267,23 +215,13 @@ transition: slide-up
 
 | 维度 | Svelte 4 | Svelte 5 |
 |---|---|---|
-| 响应式状态 | `let count = 0`（编译器隐式） | `let count = $state(0)`（显式 Rune） |
-| 派生值 | `$: doubled = count * 2` | `let doubled = $derived(count * 2)` |
-| 副作用 | `$: console.log(count)` | `$effect(() => console.log(count))` |
-| Props | `export let name: string` | `let { name } = $props()` |
-| 事件 | `on:click={fn}` | `onclick={fn}` |
-| 子组件事件 | `createEventDispatcher` | callback props |
-| 插槽 | `<slot />` | `{@render children?.()}` + `{#snippet}` |
-| 动态组件 | `<svelte:component this={Comp} />` | 直接 `<Comp />` |
-| 组件实例 | `new App({ target })` | `mount(App, { target })` |
+| 响应式状态 | `let count = 0`（隐式） | `let count = $state(0)`（显式 Rune） |
+| 派生 / 副作用 | `$: doubled = count * 2` | `$derived(count * 2)` / `$effect(...)` |
+| Props / 事件 | `export let name` / `on:click` | `$props()` / `onclick={fn}` |
+| 插槽 / 动态组件 | `<slot />` / `<svelte:component>` | `{@render}` + `{#snippet}` / 直接 `<Comp />` |
+| 实例化 | `new App({ target })` | `mount(App, { target })` |
 
-<v-click>
-
-> 💡 **迁移自动化**
->
-> `pnpm dlx sv migrate svelte-5` 自动转换大部分语法。复杂 `$:` 块、custom stores、测试代码需手动检查。
-
-</v-click>
+> 💡 `pnpm dlx sv migrate svelte-5` 自动转换大部分。复杂 `$:` 块 / custom stores / 测试需手动检查。
 
 ---
 transition: slide-up
@@ -349,17 +287,13 @@ transition: slide-up
 
 ```svelte
 <script lang="ts">
-  let todos = $state([
-    { id: 1, text: 'Learn Svelte', done: false },
-    { id: 2, text: 'Build app', done: false }
-  ])
+  let todos = $state([{ id: 1, text: 'Learn Svelte', done: false }])
 </script>
 
 <ul>
   {#each todos as todo, i (todo.id)}
     <li class:done={todo.done}>
-      <input type="checkbox" bind:checked={todo.done} />
-      {i + 1}. {todo.text}
+      <input type="checkbox" bind:checked={todo.done} /> {i + 1}. {todo.text}
     </li>
   {:else}
     <li>No todos</li>
@@ -367,16 +301,10 @@ transition: slide-up
 </ul>
 
 <!-- 解构 -->
-{#each todos as { id, text, done } (id)}
-  <li class:done>{text}</li>
-{/each}
+{#each todos as { id, text } (id)}<li>{text}</li>{/each}
 ```
 
-<v-click>
-
-**`(todo.id)` 是 key**——告诉 Svelte 用什么标识 diff 列表（与 React `key` 同思路）。省略 key 用 index 兜底，复用错节点。
-
-</v-click>
+**`(todo.id)` 是 key**——告诉 Svelte 用什么标识 diff 列表。省略 key 用 index 兜底，复用错节点。
 
 ---
 transition: slide-up
@@ -492,29 +420,17 @@ transition: slide-up
 <!-- DataTable.svelte -->
 <script lang="ts" generics="T extends { id: string }">
   import type { Snippet } from 'svelte'
-
-  interface Props {
-    items: T[]
-    row: Snippet<[T]>           // 单参数：每行收到 item
-    empty?: Snippet
-  }
-
+  interface Props { items: T[]; row: Snippet<[T]>; empty?: Snippet }
   let { items, row, empty }: Props = $props()
 </script>
 
 <table>
-  {#each items as item (item.id)}
-    <tr>{@render row(item)}</tr>
-  {:else}
-    {@render empty?.()}
-  {/each}
+  {#each items as item (item.id)}<tr>{@render row(item)}</tr>{:else}{@render empty?.()}{/each}
 </table>
 
 <!-- 使用 -->
 <DataTable items={users}>
-  {#snippet row(user)}
-    <td>{user.id}</td><td>{user.name}</td>
-  {/snippet}
+  {#snippet row(user)}<td>{user.id}</td><td>{user.name}</td>{/snippet}
 </DataTable>
 ```
 
@@ -526,26 +442,14 @@ transition: slide-up
 
 | Rune | 用途 |
 |---|---|
-| `$state<T>(initial)` | 响应式状态（深响应式 Proxy） |
-| `$state.raw<T>(initial)` | 浅响应式（整体替换才更新） |
-| `$state.snapshot<T>(value)` | 取出 Proxy 的纯 JS 快照 |
-| `$derived<T>(expr)` | 派生值（表达式版） |
-| `$derived.by<T>(fn)` | 派生值（函数版） |
-| `$effect(fn)` | 副作用（DOM 更新后） |
-| `$effect.pre(fn)` | 副作用（DOM 更新前） |
-| `$effect.tracking()` | 判断是否在响应式追踪上下文 |
-| `$effect.root(fn)` | 独立 effect 作用域（手动 cleanup） |
-| `$props<T>()` | 接收组件 props |
-| `$bindable<T>(default?)` | 标记 prop 可双向绑定 |
-| `$inspect(...values)` | 开发期响应式日志（生产剥离） |
-| `$inspect.trace(label?)` | 追踪 effect / derived 触发原因 |
-| `$host()` | 自定义元素宿主 DOM 节点 |
+| `$state<T>(initial)` / `$state.raw` / `$state.snapshot` | 响应式状态（深 / 浅 / 快照） |
+| `$derived(expr)` / `$derived.by(fn)` | 派生值（表达式 + 函数版） |
+| `$effect(fn)` / `$effect.pre` / `.tracking` / `.root` | 副作用 + 前置 + 追踪判断 + 作用域 |
+| `$props<T>()` / `$bindable(default?)` | 组件 props + 双向绑定 |
+| `$inspect(values)` / `.trace(label?)` | 开发期日志（生产剥离） |
+| `$host()` | 自定义元素宿主 DOM |
 
-<v-click>
-
-> 💡 **Runes 不是函数**——编译器识别的特殊语法，前缀 `$` 标记。运行时不存在「`$state` 函数」，编译后变成 `__signal()` / `__set()` 等内部 API。
-
-</v-click>
+> 💡 **Runes 不是函数**——编译器识别的语法，前缀 `$` 标记，运行时不存在「`$state` 函数」。
 
 ---
 transition: slide-up
@@ -555,12 +459,8 @@ transition: slide-up
 
 ```svelte
 <script lang="ts">
-  // 基本类型
-  let count = $state(0)
-  let name = $state('')
-
-  // 对象 / 数组：深响应式（Proxy 包装）
-  let user = $state({ name: 'Alice', age: 30 })
+  let count = $state(0)                          // 基本类型
+  let user = $state({ name: 'Alice', age: 30 })  // 深响应式（Proxy 包装）
   let todos = $state<Todo[]>([])
 
   function update() {
@@ -572,15 +472,7 @@ transition: slide-up
 </script>
 ```
 
-<v-click>
-
-**三要点**：
-
-1. **直接读写**——`count` 就是值（不是 `count.value` / `count()`）
-2. **深响应式**——对象 / 数组用 Proxy 自动包装
-3. **解构会断**——`let { name } = user` 是普通值，不再响应
-
-</v-click>
+**三要点**：① 直接读写（不是 `.value`）② 深响应式（Proxy）③ 解构会断响应。
 
 ---
 transition: slide-up
@@ -628,30 +520,17 @@ transition: slide-up
   person.age = 50                  // ❌ 无效
   person = { ...person, age: 50 }  // ✅ 整体替换
 
-  // 大对象避免 Proxy 开销
-  let bigList = $state.raw<Item[]>([])
-  bigList = bigList.map(transform)
-
   // $state.snapshot：取出干净 JS 对象（不再是 Proxy）
   let user = $state({ name: 'Alice', tags: ['vue', 'react'] })
-  function save() {
-    const plain = $state.snapshot(user)
-    api.save(plain)
-    localStorage.setItem('user', JSON.stringify(plain))
-  }
+  const plain = $state.snapshot(user)
+  api.save(plain)
 </script>
 ```
 
-<v-click>
-
 | 场景 | 推荐 |
 |---|---|
-| 表单数据 / 配置对象 / 用户对象 | `$state`（要改属性） |
-| 来自后端的只读数据 | `$state.raw` |
-| Map / Set / 类实例 | `$state.raw` |
-| 大数组（性能敏感） | `$state.raw` |
-
-</v-click>
+| 表单 / 配置 / 用户对象 | `$state`（要改属性） |
+| 后端只读数据 / Map / Set / 类实例 / 大数组 | `$state.raw` |
 
 ---
 transition: slide-up
@@ -661,13 +540,10 @@ transition: slide-up
 
 ```svelte
 <script lang="ts">
-  let firstName = $state('')
-  let lastName = $state('')
-  let numbers = $state<number[]>([])
+  let firstName = $state(''), lastName = $state(''), numbers = $state<number[]>([])
 
   // 表达式版（最常用）
   let fullName = $derived(`${firstName} ${lastName}`)
-  let isAdult = $derived(age >= 18)
 
   // 函数版（多语句、复杂逻辑）
   let stats = $derived.by(() => {
@@ -676,19 +552,9 @@ transition: slide-up
     return { sum, avg: sum / numbers.length }
   })
 </script>
-
-<p>{fullName} (Avg: {stats.avg})</p>
 ```
 
-<v-click>
-
-**三特性**：
-
-1. **懒计算**——只在被读取时才执行
-2. **自动追踪**——内部读取的 `$state` 自动成为依赖
-3. **引用相等优化**——重算结果与上次相同时，下游不重渲染
-
-</v-click>
+**三特性**：① 懒计算（被读取时才执行）② 自动追踪 `$state` 依赖 ③ 引用相等优化下游不重渲染。
 
 ---
 transition: slide-up
@@ -702,7 +568,6 @@ transition: slide-up
 
   // 自动追踪：count 是依赖
   $effect(() => {
-    console.log('count is', count)
     document.title = `Count: ${count}`
   })
 
@@ -714,17 +579,7 @@ transition: slide-up
 </script>
 ```
 
-<v-click>
-
-**五要点**：
-
-1. **自动追踪依赖**——内部访问的 `$state` 自动被追踪（无依赖数组）
-2. **mount 时跑一次**——之后依赖变化重跑
-3. **返回 cleanup**——下次重跑前或组件卸载时执行
-4. **不要用 effect 派生状态**——派生用 `$derived`
-5. **`untrack(fn)`** 可读值但不追踪
-
-</v-click>
+**要点**：自动追踪依赖（无 deps array）/ mount 时跑一次后随依赖重跑 / return cleanup / 不要派生状态用 `$derived` / `untrack(fn)` 读值不追踪。
 
 ---
 transition: slide-up
@@ -769,41 +624,25 @@ transition: slide-up
 ```svelte
 <script lang="ts">
   // 1. $effect.pre：DOM 更新前（替代 v4 beforeUpdate）
-  let container: HTMLDivElement
-  let shouldScrollDown = $state(false)
   $effect.pre(() => {
     if (!container) return
-    shouldScrollDown =
-      container.scrollTop + container.clientHeight >=
-      container.scrollHeight - 1
+    shouldScrollDown = container.scrollTop + container.clientHeight >= container.scrollHeight - 1
     messages.length   // 触发依赖追踪
   })
 
   // 2. $effect.tracking()：判断是否在追踪上下文
-  function watch(getter, callback) {
-    if ($effect.tracking()) {
-      $effect(() => { getter(); return callback })
-    } else { /* 不在 effect 内 */ }
-  }
+  if ($effect.tracking()) { $effect(() => { getter(); return callback }) }
 </script>
 ```
 
-<v-click>
-
 ```ts
-// 3. $effect.root：组件外的 effect 作用域
+// 3. $effect.root：组件外的 effect 作用域（插件 / 测试 Runes）
 const cleanup = $effect.root(() => {
   let count = $state(0)
   $effect(() => console.log('Outside:', count))
-  setInterval(() => count++, 1000)
   return () => console.log('Cleaning up')
 })
-cleanup()
 ```
-
-**用途**：插件、共享状态模块、Vitest 测试 Runes 时需要手动管 effect 生命周期。
-
-</v-click>
 
 ---
 transition: slide-up
@@ -824,7 +663,7 @@ transition: slide-up
     children?: Snippet
   }
 
-  let { label, variant = 'primary', disabled = false, onclick, children }: Props = $props()
+  let { label, variant = 'primary', disabled, onclick, children }: Props = $props()
 </script>
 
 <button class={variant} {disabled} {onclick}>
@@ -832,23 +671,7 @@ transition: slide-up
 </button>
 ```
 
-<v-click>
-
-**高级用法**：
-
-```svelte
-<script lang="ts">
-  // 重命名（关键字 / 数字 / 含连字符）
-  let { class: className, 'data-id': dataId } = $props()
-
-  // Rest 收集所有其他 props
-  let { variant, ...rest } = $props()
-</script>
-
-<button class={variant} {...rest}>...</button>
-```
-
-</v-click>
+**高级**：`let { class: cls, 'data-id': id, ...rest } = $props()` —— 关键字重命名 + Rest 收集
 
 ---
 transition: slide-up
@@ -893,9 +716,6 @@ transition: slide-up
 
 ```svelte
 <script lang="ts">
-  let count = $state(0)
-  let user = $state({ name: 'Alice' })
-
   // 1. $inspect：开发期响应式日志
   $inspect(count)                      // 每次 count 变化都打印
   $inspect(count, user)                // 多值
@@ -906,25 +726,13 @@ transition: slide-up
     $inspect.trace('doubled-derived')
     return count * 2
   })
+
+  // 2. $host：仅在编译为 Custom Element 时可用
+  $host().dispatchEvent(new CustomEvent('greet', { detail: 'hello' }))
 </script>
 ```
 
-```svelte
-<!-- 2. $host：仅在编译为 Custom Element 时可用 -->
-<svelte:options customElement="my-button" />
-
-<script>
-  function dispatch() {
-    $host().dispatchEvent(new CustomEvent('greet', { detail: 'hello' }))
-  }
-</script>
-```
-
-<v-click>
-
-> 💡 **`$inspect` 生产环境被剥离**——`vite build` 后编译成 no-op，可以放心散布。
-
-</v-click>
+> 💡 **`$inspect` 生产环境被剥离**——`vite build` 后编译成 no-op。
 
 ---
 transition: slide-up
@@ -999,33 +807,22 @@ transition: slide-up
 
 ```svelte
 <script lang="ts">
-  let text = $state('')
-  let count = $state(0)
-  let agreed = $state(false)
+  let text = $state(''), count = $state(0), agreed = $state(false)
 </script>
 
-<!-- 文本 -->
+<!-- 文本 / 数字（自动转 number） -->
 <input bind:value={text} />
-
-<!-- 数字（自动转 number） -->
 <input type="number" bind:value={count} />
 
-<!-- Checkbox -->
-<label>
-  <input type="checkbox" bind:checked={agreed} />
-  I agree
-</label>
-
-<!-- Textarea -->
+<!-- Checkbox / Textarea -->
+<label><input type="checkbox" bind:checked={agreed} /> I agree</label>
 <textarea bind:value={text}></textarea>
 
-<!-- Select -->
+<!-- Select / File -->
 <select bind:value={text}>
   <option value="a">A</option>
   <option value="b">B</option>
 </select>
-
-<!-- File input -->
 <input type="file" bind:files multiple />
 ```
 
@@ -1068,32 +865,19 @@ transition: slide-up
 ```svelte
 <script lang="ts">
   import { onMount } from 'svelte'
-
   let inputEl: HTMLInputElement
-  let currentTime = $state(0)
-  let duration = $state(0)
-  let paused = $state(true)
-
+  let currentTime = $state(0), duration = $state(0), paused = $state(true)
   onMount(() => inputEl.focus())
 </script>
 
-<!-- DOM 引用 -->
 <input bind:this={inputEl} />
 <button onclick={() => inputEl.focus()}>Focus</button>
 
-<!-- 媒体元素双向绑定 -->
 <video src="movie.mp4" bind:currentTime bind:duration bind:paused />
 <p>{currentTime.toFixed(1)} / {duration.toFixed(1)}s</p>
-<button onclick={() => paused = !paused}>{paused ? 'Play' : 'Pause'}</button>
 ```
 
-<v-click>
-
-**媒体可绑定属性**：`currentTime` / `duration` / `paused` / `volume` / `muted` / `playbackRate` / `seeking` / `ended` / `played` / `buffered` / `seekable` / `readyState`
-
-Svelte 把 HTMLMediaElement 属性映射成双向绑定，省去 onTimeUpdate / onVolumeChange 等十几个事件监听。
-
-</v-click>
+**媒体可绑定**：`currentTime` / `duration` / `paused` / `volume` / `muted` / `playbackRate` / `ended` 等十几个属性，省去事件监听。
 
 ---
 transition: slide-up
@@ -1106,10 +890,7 @@ Svelte 5 没有 `createEventDispatcher`——子→父直接传函数：
 ```svelte
 <!-- 子组件 Search.svelte -->
 <script lang="ts">
-  interface Props {
-    onSearch: (query: string) => void
-    onCancel?: () => void
-  }
+  interface Props { onSearch: (q: string) => void; onCancel?: () => void }
   let { onSearch, onCancel }: Props = $props()
   let query = $state('')
 </script>
@@ -1117,30 +898,12 @@ Svelte 5 没有 `createEventDispatcher`——子→父直接传函数：
 <input bind:value={query} />
 <button onclick={() => onSearch(query)}>Go</button>
 <button onclick={onCancel}>Cancel</button>
-```
 
-```svelte
 <!-- 父组件 -->
-<Search
-  onSearch={(q) => console.log('Searching for', q)}
-  onCancel={() => console.log('Cancelled')}
-/>
+<Search onSearch={(q) => log(q)} onCancel={() => log('cancel')} />
 ```
 
-<v-click>
-
-**vs v4 createEventDispatcher**：
-
-```svelte
-<!-- v4 -->
-const dispatch = createEventDispatcher<{ select: { id: string } }>()
-dispatch('select', { id: '1' })
-// 父：<Child on:select={(e) => console.log(e.detail.id)} />
-```
-
-callback props 类型推导更好。
-
-</v-click>
+**vs v4 createEventDispatcher**：v4 `dispatch('select', { id })` + `on:select`，v5 callback props 类型推导更好。
 
 ---
 transition: slide-up
@@ -1152,33 +915,18 @@ transition: slide-up
 // stores/counter.ts
 import { writable, readable, derived } from 'svelte/store'
 
-// writable：可读可写
-export const count = writable(0)
-
-// readable：仅读
-export const time = readable(new Date(), (set) => {
+export const count = writable(0)                                    // writable
+export const time = readable(new Date(), (set) => {                 // readable
   const timer = setInterval(() => set(new Date()), 1000)
   return () => clearInterval(timer)
 })
-
-// derived：派生
-export const doubled = derived(count, ($count) => $count * 2)
-
-// 多 store 派生
-export const summary = derived(
-  [count, doubled],
-  ([$count, $doubled]) => `${$count} doubled is ${$doubled}`
-)
+export const doubled = derived(count, ($count) => $count * 2)       // derived
+export const summary = derived([count, doubled], ([$c, $d]) => `${$c} → ${$d}`)
 ```
 
 ```svelte
-<script lang="ts">
-  import { count, doubled, time } from './stores/counter'
-</script>
-
 <!-- $ 自动订阅 + cleanup -->
-<p>{$count} doubled = {$doubled}</p>
-<p>Time: {$time.toLocaleTimeString()}</p>
+<p>{$count} doubled = {$doubled}, Time: {$time.toLocaleTimeString()}</p>
 <button onclick={() => $count++}>+1</button>
 ```
 
@@ -1243,8 +991,6 @@ transition: slide-up
 
 ```ts
 // stores/cart.svelte.ts
-interface CartItem { id: string; name: string; quantity: number }
-
 let _items = $state<CartItem[]>([])
 
 export const cart = {
@@ -1255,26 +1001,17 @@ export const cart = {
     if (existing) existing.quantity++
     else _items.push({ ...item, quantity: 1 })
   },
-  remove(id: string) { _items = _items.filter(i => i.id !== id) },
-  clear() { _items = [] }
+  remove(id: string) { _items = _items.filter(i => i.id !== id) }
 }
 ```
 
 ```svelte
-<!-- 任意组件 -->
-<script lang="ts">
-  import { cart } from '$lib/stores/cart.svelte'
-</script>
-
-<p>Total items: {cart.total}</p>
+<script lang="ts">import { cart } from '$lib/stores/cart.svelte'</script>
+<p>Total: {cart.total}</p>
 <button onclick={() => cart.add({ id: '1', name: 'Book' })}>Add</button>
 ```
 
-<v-click>
-
-> 💡 **必须用 `.svelte.ts` 后缀**——普通 `.ts` 不会被 Svelte 编译，`$state` 等 Runes 无效。
-
-</v-click>
+> 💡 **必须用 `.svelte.ts` 后缀**——普通 `.ts` 不会被 Svelte 编译，Runes 无效。
 
 ---
 transition: slide-up
@@ -1287,34 +1024,21 @@ transition: slide-up
 <script lang="ts">
   import { setContext } from 'svelte'
   let theme = $state<'light' | 'dark'>('light')
-
   setContext('theme', {
     get value() { return theme },
     toggle() { theme = theme === 'light' ? 'dark' : 'light' }
   })
 </script>
 
-<DeepChild />
-```
-
-```svelte
 <!-- DeepChild.svelte（任意层级深处） -->
 <script lang="ts">
   import { getContext } from 'svelte'
   const theme = getContext<{ value: string; toggle: () => void }>('theme')
 </script>
-
-<p>Theme: {theme.value}</p>
-<button onclick={theme.toggle}>Toggle</button>
+<button onclick={theme.toggle}>{theme.value}</button>
 ```
 
-<v-click>
-
-**API**：`setContext(key, value)` / `getContext<T>(key)` / `hasContext(key)` / `getAllContexts()`
-
-必须在组件 `<script>` 顶层调用（不能在事件回调、async 内）。
-
-</v-click>
+**API**：`setContext` / `getContext<T>` / `hasContext` / `getAllContexts`。必须在 `<script>` 顶层调用。
 
 ---
 transition: slide-up
@@ -1325,22 +1049,15 @@ transition: slide-up
 ```ts
 // theme-context.ts
 import { getContext, setContext } from 'svelte'
-
-interface ThemeContext {
-  value: 'light' | 'dark'
-  toggle(): void
-}
-
+interface ThemeContext { value: 'light' | 'dark'; toggle(): void }
 const KEY = Symbol('theme')
-
-export function setThemeContext(ctx: ThemeContext) { setContext(KEY, ctx) }
-export function getThemeContext(): ThemeContext { return getContext<ThemeContext>(KEY) }
+export const setThemeContext = (ctx: ThemeContext) => setContext(KEY, ctx)
+export const getThemeContext = (): ThemeContext => getContext<ThemeContext>(KEY)
 ```
 
 ```svelte
 <!-- 提供 -->
 <script lang="ts">
-  import { setThemeContext } from './theme-context'
   let theme = $state<'light' | 'dark'>('light')
   setThemeContext({
     get value() { return theme },
@@ -1349,10 +1066,7 @@ export function getThemeContext(): ThemeContext { return getContext<ThemeContext
 </script>
 
 <!-- 消费 -->
-<script lang="ts">
-  import { getThemeContext } from './theme-context'
-  const theme = getThemeContext()
-</script>
+<script lang="ts">const theme = getThemeContext()</script>
 ```
 
 ---
@@ -1364,35 +1078,22 @@ transition: slide-up
 ```svelte
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte'
-
   let ref: HTMLDivElement
   let data = $state<Item[]>([])
 
   onMount(async () => {
-    // 1. 客户端独占（SSR 不跑）
-    ref.focus()
-
-    // 2. 取数据
+    ref.focus()                                                  // 客户端独占（SSR 不跑）
     data = await fetch('/api/items').then(r => r.json())
-
-    // 3. 返回 cleanup（onDestroy 的简写）
-    const handler = () => console.log('online')
+    const handler = () => console.log('online')                  // 返回 cleanup（onDestroy 简写）
     window.addEventListener('online', handler)
     return () => window.removeEventListener('online', handler)
   })
 
-  onDestroy(() => {
-    // 卸载前清理（SSR 也跑）
-    console.log('Component destroyed')
-  })
+  onDestroy(() => console.log('destroyed'))                      // 双端都跑
 </script>
 ```
 
-<v-click>
-
-`onMount` 仅客户端跑（SSR 不跑），`onDestroy` 双端都跑。能在 `onMount` 返回 cleanup 就别拆 `onDestroy`，更紧凑。
-
-</v-click>
+`onMount` 仅客户端，`onDestroy` 双端。能在 `onMount` return cleanup 就别拆 `onDestroy`。
 
 ---
 transition: slide-up
@@ -1403,29 +1104,22 @@ transition: slide-up
 ```svelte
 <script lang="ts">
   import { tick, untrack, flushSync } from 'svelte'
-
-  let count = $state(0)
   let a = $state(0), b = $state(0)
 
   // 1. tick：等 DOM 更新
   async function clickAndMeasure() {
     count++
-    console.log(document.querySelector('p')?.textContent)   // 旧值
     await tick()
     console.log(document.querySelector('p')?.textContent)   // 新值
   }
 
   // 2. untrack：读值但不追踪
   $effect(() => {
-    console.log('a:', a)                       // 追踪 a
-    console.log('b:', untrack(() => b))        // 读 b 但不追踪
+    console.log('a:', a, 'b (untracked):', untrack(() => b))
   })
 
   // 3. flushSync：强制同步执行 pending effects（测试常用）
-  function update() {
-    a = 1
-    flushSync()
-  }
+  a = 1; flushSync()
 </script>
 ```
 
@@ -1437,31 +1131,18 @@ transition: slide-up
 
 | Svelte 4 | Svelte 5 | 备注 |
 |---|---|---|
-| `onMount` | 保留 | 建议改用 `$effect`（自动追踪） |
-| `onDestroy` | 保留 | 建议改用 `$effect` return cleanup |
-| `beforeUpdate` | **deprecated** | 用 `$effect.pre`（依赖控制） |
-| `afterUpdate` | **deprecated** | 用 `$effect`（依赖控制） |
+| `onMount` / `onDestroy` | 保留 | 建议改用 `$effect`（自动追踪 + return cleanup） |
+| `beforeUpdate` / `afterUpdate` | **deprecated** | 用 `$effect.pre` / `$effect`（依赖控制） |
 | `tick` | 保留 | 等 DOM 更新 |
 
-<v-click>
-
-**为什么 `beforeUpdate` / `afterUpdate` deprecated**：
+**为什么 deprecated**：v4 任何 state 变化都触发（无依赖控制）；v5 通过显式读取实现追踪：
 
 ```svelte
-<!-- v4：任何 state 变化都触发，无依赖控制 -->
 <script>
-  beforeUpdate(() => console.log('before'))
-  afterUpdate(() => console.log('after'))
-</script>
-
-<!-- v5：显式读取追踪 -->
-<script>
-  $effect.pre(() => { someState; console.log('before DOM update') })
-  $effect(() => { someState; console.log('after DOM update') })
+  $effect.pre(() => { someState; /* before DOM */ })
+  $effect(() => { someState; /* after DOM */ })
 </script>
 ```
-
-</v-click>
 
 ---
 transition: slide-up
@@ -1471,10 +1152,7 @@ transition: slide-up
 
 ```svelte
 <!-- Card.svelte -->
-<div class="card">
-  <h2>Title</h2>
-</div>
-
+<div class="card"><h2>Title</h2></div>
 <style>
   /* 选择器自动加 hash，仅作用本组件 */
   .card { padding: 16px; border: 1px solid #ddd; }
@@ -1482,27 +1160,9 @@ transition: slide-up
 </style>
 ```
 
-<v-click>
+编译后：`<div class="card svelte-abc123">` + `.card.svelte-abc123 { ... }`
 
-编译后：
-
-```html
-<div class="card svelte-abc123">
-  <h2 class="svelte-abc123">Title</h2>
-</div>
-<style>
-  .card.svelte-abc123 { ... }
-  h2.svelte-abc123 { ... }
-</style>
-```
-
-**vs React / Vue**：
-
-- React：无内置 scoped，需 CSS Modules / styled-components / Tailwind
-- Vue：`<style scoped>` 需显式标 scoped
-- Svelte：**默认 scoped**，无需任何额外标记
-
-</v-click>
+**vs React / Vue**：React 需 CSS Modules / styled-components；Vue 需 `<style scoped>` 标注；Svelte **默认 scoped**，无需额外标记。
 
 ---
 transition: slide-up
@@ -1545,19 +1205,11 @@ transition: slide-up
 # `style:` + CSS 变量传递
 
 ```svelte
-<script lang="ts">
-  let color = $state('red')
-  let size = $state(16)
-</script>
+<script lang="ts">let color = $state('red'), size = $state(16)</script>
 
 <!-- style:property -->
 <p style:color style:font-size={`${size}px`}>Hello</p>
-
-<!-- 等价 -->
-<p style="color: {color}; font-size: {size}px;">Hello</p>
 ```
-
-<v-click>
 
 **CSS 自定义属性传递**：
 
@@ -1566,18 +1218,10 @@ transition: slide-up
 <Card --bg-color="lightblue" --text-color="darkblue" />
 
 <!-- Card.svelte -->
-<div class="card">Hello</div>
-<style>
-  .card {
-    background: var(--bg-color, white);
-    color: var(--text-color, black);
-  }
-</style>
+<style>.card { background: var(--bg-color, white); color: var(--text-color, black); }</style>
 ```
 
-这种「父组件用 CSS 变量定制子组件」是 Svelte 独家——React / Vue 都没有内置语法糖。
-
-</v-click>
+「父组件用 CSS 变量定制子组件」是 Svelte 独家——React / Vue 都没有内置语法糖。
 
 ---
 transition: slide-up
@@ -1624,12 +1268,8 @@ transition: slide-up
 <script lang="ts">
   import { flip } from 'svelte/animate'
   import { crossfade } from 'svelte/transition'
-
   const [send, receive] = crossfade({ duration: 400 })
-
-  let todos = $state([{ id: 1, done: false }, { id: 2, done: true }])
   let active = $derived(todos.filter(t => !t.done))
-  let completed = $derived(todos.filter(t => t.done))
 </script>
 
 <!-- animate:flip 列表项重排（FLIP 技术）-->
@@ -1640,20 +1280,12 @@ transition: slide-up
 </ul>
 
 <!-- crossfade：Todo 项在两列间「飞过去」 -->
-<ul>
-  {#each active as todo (todo.id)}
-    <li in:receive={{ key: todo.id }} out:send={{ key: todo.id }}>
-      {todo.text}
-    </li>
-  {/each}
-</ul>
+{#each active as todo (todo.id)}
+  <li in:receive={{ key: todo.id }} out:send={{ key: todo.id }}>{todo.text}</li>
+{/each}
 ```
 
-<v-click>
-
-`animate:flip` 是 **F**irst **L**ast **I**nvert **P**lay 技术，Svelte 内置 1 行 API。`crossfade` 实现跨容器过渡——React / Vue 通常需要 Framer Motion / FLIP plugin。
-
-</v-click>
+`flip` = **F**irst **L**ast **I**nvert **P**lay；`crossfade` 实现跨容器过渡，1 行 API（React/Vue 需 Framer Motion）。
 
 ---
 transition: slide-up
@@ -1663,8 +1295,6 @@ transition: slide-up
 
 ```ts
 // myTransition.ts
-import type { TransitionConfig } from 'svelte/transition'
-
 export function whirl(node: Element, params?: { duration?: number }): TransitionConfig {
   return {
     duration: params?.duration ?? 400,
@@ -1675,27 +1305,18 @@ export function whirl(node: Element, params?: { duration?: number }): Transition
 
 ```svelte
 <script lang="ts">
-  import { whirl } from './myTransition'
   import { tweened, spring } from 'svelte/motion'
   import { cubicOut } from 'svelte/easing'
-
   // tweened：渐变 store / spring：弹性 store
   const progress = tweened(0, { duration: 400, easing: cubicOut })
   const x = spring(0, { stiffness: 0.1, damping: 0.4 })
-
-  let visible = $state(true)
 </script>
 
-{#if visible}<div transition:whirl={{ duration: 600 }}>Spinning!</div>{/if}
+<div transition:whirl={{ duration: 600 }}>Spinning!</div>
 <div class="bar" style:width={`${$progress}%`}></div>
-<div class="ball" style:transform={`translateX(${$x}px)`}></div>
 ```
 
-<v-click>
-
-**缓动函数**：`linear` / `cubicOut` / `bounceOut` / `elasticOut` etc. from `svelte/easing`
-
-</v-click>
+**缓动函数**：`linear` / `cubicOut` / `bounceOut` / `elasticOut` from `svelte/easing`。
 
 ---
 transition: slide-up
@@ -1742,32 +1363,20 @@ transition: slide-up
 
 ```svelte
 <script lang="ts">
-  let scrollY = $state(0)
-  let innerWidth = $state(0)
-  let online = $state(true)
+  let scrollY = $state(0), innerWidth = $state(0), online = $state(true)
 </script>
 
 <!-- 监听 window 事件 + 绑定属性 -->
 <svelte:window
-  bind:scrollY
-  bind:innerWidth
-  bind:online
+  bind:scrollY bind:innerWidth bind:online
   onkeydown={(e) => e.key === 'Escape' && console.log('Esc')}
 />
 
 <svelte:document onvisibilitychange={handleVisibility} />
 <svelte:body onmouseenter={() => isHovered = true} />
-
-<p>Scroll: {scrollY}px, Width: {innerWidth}px, Online: {online}</p>
 ```
 
-<v-click>
-
-**`<svelte:window>` 可绑定**：`innerWidth` / `innerHeight` / `outerWidth` / `outerHeight` / `scrollX` / `scrollY` / `online` / `devicePixelRatio`
-
-Svelte 自动管理 mount/unmount 时的 addEventListener，比 React `useEffect` 简洁。
-
-</v-click>
+**`<svelte:window>` 可绑定**：`innerWidth` / `innerHeight` / `scrollX` / `scrollY` / `online` / `devicePixelRatio` 等。Svelte 自动管理 add/removeEventListener，比 `useEffect` 简洁。
 
 ---
 transition: slide-up
@@ -1780,30 +1389,15 @@ transition: slide-up
 <svelte:head>
   <title>My Page Title</title>
   <meta name="description" content="Page description" />
-  <link rel="canonical" href="https://example.com/page" />
 </svelte:head>
 
 <!-- 编译选项 -->
-<svelte:options
-  customElement="my-button"
-  immutable={true}
-  accessors={false}
-  runes={true}
-/>
+<svelte:options customElement="my-button" immutable={true} runes={true} />
 ```
 
-<v-click>
+**`<svelte:options>` 选项**：`customElement`（编译成 Web Component）/ `immutable`（性能优化）/ `accessors`（v4 兼容）/ `runes`（迁移期）。
 
-**`<svelte:options>` 选项**：
-
-- `customElement` —— 编译成 Web Component
-- `immutable` —— props 引用变化才更新（性能优化）
-- `accessors` —— 暴露 get / set（Svelte 4 兼容）
-- `runes` —— 强制启用 / 禁用 Runes（迁移期单文件用）
-
-> 💡 SvelteKit 自动合并多层 layout / page 的 `<svelte:head>`，子页面覆盖父 layout 的 `<title>`。
-
-</v-click>
+> 💡 SvelteKit 自动合并多层 layout / page 的 `<svelte:head>`，子页面覆盖父 `<title>`。
 
 ---
 transition: slide-up
@@ -1813,15 +1407,11 @@ transition: slide-up
 
 ```svelte
 <script lang="ts">
-  function logError(error: Error) {
-    console.error(error)
-    sentry.captureException(error)
-  }
+  const logError = (e: Error) => { console.error(e); sentry.captureException(e) }
 </script>
 
 <svelte:boundary onerror={logError}>
   <RiskyComponent />
-
   {#snippet failed(error, reset)}
     <p>Error: {error.message}</p>
     <button onclick={reset}>Retry</button>
@@ -1829,17 +1419,7 @@ transition: slide-up
 </svelte:boundary>
 ```
 
-<v-click>
-
-**vs React ErrorBoundary**：
-
-- React 16+：必须用 class 组件（`componentDidCatch`）
-- Svelte 5.3+：声明式 `<svelte:boundary>` + snippet
-- Vue 3：`onErrorCaptured` 钩子
-
-Svelte 把错误边界做成元素 + snippet，比 React 的「class only」更现代。
-
-</v-click>
+**vs React / Vue**：React 16+ 必须用 class（`componentDidCatch`）；Svelte 5.3+ 声明式元素 + snippet；Vue 3 用 `onErrorCaptured`。
 
 ---
 transition: slide-up
@@ -1852,35 +1432,20 @@ transition: slide-up
 import type { Action } from 'svelte/action'
 
 export const clickOutside: Action<HTMLElement, () => void> = (node, callback) => {
-  function handle(e: MouseEvent) {
+  const handle = (e: MouseEvent) => {
     if (!node.contains(e.target as Node)) callback()
   }
   document.addEventListener('click', handle, true)
-
-  return {
-    destroy() {
-      document.removeEventListener('click', handle, true)
-    }
-  }
+  return { destroy: () => document.removeEventListener('click', handle, true) }
 }
 ```
 
 ```svelte
-<script lang="ts">
-  import { clickOutside } from './actions/clickOutside'
-  let open = $state(false)
-</script>
-
-{#if open}
-  <div use:clickOutside={() => open = false}>Dropdown content</div>
-{/if}
+<script lang="ts">let open = $state(false)</script>
+{#if open}<div use:clickOutside={() => open = false}>Dropdown</div>{/if}
 ```
 
-<v-click>
-
-**vs React 自定义 Hook / Vue 自定义指令**：Svelte `use:fn={params}` 一行；返回 `{ update, destroy }` 钩子；类型 `Action<E, P>`。
-
-</v-click>
+**vs React Hook / Vue 自定义指令**：Svelte `use:fn={params}` 一行；返回 `{ update, destroy }`；类型 `Action<E, P>`。
 
 ---
 transition: slide-up
@@ -1890,26 +1455,18 @@ transition: slide-up
 
 ```ts
 // actions/tooltip.ts
-import type { Action } from 'svelte/action'
-
 interface TooltipParams { text: string; position?: 'top' | 'bottom' }
 
 export const tooltip: Action<HTMLElement, TooltipParams> = (node, params) => {
-  let { text, position = 'top' } = params
   const el = document.createElement('div')
-  el.textContent = text
-
-  function show() { /* 定位 + appendChild */ }
-  function hide() { el.remove() }
-
+  el.textContent = params.text
+  const show = () => { /* 定位 + appendChild */ }
+  const hide = () => el.remove()
   node.addEventListener('mouseenter', show)
   node.addEventListener('mouseleave', hide)
 
   return {
-    update(newParams) {
-      text = newParams.text
-      el.textContent = text
-    },
+    update(p) { el.textContent = p.text },
     destroy() {
       node.removeEventListener('mouseenter', show)
       node.removeEventListener('mouseleave', hide)
@@ -1920,7 +1477,7 @@ export const tooltip: Action<HTMLElement, TooltipParams> = (node, params) => {
 ```
 
 ```svelte
-<button use:tooltip={{ text: 'Click me', position: 'top' }}>Hover</button>
+<button use:tooltip={{ text: 'Click me' }}>Hover</button>
 ```
 
 ---
@@ -1931,30 +1488,13 @@ transition: slide-up
 
 SvelteKit 是 Svelte 官方元框架（基于 Vite），类比 Vue 的 Nuxt / React 的 Next.js：
 
-```
-SvelteKit 提供：
-  ├── 文件系统路由（src/routes/）
-  ├── SSR + Hydration
-  ├── Form Actions（渐进增强）
-  ├── Server Endpoints（+server.ts）
-  ├── Server-only modules（$lib/server/）
-  ├── Hooks（中间件）
-  ├── 多 Adapter
-  └── 内置 alias（$lib / $app/* / $env/*）
-```
-
-<v-click>
+文件系统路由（`src/routes/`）/ SSR + Hydration / Form Actions（渐进增强）/ Server Endpoints（`+server.ts`）/ Server-only modules（`$lib/server/`）/ Hooks（中间件）/ 多 Adapter / 内置 alias（`$lib` / `$app/*` / `$env/*`）
 
 | Adapter | 用途 |
 |---|---|
-| **adapter-auto** | 自动检测部署平台 |
-| **adapter-node** | 自托管 Node.js |
-| **adapter-static** | 完全静态（SSG） |
-| **adapter-vercel** | Vercel Edge / Serverless |
-| **adapter-cloudflare** | Cloudflare Workers / Pages |
-| **adapter-netlify** | Netlify Functions |
-
-</v-click>
+| **adapter-auto** / **node** | 自动检测 / 自托管 Node.js |
+| **adapter-static** / **vercel** | SSG / Vercel Edge / Serverless |
+| **adapter-cloudflare** / **netlify** | Cloudflare Workers / Netlify Functions |
 
 ---
 transition: slide-up
@@ -2002,26 +1542,18 @@ transition: slide-up
 </script>
 
 <h1>{data.user.name}</h1>
-<ul>
-  {#each data.posts as post (post.id)}<li>{post.title}</li>{/each}
-</ul>
+{#each data.posts as post (post.id)}<li>{post.title}</li>{/each}
 ```
 
 ```ts
 // src/routes/users/[id]/+page.ts
-import { error } from '@sveltejs/kit'
-import type { PageLoad } from './$types'
-
 export const load: PageLoad = async ({ params, fetch, parent }) => {
-  const { id } = params
-  const parentData = await parent()       // 合并父 layout data
-
-  const res = await fetch(`/api/users/${id}`)
+  const parentData = await parent()                              // 合并父 layout data
+  const res = await fetch(`/api/users/${params.id}`)
   if (!res.ok) throw error(404, 'User not found')
-
   return {
     user: await res.json(),
-    posts: fetch(`/api/users/${id}/posts`).then(r => r.json())   // stream
+    posts: fetch(`/api/users/${params.id}/posts`).then(r => r.json())   // stream
   }
 }
 ```
@@ -2034,32 +1566,19 @@ transition: slide-up
 
 | 文件 | 运行位置 | 用途 |
 |---|---|---|
-| `+page.ts` | **客户端 + 服务端** | universal load |
-| `+page.server.ts` | **仅服务端** | 需数据库、密钥、cookies |
-| `+layout.ts` / `+layout.server.ts` | 同上 | layout 级数据 |
+| `+page.ts` / `+layout.ts` | 客户端 + 服务端 | universal load |
+| `+page.server.ts` / `+layout.server.ts` | **仅服务端** | 数据库 / 密钥 / cookies |
 
 ```ts
 // +page.server.ts —— 服务端独占
-import type { PageServerLoad } from './$types'
-import { db } from '$lib/server/db'
-
 export const load: PageServerLoad = async ({ locals, params }) => {
-  // 直接访问数据库（不进客户端 bundle）
   const user = await db.user.findUnique({ where: { id: params.id } })
-
-  // locals 来自 hooks（如认证用户）
-  if (!user || user.orgId !== locals.user?.orgId) {
-    throw error(403, 'Forbidden')
-  }
+  if (!user || user.orgId !== locals.user?.orgId) throw error(403, 'Forbidden')
   return { user }
 }
 ```
 
-<v-click>
-
-**对比 Next.js**：Next.js 用 `'use client'` 切换 Server / Client Component；SvelteKit 明确文件名 `+page.server.ts` vs `+page.ts`，类型更显式。
-
-</v-click>
+**对比 Next.js**：Next.js 用 `'use client'` 切换 Server / Client；SvelteKit 用文件名 `+page.server.ts` vs `+page.ts`，更显式。
 
 ---
 transition: slide-up
@@ -2078,22 +1597,17 @@ transition: slide-up
   <input name="email" type="email" required />
   <input name="password" type="password" required />
   <button type="submit">Login</button>
-  {#if form?.error}<p class="error">{form.error}</p>{/if}
+  {#if form?.error}<p>{form.error}</p>{/if}
 </form>
 ```
 
 ```ts
 // +page.server.ts
-import { fail, redirect } from '@sveltejs/kit'
-import type { Actions } from './$types'
-
 export const actions: Actions = {
   default: async ({ request, cookies }) => {
     const data = await request.formData()
-    const email = data.get('email') as string
-    const user = await db.user.findUnique({ where: { email } })
-    if (!user) return fail(400, { error: 'Invalid', email })
-
+    const user = await db.user.findUnique({ where: { email: data.get('email') as string } })
+    if (!user) return fail(400, { error: 'Invalid' })
     cookies.set('token', sign(user.id), { path: '/' })
     throw redirect(302, '/dashboard')
   }
@@ -2119,24 +1633,12 @@ export const actions: Actions = {
 ```
 
 ```svelte
-<!-- 指定 action -->
 <form method="POST" action="?/login" use:enhance>...</form>
 <form method="POST" action="?/register" use:enhance>...</form>
-<form method="POST" action="?/logout" use:enhance>
-  <button>Logout</button>
-</form>
+<form method="POST" action="?/logout" use:enhance><button>Logout</button></form>
 ```
 
-<v-click>
-
-**Form Actions 优势**：
-
-1. **渐进增强**——无 JS 也能用（浏览器原生表单提交）
-2. **类型安全**——`Actions` + `ActionData` 自动推导
-3. **进度可视**——`use:enhance` 自动 disable button、loading state
-4. **无需手写 fetch**——表单提交逻辑全在服务端
-
-</v-click>
+**Form Actions 优势**：渐进增强（无 JS 也能用）/ 类型安全（`Actions` 自动推导）/ 进度可视（`use:enhance` 自动 disable + loading）/ 无需手写 fetch。
 
 ---
 transition: slide-up
@@ -2180,7 +1682,7 @@ transition: slide-up
 
 ```ts
 // src/hooks.server.ts
-import type { Handle, HandleServerError, HandleFetch } from '@sveltejs/kit'
+import type { Handle, HandleServerError } from '@sveltejs/kit'
 import { sequence } from '@sveltejs/kit/hooks'
 
 const authentication: Handle = async ({ event, resolve }) => {
@@ -2198,16 +1700,9 @@ const logging: Handle = async ({ event, resolve }) => {
 
 export const handle = sequence(authentication, logging)
 
-export const handleError: HandleServerError = ({ error, event }) => {
+export const handleError: HandleServerError = ({ error }) => {
   console.error(error)
   return { message: 'Internal error' }
-}
-
-export const handleFetch: HandleFetch = ({ event, request, fetch }) => {
-  if (request.url.startsWith('https://api.internal.com')) {
-    request.headers.set('X-API-Key', env.INTERNAL_API_KEY)
-  }
-  return fetch(request)
 }
 ```
 
@@ -2218,35 +1713,19 @@ transition: slide-up
 # 渲染模式 + Streaming SSR
 
 ```ts
-// +page.server.ts 或 +page.ts
 export const ssr = true        // 服务端渲染（默认）
 export const csr = true        // 客户端 Hydration（默认）
-export const prerender = false // 构建时预渲染（默认 'auto'）
+export const prerender = false // 构建时预渲染
 ```
 
-| ssr | csr | prerender | 类型 |
-|---|---|---|---|
-| true | true | false | 默认 SSR + CSR |
-| true | true | true | **SSG**（构建时预渲染） |
-| true | false | false | **纯 SSR**（无客户端 JS） |
-| false | true | false | **SPA**（仅客户端渲染） |
+| ssr / csr / prerender | 类型 |
+|---|---|
+| true / true / false | 默认 SSR + CSR |
+| true / true / true | **SSG**（构建时预渲染） |
+| true / false / false | **纯 SSR**（无客户端 JS） |
+| false / true / false | **SPA**（仅客户端渲染） |
 
-<v-click>
-
-**Streaming SSR**：
-
-```ts
-export const load = async ({ fetch }) => {
-  return {
-    user: await fetch('/api/me').then(r => r.json()),   // 等
-    posts: fetch('/api/posts').then(r => r.json())     // ← 不 await，stream
-  }
-}
-```
-
-用户立刻看到 user，posts 准备好后流式注入。
-
-</v-click>
+**Streaming SSR**：`load` 中 `await` 的字段先返回，未 `await` 的字段流式注入。
 
 ---
 transition: slide-up
@@ -2329,33 +1808,12 @@ SvelteKit 2.7+ 引入 `$app/state` 替代 `$app/stores`（Runes 化）：
   import { page, navigating, updated } from '$app/state'
 </script>
 
-<p>Current path: {page.url.pathname}</p>
-<p>Route ID: {page.route.id}</p>
-<p>Status: {page.status}</p>
-
-{#if navigating.to}
-  <p>Navigating to {navigating.to.url.pathname}...</p>
-{/if}
-
-{#if updated.current}
-  <button onclick={() => location.reload()}>Reload for new version</button>
-{/if}
+<p>Path: {page.url.pathname}, Status: {page.status}</p>
+{#if navigating.to}<p>Navigating to {navigating.to.url.pathname}...</p>{/if}
+{#if updated.current}<button onclick={() => location.reload()}>Reload</button>{/if}
 ```
 
-<v-click>
-
-**vs `$app/stores`**（v2.6 及之前）：
-
-```svelte
-<script>
-  import { page } from '$app/stores'    // stores 版本
-</script>
-<p>{$page.url.pathname}</p>             <!-- 需要 $ 前缀 -->
-```
-
-新代码推荐 `$app/state`（无 `$`，直接属性访问）。
-
-</v-click>
+**vs `$app/stores`**（v2.6 之前）：`import { page } from '$app/stores'` + `{$page.url.pathname}`（需要 `$` 前缀）。新代码推荐 `$app/state`。
 
 ---
 transition: slide-up
@@ -2367,39 +1825,21 @@ transition: slide-up
 <!-- DataTable.svelte -->
 <script lang="ts" generics="T extends { id: string }">
   import type { Snippet } from 'svelte'
-
-  interface Props {
-    items: T[]
-    row: Snippet<[T]>
-    keyExtractor?: (item: T) => string
-  }
-
-  let {
-    items,
-    row,
-    keyExtractor = (item) => item.id
-  }: Props = $props()
+  interface Props { items: T[]; row: Snippet<[T]>; keyExtractor?: (i: T) => string }
+  let { items, row, keyExtractor = (i) => i.id }: Props = $props()
 </script>
 
 <table>
-  {#each items as item (keyExtractor(item))}
-    <tr>{@render row(item)}</tr>
-  {/each}
+  {#each items as item (keyExtractor(item))}<tr>{@render row(item)}</tr>{/each}
 </table>
-```
 
-```svelte
 <!-- 使用：T 自动推导为 User -->
 <DataTable items={users}>
   {#snippet row(user)}<td>{user.name}</td>{/snippet}
 </DataTable>
 ```
 
-<v-click>
-
 **vs Vue Generic Components**：Vue 3.3 `<script setup lang="ts" generic="T">`，写法几乎一致。
-
-</v-click>
 
 ---
 transition: slide-up
@@ -2476,16 +1916,9 @@ transition: slide-up
 
 ```ts
 // vite.config.ts
-import { sveltekit } from '@sveltejs/kit/vite'
-import { defineConfig } from 'vitest/config'
-
 export default defineConfig({
   plugins: [sveltekit()],
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./src/test-setup.ts']
-  }
+  test: { environment: 'jsdom', globals: true, setupFiles: ['./src/test-setup.ts'] }
 })
 ```
 
@@ -2493,13 +1926,11 @@ export default defineConfig({
 // Counter.test.ts
 import { render, screen } from '@testing-library/svelte'
 import { fireEvent } from '@testing-library/dom'
-import { expect, it } from 'vitest'
 import Counter from './Counter.svelte'
 
 it('increments on click', async () => {
   render(Counter, { props: { initial: 0 } })
-  const button = screen.getByRole('button', { name: /\+1/ })
-  await fireEvent.click(button)
+  await fireEvent.click(screen.getByRole('button', { name: /\+1/ }))
   expect(screen.getByText(/count: 1/i)).toBeInTheDocument()
 })
 ```
@@ -2519,34 +1950,23 @@ class Counter {
   get doubled() { return this.count * 2 }
   increment() { this.count++ }
 }
-
 export const counter = new Counter()
 ```
 
 ```ts
 // counter.svelte.test.ts
-import { describe, it, expect } from 'vitest'
-import { flushSync } from 'svelte'
-import { counter } from './counter.svelte'
-
-describe('Counter', () => {
-  it('increments', () => {
-    const cleanup = $effect.root(() => {
-      counter.increment()
-      flushSync()
-      expect(counter.count).toBe(1)
-      expect(counter.doubled).toBe(2)
-    })
-    cleanup()
+it('increments', () => {
+  const cleanup = $effect.root(() => {
+    counter.increment()
+    flushSync()
+    expect(counter.count).toBe(1)
+    expect(counter.doubled).toBe(2)
   })
+  cleanup()
 })
 ```
 
-<v-click>
-
-`$effect.root` 在测试中创建独立作用域；`flushSync` 强制同步执行 pending effects。
-
-</v-click>
+`$effect.root` 创建独立作用域；`flushSync` 强制同步执行 pending effects。
 
 ---
 transition: slide-up
@@ -2556,21 +1976,12 @@ transition: slide-up
 
 ```ts
 // playwright.config.ts
-import { defineConfig } from '@playwright/test'
-
 export default defineConfig({
-  webServer: {
-    command: 'pnpm build && pnpm preview',
-    port: 4173
-  },
+  webServer: { command: 'pnpm build && pnpm preview', port: 4173 },
   testDir: 'tests'
 })
-```
 
-```ts
 // tests/login.spec.ts
-import { test, expect } from '@playwright/test'
-
 test('login flow', async ({ page }) => {
   await page.goto('/login')
   await page.fill('input[name="email"]', 'test@example.com')
@@ -2580,16 +1991,7 @@ test('login flow', async ({ page }) => {
 })
 ```
 
-<v-click>
-
-**测试栈推荐**：
-
-- 单元 / 集成：Vitest + `@testing-library/svelte`
-- 浏览器测试：Vitest browser mode（Playwright provider）
-- E2E：Playwright
-- 组件测试：`@playwright/experimental-ct-svelte`
-
-</v-click>
+**测试栈**：单元 Vitest + `@testing-library/svelte`；浏览器测试 Vitest browser mode；E2E Playwright；组件 `@playwright/experimental-ct-svelte`
 
 ---
 transition: slide-up
@@ -2628,17 +2030,10 @@ transition: slide-up
 
 # 编译输出示例
 
-源代码：
-
 ```svelte
-<script>
-  let count = $state(0)
-</script>
-
+<script>let count = $state(0)</script>
 <button onclick={() => count++}>Clicks: {count}</button>
 ```
-
-<v-click>
 
 简化后的编译输出（Svelte 5 内部表示）：
 
@@ -2648,23 +2043,16 @@ import * as $ from 'svelte/internal/client'
 function App($$anchor, $$props) {
   let count = $.state(0)
   const template = $.template(`<button> </button>`)
-
   const button = template()
   const text = button.firstChild
 
   button.addEventListener('click', () => $.set(count, $.get(count) + 1))
-
-  $.template_effect(() => {
-    $.set_text(text, `Clicks: ${$.get(count)}`)
-  })
-
+  $.template_effect(() => $.set_text(text, `Clicks: ${$.get(count)}`))
   $.append($$anchor, button)
 }
 ```
 
 **关键**：没有 vnode、没有 reconcile、没有组件函数重跑——直接 addEventListener + 局部 setText。
-
-</v-click>
 
 ---
 transition: slide-up
@@ -2672,40 +2060,21 @@ transition: slide-up
 
 # Runes 反应式 = Signals
 
-Svelte 5 的 Runes 内部是 **signals**（与 Solid / Preact Signals 同思路）：
+Svelte 5 Runes 内部是 **signals**（与 Solid / Preact Signals 同思路）：
 
 ```ts
 // 简化的内部表示
-interface Signal<T> {
-  value: T
-  consumers: Set<Computation>     // 谁依赖了我
-}
-
-interface Computation {
-  fn: () => void
-  deps: Set<Signal<any>>           // 我依赖了谁
-}
+interface Signal<T> { value: T; consumers: Set<Computation> }
+interface Computation { fn: () => void; deps: Set<Signal<any>> }
 ```
 
-<v-click>
-
-**依赖图**：
-
-```
-   count (signal)
-     ↓ (consumer)
-   doubled (derived)
-     ↓ (consumer)
-   effect
-```
+**依赖图**：`count (signal) → doubled (derived) → effect`
 
 **推-拉混合（Push-Pull）**：
 
 - `count = 1` → push 通知 consumers「我变了」（标记 dirty，不立即重算）
 - 读 `doubled` → pull 此时才计算（懒）
 - `$effect` 在 microtask 里 batched 触发
-
-</v-click>
 
 ---
 transition: slide-up
@@ -2753,35 +2122,17 @@ transition: slide-up
 
 ```svelte
 <script lang="ts">
-  let a = $state(0)
-  let b = $state(0)
-
-  $effect(() => {
-    console.log('effect:', a, b)
-  })
+  let a = $state(0), b = $state(0)
+  $effect(() => console.log('effect:', a, b))
 
   function update() {
-    a = 1
-    b = 1
+    a = 1; b = 1
     // effect 只跑一次（batched），不是两次
   }
 </script>
 ```
 
-<v-click>
-
-**强制同步执行**：
-
-```ts
-import { flushSync } from 'svelte'
-
-a = 1
-flushSync()    // 立即执行所有待处理 effects
-```
-
-测试时常用——保证断言时所有 effect 已跑完。
-
-</v-click>
+**强制同步**：`flushSync()` 立即执行所有 pending effects（测试时保证断言时所有 effect 已跑完）。
 
 ---
 transition: slide-up
@@ -2831,26 +2182,9 @@ transition: slide-up
 pnpm dlx sv migrate svelte-5
 ```
 
-工具自动转换：
+**自动转换**：`on:click` → `onclick` / `$:` → `$state` / `$derived` / `$effect` / `export let` → `$props()` / `createEventDispatcher` → callback / `<slot>` → `{#snippet}` + `{@render}` / `<script context="module">` → `<script module>`
 
-- `on:click` → `onclick`
-- `$:` → `$state` / `$derived` / `$effect`
-- `export let` → `$props()`
-- `createEventDispatcher` → callback props
-- `<slot>` → `{#snippet}` + `{@render}`
-- `<script context="module">` → `<script module>`
-
-<v-click>
-
-**需要手动检查**：
-
-- 复杂 `$:` 块（依赖多状态、含 side-effect）
-- 自定义 stores（API 可能与 v5 习惯不同）
-- 测试代码（mount/unmount API 变化）
-- `beforeUpdate` / `afterUpdate` 需手动改为 `$effect.pre` / `$effect`
-- `<svelte:component this={X}>` 可去掉（v5 直接 `<X>`）
-
-</v-click>
+**手动检查**：复杂 `$:` 块 / 自定义 stores / 测试代码（mount/unmount API）/ `beforeUpdate` `afterUpdate` 改为 `$effect.pre` / `$effect` / `<svelte:component this={X}>` 可去掉（v5 直接 `<X>`）
 
 ---
 transition: slide-up
@@ -2904,9 +2238,6 @@ transition: slide-up
 <script lang="ts">
   // 1. $state.raw 避免 Proxy 开销（大对象）
   let bigList = $state.raw<Item[]>([])
-  function update() {
-    bigList = bigList.map(transform)
-  }
 
   // 2. 代码分割（lazy load 组件）
   let Modal = $state<typeof import('./Modal.svelte').default | null>(null)
@@ -2919,24 +2250,7 @@ transition: slide-up
 <svelte:options immutable />
 ```
 
-<v-click>
-
-**4. 列表虚拟化**（>500 行）：
-
-```svelte
-<script lang="ts">
-  import { createVirtualizer } from '@tanstack/svelte-virtual'
-  const virtualizer = $derived(
-    createVirtualizer({
-      count: items.length,
-      getScrollElement: () => parentRef,
-      estimateSize: () => 40
-    })
-  )
-</script>
-```
-
-</v-click>
+**4. 列表虚拟化**（>500 行）：`@tanstack/svelte-virtual` 的 `createVirtualizer` + `$derived`
 
 ---
 transition: slide-up
@@ -2982,24 +2296,12 @@ transition: slide-up
 
 | 维度 | Tauri | Electron |
 |---|---|---|
-| 后端语言 | Rust | Node.js |
-| 渲染引擎 | 系统原生 WebView | 嵌入 Chromium |
-| Bundle 大小 | ~5-10 MB | ~100-150 MB |
-| 内存占用 | ~50 MB | ~200-500 MB |
-| 启动速度 | 毫秒级 | 数百毫秒 |
-| 跨平台一致 | 不同 WebView 渲染差异 | Chromium 一致 |
-| 生态成熟度 | 较新（2022 发布） | 老牌（2013） |
+| 后端 / 渲染 | Rust / 系统 WebView | Node.js / 嵌入 Chromium |
+| Bundle / 内存 | ~5-10 MB / ~50 MB | ~100-150 MB / ~200-500 MB |
+| 启动 / 跨平台 | 毫秒级 / WebView 差异 | 数百毫秒 / Chromium 一致 |
+| 生态 | 较新（2022） | 老牌（2013） |
 
-<v-click>
-
-**结论**：
-
-- 新项目优先 **Tauri**（极小体积 + 高性能）
-- 需要 Node.js 生态强集成的工具型应用（如 VS Code 类）用 Electron
-- **Svelte Native（已沉寂）**：基于 NativeScript，社区维护已久未活跃，**不推荐新项目**
-- 移动端用 **Capacitor**（H5 壳，配合 adapter-static）
-
-</v-click>
+**结论**：新项目优先 **Tauri**（极小体积 + 高性能）；强 Node.js 集成（VS Code 类）用 Electron；移动用 **Capacitor**（adapter-static）；Svelte Native 已沉寂。
 
 ---
 transition: slide-up
@@ -3007,38 +2309,23 @@ transition: slide-up
 
 # Web Components 输出
 
-Svelte 可以编译组件为原生 Custom Element：
+Svelte 可编译组件为原生 Custom Element：
 
 ```svelte
 <!-- MyButton.svelte -->
 <svelte:options customElement="my-button" />
-
 <script lang="ts">
-  let { label = 'Click', variant = 'primary' }: {
-    label?: string; variant?: string
-  } = $props()
+  let { label = 'Click', variant = 'primary' } = $props()
 </script>
-
 <button class={variant}>{label}</button>
-
-<style>.primary { background: blue; color: white; }</style>
 ```
 
-```js
-import './MyButton.svelte'
-// 任意 HTML 中使用
-// <my-button label="Save" variant="primary"></my-button>
+```html
+<!-- 任意 HTML 中使用 -->
+<my-button label="Save" variant="primary"></my-button>
 ```
 
-<v-click>
-
-**用途**：
-
-- 给非 Svelte 项目（React / Vue / 原生）输出组件
-- 微前端中作为框架无关的「壳」
-- 设计系统跨技术栈复用
-
-</v-click>
+**用途**：给非 Svelte 项目输出组件 / 微前端框架无关「壳」 / 设计系统跨技术栈复用。
 
 ---
 transition: slide-up
@@ -3048,21 +2335,12 @@ transition: slide-up
 
 | UI 库 | 风格 | 适用场景 |
 |---|---|---|
-| **Skeleton UI** | Tailwind 全套设计系统 | 快速搭建 |
-| **shadcn-svelte** | 复制粘贴源码 | 完全控制样式 + 行为 |
-| **Bits UI / Melt UI** | 无样式行为组件（Headless） | 自定义样式 |
-| **Flowbite Svelte** | Tailwind UI 风格 | 后台 / 内部工具 |
-| **SVAR** | 企业级数据组件 | CRM / ERP / Admin |
-| **Svelte Material UI** | Material Design 3 | Material 风格 |
-| **Carbon for Svelte** | IBM Carbon Design | 企业风格 |
+| **Skeleton UI** / **shadcn-svelte** | Tailwind 设计系统 / 复制粘贴源码 | 快速搭建 / 完全控制 |
+| **Bits UI / Melt UI** | 无样式 Headless | 自定义样式 |
+| **Flowbite Svelte** / **SVAR** | Tailwind UI / 企业级数据 | 后台 / CRM / ERP |
+| **Svelte Material UI** / **Carbon** | MD3 / IBM Carbon | Material / 企业风 |
 
-<v-click>
-
-> 💡 **Skeleton 3.x / Flowbite Svelte 仍在适配 Svelte 5**
->
-> 新项目选 UI 库时，先确认 Svelte 5 + Runes 支持情况。无样式 + 自定义首选 **shadcn-svelte** / **Bits UI**。
-
-</v-click>
+> 💡 新项目先确认 Svelte 5 + Runes 支持情况。无样式 + 自定义首选 **shadcn-svelte** / **Bits UI**。
 
 ---
 transition: slide-up
@@ -3072,20 +2350,12 @@ transition: slide-up
 
 | 类别 | 推荐 |
 |---|---|
-| **样式** | Tailwind / `@unocss/svelte-scoped` / Pico CSS |
-| **UI 库** | shadcn-svelte / Bits UI / Melt UI / Skeleton / Flowbite |
-| **i18n** | svelte-i18n（社区主流） / Paraglide（类型最强 / 编译时） |
-| **数据获取** | SvelteKit `load`（首选） / TanStack Query Svelte |
-| **图标** | lucide-svelte / @iconify-icon/svelte |
-| **表单** | Form Actions（内置） / Superforms + Zod（端到端类型安全） |
-| **认证** | Auth.js Svelte / Lucia / Clerk |
-| **ORM** | Prisma / Drizzle / Kysely |
-| **CMS** | Sanity / Strapi / Contentful（+ SvelteKit load） |
-| **Storybook** | 官方支持（CSF3 / Args / Controls） |
-| **测试** | Vitest + `@testing-library/svelte` + Playwright |
-| **桌面** | Tauri / Electron |
-| **移动 H5 壳** | Capacitor + adapter-static |
-| **微前端** | Svelte → Web Component / Module Federation |
+| **样式 / UI** | Tailwind / UnoCSS；shadcn-svelte / Bits UI / Melt UI |
+| **i18n / 表单** | Paraglide（编译时）；Form Actions + Superforms + Zod |
+| **数据 / ORM** | SvelteKit `load`（首选）；Prisma / Drizzle / Kysely |
+| **图标 / 认证** | lucide-svelte / iconify；Auth.js / Lucia / Clerk |
+| **测试 / Storybook** | Vitest + `@testing-library/svelte` + Playwright；官方支持 |
+| **桌面 / 移动 / 微前端** | Tauri / Electron；Capacitor + adapter-static；编译 Web Component |
 
 ---
 transition: slide-up
@@ -3095,22 +2365,11 @@ transition: slide-up
 
 | 维度 | Svelte 5 | Solid |
 |---|---|---|
-| 模板 | `{#if}` / `{#each}` 控制流块 | JSX |
-| 反应式 | `let count = $state(0)`（自动 getter/setter） | `const [count, setCount] = createSignal(0)` |
-| 派生 | `$derived(count * 2)` | `createMemo(() => count() * 2)` |
-| Effect | `$effect(...)` | `createEffect(...)` |
-| 编译策略 | 模板 → 命令式 DOM | JSX → 命令式 DOM |
-| 生态 | SvelteKit 较成熟 | SolidStart 较新 |
+| 模板 / 反应式 | 控制流块 / `let count = $state(0)` | JSX / `[count, setCount] = createSignal(0)` |
+| 派生 / Effect | `$derived(...)` / `$effect(...)` | `createMemo(...)` / `createEffect(...)` |
+| 编译 / 生态 | 模板 → 命令式 DOM / SvelteKit 较成熟 | JSX → 命令式 DOM / SolidStart 较新 |
 
-<v-click>
-
-**比较**：
-
-- 写法 Svelte 更接近 HTML（控制流块），Solid 用 JSX（接近 React）
-- 反应式 Solid 更纯粹（`createSignal` 直接返回 `[get, set]`），Svelte 5 隐藏了 getter/setter
-- 生态 Svelte 更成熟（SvelteKit 比 SolidStart 更稳定 / 文档更全）
-
-</v-click>
+- Svelte 更接近 HTML，Solid 用 JSX；Solid 反应式更纯粹（`[get, set]`）；Svelte 生态更稳。
 
 ---
 transition: slide-up
@@ -3120,25 +2379,13 @@ transition: slide-up
 
 | 维度 | Svelte 5 | Vue 3 |
 |---|---|---|
-| 文件 | `.svelte`（三段式） | `.vue`（SFC 三段） |
-| 状态 | `let count = $state(0)` | `const count = ref(0)` + `count.value` |
-| 派生 | `$derived(count * 2)` | `computed(() => count.value * 2)` |
-| Effect | `$effect(...)` | `watchEffect(...)` |
-| 模板 | `{#if}` 块 / `onclick={fn}` | `v-if` / `@click="fn"` 指令 |
-| Props | `$props()` | `defineProps()` |
-| 双向 | `bind:value` + `$bindable` | `v-model` + `defineModel` |
-| Slot | `{#snippet}` + `{@render}` | `<slot>` + `<template #name>` |
-| 元框架 | SvelteKit | Nuxt |
-| Bundle | ~10 KB | ~25 KB |
-| 生态 | 较小 | 较大（国内尤其） |
+| 状态 / 派生 | `$state(0)` / `$derived(x*2)` | `ref(0)` + `.value` / `computed` |
+| Effect / Props | `$effect` / `$props()` | `watchEffect` / `defineProps` |
+| 模板 / 双向 | `{#if}` 块 / `bind:value` + `$bindable` | `v-if` / `v-model` + `defineModel` |
+| Slot / 元框架 | `{#snippet}` + `{@render}` / SvelteKit | `<slot>` + `<template #name>` / Nuxt |
+| Bundle / 生态 | ~10 KB / 较小 | ~25 KB / 较大（国内尤甚） |
 
-<v-click>
-
-- 心智模型 Svelte 更简单（无 `.value`、无 `<script setup>` 宏负担）
-- 模板 Vue 更直观（`v-model` / `v-if` 一目了然）
-- 生态 Vue 大很多（国内 Element Plus / Ant Design Vue / Nuxt 全官方）
-
-</v-click>
+- 心智 Svelte 更简单（无 `.value` / 无 setup 宏）；模板 Vue 更直观；生态 Vue 大很多
 
 ---
 transition: slide-up
@@ -3148,24 +2395,11 @@ transition: slide-up
 
 | 维度 | Svelte 5 | React 19 |
 |---|---|---|
-| 文件 | `.svelte`（三段式） | `.tsx`（JSX in JS） |
-| 状态 | `let count = $state(0)` | `const [count, setCount] = useState(0)` |
-| 派生 | `$derived(count * 2)` | `useMemo` / Compiler 自动 |
-| Effect | `$effect(...)` | `useEffect(...)` |
-| 模板 | `{#if}` 块 | JSX 内 `&&` / 三元 |
-| Slot | `{#snippet}` | children / render props |
-| 元框架 | SvelteKit | Next.js / Remix / TanStack Start |
-| Bundle | ~10 KB | ~45 KB |
-| 招聘 | 较少 | 全球最大 |
+| 状态 / 派生 | `$state(0)` / `$derived` | `useState` / `useMemo`（Compiler 自动） |
+| Effect / 模板 / Slot | `$effect` / `{#if}` / `{#snippet}` | `useEffect` / JSX `&&` 三元 / children |
+| 元框架 / Bundle / 招聘 | SvelteKit / ~10 KB / 较少 | Next.js / Remix / ~45 KB / 全球最大 |
 
-<v-click>
-
-- Bundle Svelte 小一个数量级
-- 心智 Svelte 极简（无 deps array / 无 Rules of Hooks）
-- 生态 React 巨大（10 倍以上）；招聘也是 React 多
-- React 19 + Compiler 缩小了「自动 memo」差距
-
-</v-click>
+- Bundle Svelte 小一个数量级；心智 Svelte 极简（无 deps array）；生态 React 巨大；React 19 + Compiler 缩小了自动 memo 差距。
 
 ---
 transition: slide-up
@@ -3175,24 +2409,11 @@ transition: slide-up
 
 | 维度 | Svelte 5 | Angular 21 |
 |---|---|---|
-| 文件 | `.svelte`（三段式） | `.ts` + `.html` 分离 |
-| 状态 | `$state(0)` | `signal(0)` |
-| 派生 | `$derived(...)` | `computed(...)` |
-| Effect | `$effect(...)` | `effect(...)` |
-| 模板 | `{#if}` 块 | `@if` / `@for`（v17+） |
-| DI | Context / Stores | Hierarchical Injector（强类型） |
-| 范式 | 函数 + Runes | OOP + 装饰器 |
-| 元框架 | SvelteKit | Angular SSR + Universal |
-| Bundle | ~10 KB | ~150 KB |
+| 状态 / 派生 / Effect | `$state` / `$derived` / `$effect` | `signal` / `computed` / `effect` |
+| 模板 / DI / 范式 | `{#if}` / Context / 函数 + Runes | `@if` / Hierarchical Injector / OOP + 装饰器 |
+| 元框架 / Bundle | SvelteKit / ~10 KB | Angular SSR / ~150 KB |
 
-<v-click>
-
-- Bundle Svelte 极小（Angular 是 15 倍）
-- Angular 强约定（DI / 装饰器 / 模板编译），适合企业级
-- Svelte 极简（无 NgModule / 无装饰器 / 无 Zone.js）
-- Angular 21 Signals 设计与 Svelte 5 Runes 几乎是兄弟，但生态差距大
-
-</v-click>
+- Bundle Svelte 是 Angular 的 1/15；Angular 适合企业级（DI / 装饰器）；Angular Signals 设计与 Runes 是兄弟。
 
 ---
 transition: slide-up
@@ -3239,23 +2460,10 @@ transition: slide-up
 | **SPA + 后端 API** | Vite + Svelte 5 + svelte-spa-router |
 | **全栈 SaaS** | SvelteKit + Drizzle / Prisma + shadcn-svelte |
 | **静态站 / 博客** | SvelteKit + adapter-static + mdsvex |
-| **后台管理** | SvelteKit + SVAR DataGrid + Flowbite |
-| **桌面应用** | Tauri + SvelteKit + Tailwind |
-| **移动 H5 壳** | SvelteKit + adapter-static + Capacitor |
-| **设计系统跨栈** | Svelte + customElement + Storybook |
-| **嵌入式 / IoT** | Vite + Svelte 5（bundle 极小） |
-| **微前端子应用** | Svelte 编译 Web Component |
+| **桌面 / 移动 H5** | Tauri / Capacitor + SvelteKit |
+| **微前端 / 嵌入式** | Svelte 编译 Web Component / bundle 极小 |
 
-<v-click>
-
-**新项目选 Svelte 5 的强信号**：
-
-- bundle / 启动速度敏感
-- 设计 / 动画 / 交互重，过渡需求多
-- 全栈 SvelteKit 一体化方案
-- 团队对 Runes 心智模型买账
-
-</v-click>
+**新项目选 Svelte 5 的强信号**：bundle 敏感 / 动画密集 / 全栈 SvelteKit / 团队认可 Runes
 
 ---
 transition: slide-up
@@ -3332,21 +2540,10 @@ transition: slide-up
 
 | 包 | 用途 |
 |---|---|
-| `svelte` | 核心库（`onMount` / `mount` / `tick` / `untrack` / `flushSync` / `getContext`） |
-| `svelte/store` | Stores API（`writable` / `readable` / `derived` / `get`） |
-| `svelte/transition` | 过渡（`fade` / `fly` / `slide` / `scale` / `blur` / `draw` / `crossfade`） |
-| `svelte/animate` | 列表动画（`flip`） |
-| `svelte/easing` | 缓动函数（`cubicOut` / `bounceOut` / `elasticOut` etc.） |
-| `svelte/motion` | 物理动画（`tweened` / `spring`） |
-| `svelte/action` | Action 类型（`Action` / `ActionReturn`） |
-| `svelte/compiler` | 编译器 API（`compile` / `parse` / `preprocess`） |
-| `svelte/server` | SSR `render` 函数 |
-| `svelte/legacy` | v4 兼容 API |
-| `@sveltejs/kit` | SvelteKit 元框架 |
-| `@sveltejs/vite-plugin-svelte` | Vite 集成 |
-| `@sveltejs/adapter-*` | 部署 adapter |
-| `@sveltejs/package` | 包发布工具 |
-| `svelte-check` | 类型检查 CLI |
+| `svelte` / `svelte/store` | 核心库 / Stores API |
+| `svelte/transition` / `animate` / `motion` / `easing` | 过渡 + 动画 + 物理 + 缓动 |
+| `svelte/action` / `compiler` / `server` / `legacy` | Action + 编译器 + SSR + v4 兼容 |
+| `@sveltejs/kit` + `vite-plugin-svelte` + `adapter-*` + `svelte-check` | 元框架 + Vite + 部署 + 类型 CLI |
 
 ---
 layout: center

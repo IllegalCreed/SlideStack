@@ -119,16 +119,14 @@ level: 2
 - API 设计成熟，14 年沉淀，几乎没有「踩坑」未解的角落
 - 与 Vue 3 Composition API 完美融合，`useRoute` 响应式自动追踪
 - 嵌套路由 + 命名视图组合能力极强，复杂布局轻松表达
-- TypeScript 类型推导优秀，路径自动补全（配合 `unplugin-vue-router`）
-- 文档质量第一档，中英双语完整覆盖
-- 与 Pinia / Nuxt / VueUse 等生态深度协同
+- TypeScript 类型推导优秀（配合 `unplugin-vue-router`）
+- 文档质量第一档，与 Pinia / Nuxt / VueUse 等生态深度协同
 - bundle 体积小，~10 KB gzipped，按需 tree-shake
 
 **缺点**
 - 缺少类似 Remix `loader` / `action` 的官方数据路由范式
-- TypeScript 端到端类型推导不如 TanStack Router 激进
-- 文件约定路由需借助第三方 `unplugin-vue-router`（即将官方化）
-- SSR 数据获取需自行设计（Nuxt 已封装但官方层无统一方案）
+- 类型推导端到端不如 TanStack Router 激进
+- 文件约定路由需第三方 `unplugin-vue-router`（即将官方化）
 
 </v-clicks>
 
@@ -185,14 +183,13 @@ transition: slide-up
 
 | 版本 | 时间 | 关键事件 |
 |---|---|---|
-| **vue-router 1.x** | 2014 | 配 Vue 1.x 时代首发 |
-| **vue-router 3.x** | 2017 | 配 Vue 2，长期维护版 |
-| **vue-router 4.0** | 2020.12 | Vue 3 重写，`createRouter` + Composition API |
-| **vue-router 4.1** | 2022.6 | parent route 可省 component，组合 meta + guard 更灵活 |
-| **vue-router 4.2** | 2023.2 | `definePage`（unplugin 集成）/ 错误处理改进 |
-| **vue-router 4.5–4.6** | 2024 | 加固类型推导、修复 history popstate 时序、安全补丁 |
-| **vue-router 5.0** | 2025.Q1 | 实验性 Data Loaders、整合 unplugin-vue-router、Volar 加强 |
-| **vue-router 5.0.7** | 2025 | 当前 npm `latest`，包含 Babel 8、prototype pollution 防护 |
+| **1.x** | 2014 | 配 Vue 1.x 时代首发 |
+| **3.x** | 2017 | 配 Vue 2，长期维护版 |
+| **4.0** | 2020.12 | Vue 3 重写，`createRouter` + Composition API |
+| **4.1–4.2** | 2022–23 | 组合 meta + guard 更灵活，`definePage` 集成 |
+| **4.5–4.6** | 2024 | 加固类型推导，修复 popstate 时序，安全补丁 |
+| **5.0** | 2025.Q1 | 实验性 Data Loaders、整合 unplugin-vue-router |
+| **5.0.7** | 2025 | 当前 npm `latest`，Babel 8、prototype pollution 防护 |
 
 <v-click>
 
@@ -220,17 +217,15 @@ transition: slide-up
 
 <v-click>
 
-| 维度          | Vue Router 4           | React Router v7       | TanStack Router       |
-| ------------- | ---------------------- | --------------------- | --------------------- |
-| 框架绑定      | **Vue 3 官方**         | React 18+             | React 18+             |
-| API 风格      | 声明式 + 编程式        | Routes + Data router  | Route object 类型化   |
-| 数据加载      | 守卫 + 组件内自管      | `loader` / `action`   | `loader` + react-query |
-| SSR           | 通过 Nuxt              | Framework 模式一等公民 | TanStack Start（独立）|
-| 文件约定路由  | `unplugin-vue-router`  | `flatRoutes()`        | 自动从 `routes/` 扫描 |
-| 类型安全      | 良好（手动 + 插件）    | `+types/` 自动生成    | **编译期路径校验**    |
-| 包体积        | ~10 KB                 | ~17 KB                | ~13 KB                |
-| Devtools      | Vue DevTools 集成      | 内置 Router DevTools  | Router DevTools 浮层  |
-| 历史包袱      | 极少（v4 重写）        | v6 → v7 跨度大        | 极少（2023 新生）     |
+| 维度 | Vue Router 4 | React Router v7 | TanStack Router |
+| --- | --- | --- | --- |
+| 框架绑定 | **Vue 3 官方** | React 18+ | React 18+ |
+| API 风格 | 声明式 + 编程式 | Routes + Data router | Route object 类型化 |
+| 数据加载 | 守卫 + 组件内自管 | `loader` / `action` | `loader` + react-query |
+| SSR | 通过 Nuxt | Framework 模式一等公民 | TanStack Start |
+| 文件约定 | `unplugin-vue-router` | `flatRoutes()` | 自动扫描 `routes/` |
+| 类型安全 | 良好（手动 + 插件） | `+types/` 自动生成 | **编译期路径校验** |
+| 包体积 | ~10 KB | ~17 KB | ~13 KB |
 
 </v-click>
 
@@ -369,22 +364,15 @@ transition: fade-out
 <v-click>
 
 ```ts
-import {
-  createWebHistory,
-  createWebHashHistory,
-  createMemoryHistory,
-} from "vue-router";
+import { createWebHistory, createWebHashHistory, createMemoryHistory } from "vue-router";
 
 const router = createRouter({
   // 1. HTML5 模式（推荐）：URL 像传统站点，需要服务端 fallback
   history: createWebHistory(),
-
   // 2. Hash 模式：URL 带 #，纯静态托管首选
   // history: createWebHashHistory(),
-
-  // 3. Memory 模式：不操作浏览器历史，用于 SSR / 测试 / Electron
+  // 3. Memory 模式：SSR / 测试 / Electron
   // history: createMemoryHistory(),
-
   routes: [],
 });
 ```
@@ -395,7 +383,7 @@ const router = createRouter({
 
 | 模式 | URL 形如 | 适用场景 | 服务端要求 |
 |---|---|---|---|
-| WebHistory | `/users/42` | 生产 SPA / SSR | 需要 fallback 到 `index.html` |
+| WebHistory | `/users/42` | 生产 SPA / SSR | fallback 到 `index.html` |
 | WebHashHistory | `/#/users/42` | GitHub Pages / OSS 等静态托管 | 无 |
 | MemoryHistory | （不可见） | SSR / 单元测试 / 桌面应用 | 无 |
 
@@ -710,10 +698,8 @@ transition: fade-out
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    // 局部覆盖：精确大小写匹配 + 拒绝尾部斜杠
     { path: "/users", component: User, sensitive: true, strict: true },
   ],
-  // 全局默认（v4.1+）
   sensitive: false,   // 默认大小写不敏感
   strict: false,      // 默认允许 /users/ 与 /users 等价
 });
@@ -762,6 +748,10 @@ transition: fade-out
 
 children 数组 + 父级 RouterView outlet
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **路由配置**
@@ -774,10 +764,8 @@ const routes = [
     children: [
       // 默认子路由（命中 /user/:id）
       { path: "", component: UserProfile },
-
       // /user/:id/posts
       { path: "posts", component: UserPosts },
-
       // /user/:id/settings
       { path: "settings", component: UserSettings },
     ],
@@ -786,6 +774,10 @@ const routes = [
 ```
 
 </v-click>
+
+</div>
+
+<div>
 
 <v-click>
 
@@ -805,6 +797,10 @@ const routes = [
 ```
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -845,6 +841,10 @@ transition: fade-out
 
 避免硬编码路径
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **为路由起名**
@@ -866,15 +866,19 @@ const routes = [
 
 </v-click>
 
+</div>
+
+<div>
+
 <v-click>
 
 **用 name 跳转（推荐）**
 
 ```ts
-// ❌ 硬编码字符串，重构噩梦
+// ❌ 硬编码字符串
 router.push("/user/42");
 
-// ✅ 用 name + params，路径变了不用改调用方
+// ✅ name + params
 router.push({ name: "user", params: { id: 42 } });
 
 // ✅ RouterLink 同款
@@ -885,9 +889,13 @@ router.push({ name: "user", params: { id: 42 } });
 
 </v-click>
 
+</div>
+
+</div>
+
 <v-click>
 
-> 💡 **TS 增强**：配合 `unplugin-vue-router`，name 与 params 都能获得编译期检查。
+> 💡 **TS 增强**：配合 `unplugin-vue-router`，name 与 params 都能编译期检查。
 
 </v-click>
 
@@ -928,6 +936,10 @@ transition: fade-out
 
 一个路由渲染多个组件到不同位置
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **多个 RouterView 用 name 区分**
@@ -948,19 +960,21 @@ transition: fade-out
 **路由用 components（复数）映射**
 
 ```ts
-const routes = [
-  {
-    path: "/dashboard",
-    components: {
-      default: DashboardMain,
-      sidebar: DashboardNav,
-      footer: DashboardActions,
-    },
+const routes = [{
+  path: "/dashboard",
+  components: {
+    default: DashboardMain,
+    sidebar: DashboardNav,
+    footer: DashboardActions,
   },
-];
+}];
 ```
 
 </v-click>
+
+</div>
+
+<div>
 
 <v-click>
 
@@ -971,6 +985,10 @@ const routes = [
 - IDE 风格布局：导航 + 编辑器 + 控制台
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -1008,20 +1026,20 @@ transition: fade-out
 
 router.push / replace / go / back / forward
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **router.push：新增历史记录**
 
 ```ts
 import { useRouter } from "vue-router";
-
 const router = useRouter();
 
 // 字符串路径
 router.push("/users/eduardo");
-
-// 对象 + path
-router.push({ path: "/users/eduardo" });
 
 // 对象 + name + params
 router.push({ name: "user", params: { id: 42 } });
@@ -1036,6 +1054,10 @@ router.push({
 
 </v-click>
 
+</div>
+
+<div>
+
 <v-click>
 
 **router.replace：替换当前记录（不新增历史）**
@@ -1047,6 +1069,10 @@ router.push({ path: "/home", replace: true });
 ```
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -1089,8 +1115,6 @@ go / back / forward
 // 在历史栈中前进 / 后退 N 步
 router.go(1);    // 前进 1
 router.go(-1);   // 后退 1（等价于 back()）
-router.go(-3);   // 后退 3
-
 router.back();      // 后退 1
 router.forward();   // 前进 1
 
@@ -1165,19 +1189,13 @@ import { watch } from "vue";
 const route = useRoute();
 
 // 读字段（自动响应路由变化）
-console.log(route.params.id);
-console.log(route.query.q);
-console.log(route.hash);
-console.log(route.fullPath);
-console.log(route.meta.requiresAuth);
+console.log(route.params.id, route.query.q, route.hash);
+console.log(route.fullPath, route.meta.requiresAuth);
 
 // 监听变化
-watch(
-  () => route.params.id,
-  (newId) => {
-    console.log("ID 变了：", newId);
-  },
-);
+watch(() => route.params.id, (newId) => {
+  console.log("ID 变了：", newId);
+});
 </script>
 
 <template>
@@ -1237,28 +1255,18 @@ transition: fade-out
 
 ```vue
 <script setup lang="ts">
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
-const route = useRoute();
 
 function goToProfile() {
   router.push({ name: "profile" });
-}
-
-function goBack() {
-  router.back();
 }
 
 function logout() {
   // 清登录态后跳登录页（不留历史）
   localStorage.removeItem("token");
   router.replace({ name: "login" });
-}
-
-function refresh() {
-  // 替换为同一路径触发数据重载
-  router.replace({ ...route, force: true } as any);
 }
 </script>
 
@@ -1308,6 +1316,10 @@ transition: fade-out
 
 URL 中携带的额外信息
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **Query：?key=value 形式**
@@ -1320,7 +1332,6 @@ router.push({
 });
 
 // 读取
-const route = useRoute();
 route.query.q;     // 'vue'
 route.query.page;  // '2'（注意是字符串）
 ```
@@ -1333,16 +1344,15 @@ route.query.page;  // '2'（注意是字符串）
 
 ```ts
 // 跳转：/about#team
-router.push({
-  path: "/about",
-  hash: "#team",
-});
-
-// 读取
+router.push({ path: "/about", hash: "#team" });
 route.hash;  // '#team'
 ```
 
 </v-click>
+
+</div>
+
+<div>
 
 <v-click>
 
@@ -1352,6 +1362,10 @@ route.hash;  // '#team'
 - **Query**：携带附加状态（`?sort=desc&page=2`）—— 可选，不影响匹配
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -1395,19 +1409,14 @@ transition: fade-out
 <v-click>
 
 ```ts
-const router = createRouter({ ... });
-
 router.beforeEach(async (to, from) => {
-  // 1. 不返回任何东西 / 返回 undefined / 返回 true → 放行
-  // 2. 返回 false → 取消导航
-  // 3. 返回 RouteLocationRaw → 重定向
+  // 1. undefined / true → 放行
+  // 2. return false → 取消导航
+  // 3. return RouteLocationRaw → 重定向
 
   // 例：未登录用户访问需要登录的页面
   if (to.meta.requiresAuth && !isAuthenticated()) {
-    return {
-      name: "login",
-      query: { redirect: to.fullPath },
-    };
+    return { name: "login", query: { redirect: to.fullPath } };
   }
 });
 ```
@@ -1415,8 +1424,6 @@ router.beforeEach(async (to, from) => {
 </v-click>
 
 <v-click>
-
-**参数说明**
 
 | 参数 | 类型 | 含义 |
 |---|---|---|
@@ -1478,12 +1485,8 @@ const routes = [
       if (!isAdmin()) return { name: "forbidden" };
     },
   },
-  {
-    path: "/dashboard",
-    component: Dashboard,
-    // 数组形式：多个守卫按顺序执行
-    beforeEnter: [requireAuth, requireSubscription],
-  },
+  // 数组形式：多个守卫按顺序执行（v4.2+）
+  { path: "/dashboard", component: Dashboard, beforeEnter: [requireAuth, requireSub] },
 ];
 ```
 
@@ -1494,17 +1497,8 @@ const routes = [
 **特点**
 
 - 仅在「**首次进入该路由**」时触发，params/query 变化不重跑
-- 嵌套路由：父路由的 beforeEnter 仅在跨父级时触发，子路由切换不触发
-- 数组形式从 v4.2 开始支持，便于组合多个守卫
-
-</v-click>
-
-<v-click>
-
-> 💡 **何时用路由级 vs 全局**
->
-> - 全局：跨多个路由的通用规则（登录、埋点、loading 状态）
-> - 路由级：只关心一个路由的细致规则（管理员页 / 实验性功能）
+- 嵌套路由：父路由的 beforeEnter 仅在跨父级时触发
+- 全局：跨多个路由的通用规则；路由级：仅关心一个路由的细致规则
 
 </v-click>
 
@@ -1554,22 +1548,17 @@ onBeforeRouteEnter / Update / Leave
 
 ```vue
 <script setup lang="ts">
-import {
-  onBeforeRouteUpdate,
-  onBeforeRouteLeave,
-} from "vue-router";
+import { onBeforeRouteUpdate, onBeforeRouteLeave } from "vue-router";
 
 // 同一组件 + params 变化时触发
-onBeforeRouteUpdate(async (to, from) => {
-  // 例：watch 自动取消旧请求
+onBeforeRouteUpdate(async (to) => {
   await fetchUser(to.params.id);
 });
 
 // 离开本组件时触发（适合「未保存提醒」）
-onBeforeRouteLeave((to, from) => {
+onBeforeRouteLeave(() => {
   if (hasUnsavedChanges()) {
-    const confirmLeave = window.confirm("有未保存改动，确定离开？");
-    if (!confirmLeave) return false;
+    if (!window.confirm("有未保存改动，确定离开？")) return false;
   }
 });
 </script>
@@ -1697,8 +1686,6 @@ transition: fade-out
 <v-click>
 
 ```ts
-import { useTitle } from "@vueuse/core";
-
 // 1. 自动更新页面标题
 router.afterEach((to) => {
   document.title = `${to.meta.title ?? "Default"} | My App`;
@@ -1706,21 +1693,14 @@ router.afterEach((to) => {
 
 // 2. 埋点上报
 router.afterEach((to, from) => {
-  analytics.track("page_view", {
-    path: to.path,
-    referrer: from.path,
-  });
+  analytics.track("page_view", { path: to.path, referrer: from.path });
 });
 
 // 3. 关闭全局 loading 条
-router.afterEach(() => {
-  nProgress.done();
-});
+router.afterEach(() => nProgress.done());
 
 // 4. 滚动到顶部（也可用 scrollBehavior）
-router.afterEach(() => {
-  window.scrollTo({ top: 0 });
-});
+router.afterEach(() => window.scrollTo({ top: 0 }));
 ```
 
 </v-click>
@@ -1774,6 +1754,10 @@ transition: fade-out
 
 为路由附加任意自定义数据
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **定义 + 使用**
@@ -1782,20 +1766,17 @@ transition: fade-out
 const routes = [
   {
     path: "/admin",
-    component: Admin,
     meta: {
       requiresAuth: true,
       roles: ["admin"],
       title: "管理后台",
-      breadcrumb: "Admin Home",
-      transition: "slide-left",
       keepAlive: true,
     },
   },
 ];
 
 router.beforeEach((to) => {
-  // meta 自动合并匹配链上所有父级 + 子级
+  // meta 自动合并匹配链
   if (to.meta.requiresAuth && !isLoggedIn()) {
     return "/login";
   }
@@ -1803,6 +1784,10 @@ router.beforeEach((to) => {
 ```
 
 </v-click>
+
+</div>
+
+<div>
 
 <v-click>
 
@@ -1817,13 +1802,16 @@ declare module "vue-router" {
     requiresAuth?: boolean;
     roles?: string[];
     title?: string;
-    transition?: string;
     keepAlive?: boolean;
   }
 }
 ```
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -1868,6 +1856,10 @@ transition: fade-out
 
 v-slot 解构 Component + 包 Transition
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **全局统一过渡**
@@ -1888,13 +1880,15 @@ v-slot 解构 Component + 包 Transition
   transition: opacity 0.3s ease;
 }
 .fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
+.fade-leave-to { opacity: 0; }
 </style>
 ```
 
 </v-click>
+
+</div>
+
+<div>
 
 <v-click>
 
@@ -1911,6 +1905,10 @@ v-slot 解构 Component + 包 Transition
 ```
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -1951,27 +1949,25 @@ transition: fade-out
 
 控制页面切换后的滚动位置
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **回到顶部 + 后退恢复**
 
 ```ts
-const router = createRouter({
+createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    // 浏览器前进 / 后退：恢复历史滚动位置
+    // 前进 / 后退：恢复历史位置
     if (savedPosition) return savedPosition;
-
     // 新路由含 hash：滚到锚点
     if (to.hash) {
-      return {
-        el: to.hash,
-        behavior: "smooth",
-        top: 80,  // 顶部偏移（避开固定 header）
-      };
+      return { el: to.hash, behavior: "smooth", top: 80 };
     }
-
     // 默认：回到顶部
     return { top: 0 };
   },
@@ -1979,6 +1975,10 @@ const router = createRouter({
 ```
 
 </v-click>
+
+</div>
+
+<div>
 
 <v-click>
 
@@ -1995,6 +1995,10 @@ scrollBehavior(to, from, savedPosition) {
 ```
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -2037,19 +2041,22 @@ transition: fade-out
 
 代码分割让首屏更轻
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **动态 import 替代静态 import**
 
 ```ts
-// ❌ 静态：所有组件打进首屏 bundle
+// ❌ 静态：全打进首屏 bundle
 import UserDetails from "./views/UserDetails.vue";
-
 const routes = [
   { path: "/user/:id", component: UserDetails },
 ];
 
-// ✅ 动态：访问时才下载组件 chunk
+// ✅ 动态：访问时才下载 chunk
 const routes = [
   {
     path: "/user/:id",
@@ -2059,6 +2066,10 @@ const routes = [
 ```
 
 </v-click>
+
+</div>
+
+<div>
 
 <v-click>
 
@@ -2084,9 +2095,13 @@ export default defineConfig({
 
 </v-click>
 
+</div>
+
+</div>
+
 <v-click>
 
-> 💡 **不要用 defineAsyncComponent**：路由组件不需要包装，直接用 `() => import()` 即可。
+> 💡 **不要用 defineAsyncComponent**：路由组件直接用 `() => import()` 即可。
 
 </v-click>
 
@@ -2142,28 +2157,17 @@ transition: fade-out
 
 ```ts
 // 1. 添加顶层路由
-router.addRoute({
-  path: "/about",
-  name: "about",
-  component: () => import("./views/About.vue"),
-});
+router.addRoute({ path: "/about", name: "about", component: () => import("./About.vue") });
 
 // 2. 添加嵌套路由（指定父路由名）
-router.addRoute("admin", {
-  path: "settings",
-  component: () => import("./views/AdminSettings.vue"),
-});
+router.addRoute("admin", { path: "settings", component: () => import("./AdminSettings.vue") });
 
 // 3. 替换：相同 name 自动覆盖
 router.addRoute({ name: "user", path: "/u/:id", component: UserNew });
 
-// 4. 移除
+// 4. 移除 / 检查 / 列出
 router.removeRoute("about");
-
-// 5. 检查
-router.hasRoute("user");  // true / false
-
-// 6. 列出所有路由
+router.hasRoute("user");      // true / false
 console.log(router.getRoutes());
 ```
 
@@ -2221,31 +2225,19 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 const post = ref<Post | null>(null);
 const loading = ref(false);
-const error = ref<string | null>(null);
 
 async function fetchPost(id: string) {
   loading.value = true;
-  error.value = null;
-  try {
-    post.value = await api.getPost(id);
-  } catch (e: any) {
-    error.value = e.message;
-  } finally {
-    loading.value = false;
-  }
+  try { post.value = await api.getPost(id); }
+  finally { loading.value = false; }
 }
 
 // 首次 + params 变化时拉数据
-watch(
-  () => route.params.id,
-  (id) => fetchPost(id as string),
-  { immediate: true },
-);
+watch(() => route.params.id, (id) => fetchPost(id as string), { immediate: true });
 </script>
 
 <template>
   <p v-if="loading">Loading...</p>
-  <p v-else-if="error">Error: {{ error }}</p>
   <article v-else-if="post">{{ post.title }}</article>
 </template>
 ```
@@ -2291,17 +2283,20 @@ transition: fade-out
 
 「先取数后导航」：守卫里 await
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 ```ts
-// 路由级守卫：在 beforeEnter 里预拉数据
+// beforeEnter 里预拉数据
 {
   path: "/post/:id",
   component: Post,
   async beforeEnter(to) {
     try {
       const post = await api.getPost(to.params.id as string);
-      // 存进 meta 或 Pinia store，组件直接读
       (to.meta as any).preloadedPost = post;
     } catch (e) {
       return { name: "not-found" };
@@ -2309,16 +2304,20 @@ transition: fade-out
   },
 }
 
-// 组件内
+// 组件内读取
 const route = useRoute();
 const post = computed(() => (route.meta as any).preloadedPost as Post);
 ```
 
 </v-click>
 
+</div>
+
+<div>
+
 <v-click>
 
-**配合 Suspense + async setup（Vue 3 原生）**
+**Suspense + async setup（Vue 3 原生）**
 
 ```vue
 <!-- App.vue -->
@@ -2335,6 +2334,10 @@ const post = computed(() => (route.meta as any).preloadedPost as Post);
 ```
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -2380,12 +2383,18 @@ transition: fade-out
 
 active class、自定义渲染、外部链接
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **自定义激活样式**
 
 ```vue
-<RouterLink to="/" active-class="is-active" exact-active-class="is-current">
+<RouterLink to="/"
+  active-class="is-active"
+  exact-active-class="is-current">
   首页
 </RouterLink>
 
@@ -2394,19 +2403,23 @@ active class、自定义渲染、外部链接
 const router = createRouter({
   linkActiveClass: "router-active",
   linkExactActiveClass: "router-exact-active",
-  routes,
 });
 </script>
 ```
 
 </v-click>
 
+</div>
+
+<div>
+
 <v-click>
 
-**v-slot 自定义渲染（包成自己的组件）**
+**v-slot 自定义渲染**
 
 ```vue
-<RouterLink to="/products" custom v-slot="{ href, navigate, isActive }">
+<RouterLink to="/products" custom
+  v-slot="{ href, navigate, isActive }">
   <li :class="{ active: isActive }">
     <a :href="href" @click="navigate">
       <ProductIcon /> 商品中心
@@ -2416,6 +2429,10 @@ const router = createRouter({
 ```
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -2456,6 +2473,10 @@ transition: fade-out
 
 路由 + 状态管理的最佳实践
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **Pinia：缓存路由数据**
@@ -2480,6 +2501,10 @@ export const usePostStore = defineStore("posts", () => {
 
 </v-click>
 
+</div>
+
+<div>
+
 <v-click>
 
 **VueUse：路由参数双向绑定**
@@ -2488,20 +2513,24 @@ export const usePostStore = defineStore("posts", () => {
 <script setup lang="ts">
 import { useRouteQuery } from "@vueuse/router";
 
-// 双向绑定 URL ?page=2，自动同步 router
-const page = useRouteQuery<number>("page", 1, { transform: Number });
+// 双向绑定 URL ?page=2
+const page = useRouteQuery<number>(
+  "page", 1, { transform: Number },
+);
 const search = useRouteQuery<string>("q", "");
-
-// 用户输入 → URL 更新 → 其他订阅者响应
 </script>
 
 <template>
-  <input v-model="search" placeholder="搜索..." />
+  <input v-model="search" />
   <span>第 {{ page }} 页</span>
 </template>
 ```
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -2542,6 +2571,10 @@ transition: fade-out
 
 服务端渲染时的特别考虑
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **SSR 关键差异**
@@ -2550,42 +2583,45 @@ transition: fade-out
 // 服务端 entry-server.ts
 import { createMemoryHistory, createRouter } from "vue-router";
 
-function createSSRRouter() {
-  return createRouter({
-    history: createMemoryHistory(),  // 服务端必须用 memory
+export async function render(url: string) {
+  const router = createRouter({
+    history: createMemoryHistory(),  // 服务端必须
     routes,
   });
-}
-
-export async function render(url: string) {
-  const router = createSSRRouter();
   await router.push(url);
-  await router.isReady();             // 等待首次匹配完成
+  await router.isReady();
   // ...renderToString(app)
 }
 ```
 
 </v-click>
 
+</div>
+
+<div>
+
 <v-click>
 
 **Nuxt 已经全部封装**
 
 ```vue
-<!-- pages/users/[id].vue：文件即路由 -->
+<!-- pages/users/[id].vue -->
 <script setup lang="ts">
 const route = useRoute();
-const { data: user } = await useFetch(`/api/users/${route.params.id}`);
+const { data } = await useFetch(`/api/users/${route.params.id}`);
 </script>
 ```
 
-Nuxt 内部就是 Vue Router + 文件约定 + SSR pipeline 的整合 ——
-- `pages/` 目录自动转 routes
-- `definePageMeta` 配置 meta
+Nuxt = Vue Router + 文件约定 + SSR：
+- `pages/` 自动转 routes
+- `definePageMeta` 配 meta
 - `navigateTo` 替代 router.push
-- `useRoute` / `useRouter` 直接可用
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -2628,6 +2664,10 @@ transition: fade-out
 
 未来官方化的「文件即路由」
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 <v-click>
 
 **安装与配置**
@@ -2653,6 +2693,10 @@ export default defineConfig({
 
 </v-click>
 
+</div>
+
+<div>
+
 <v-click>
 
 **文件约定示例**
@@ -2663,11 +2707,10 @@ src/pages/
 ├── about.vue              # /about
 ├── users/
 │   ├── index.vue          # /users
-│   └── [id].vue           # /users/:id（动态段）
-├── posts/
-│   ├── [id]/
-│   │   ├── index.vue      # /posts/:id
-│   │   └── edit.vue       # /posts/:id/edit
+│   └── [id].vue           # /users/:id
+├── posts/[id]/
+│   ├── index.vue          # /posts/:id
+│   └── edit.vue           # /posts/:id/edit
 └── [...path].vue          # catch-all 404
 ```
 
@@ -2675,9 +2718,13 @@ src/pages/
 
 <v-click>
 
-> 💡 **未来路线**：v5 正在把这个插件合并进 vue-router 核心，未来「装一个包就有文件路由」。
+> 💡 v5 正在把这个插件合并进 vue-router 核心。
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -2727,7 +2774,6 @@ transition: fade-out
 ```ts
 // 1. 构造器：new VueRouter → createRouter
 import { createRouter, createWebHistory } from "vue-router";
-
 const router = createRouter({
   history: createWebHistory(),    // 2. mode → history 工厂
   routes,
@@ -2735,19 +2781,13 @@ const router = createRouter({
 
 // 3. base 选项移入工厂函数
 createWebHistory("/my-app/");
-
 // 4. catch-all：path: '*' → path: '/:pathMatch(.*)*'
+// 5. 异步组件：() => import('./Home.vue')（无需 require.ensure）
 
-// 5. 异步组件：直接传函数，无需 require.ensure
-component: () => import("./views/Home.vue"),
+// 6. 守卫 next 回调 → 返回值
+router.beforeEach((to) => { if (!loggedIn) return "/login"; });
 
-// 6. 守卫 next 回调 → 返回值（旧 next 仍兼容）
-router.beforeEach((to, from) => {
-  if (!loggedIn) return "/login";
-});
-
-// 7. push / replace 返回 Promise，不再有 onComplete / onAbort 回调
-
+// 7. push / replace 返回 Promise（无 onComplete / onAbort）
 // 8. RouterLink 移除：append / event / tag / exact 四个 prop
 ```
 
@@ -2794,28 +2834,33 @@ transition: fade-out
 
 # 常见踩坑（一）：解构 route 失去响应
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 ```vue
 <script setup lang="ts">
 import { useRoute } from "vue-router";
-
 const route = useRoute();
 
-// ❌ 失去响应性 —— 拿到的是 route 当前快照
+// ❌ 失去响应性
 const { params, query } = route;
-console.log(params.id);  // 路由切换后仍是旧值
+console.log(params.id);  // 切换后仍是旧值
 
 // ❌ 同样错
 const id = route.params.id;
 </script>
 ```
 
+</div>
+
+<div>
+
 <v-click>
 
 ```vue
 <script setup lang="ts">
 import { computed, toRefs } from "vue";
-import { useRoute } from "vue-router";
-
 const route = useRoute();
 
 // ✅ 用 computed
@@ -2823,14 +2868,16 @@ const id = computed(() => route.params.id);
 
 // ✅ 用 toRefs
 const { params, query } = toRefs(route);
-// params.value.id 自动响应
 
 // ✅ 模板里直接用（不解构）
-// <p>{{ route.params.id }}</p>
 </script>
 ```
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -2934,10 +2981,14 @@ transition: fade-out
 
 # 常见踩坑（三）：守卫里访问 store
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 ```ts
 // ❌ module 顶层直接 import store 实例
 import { useUserStore } from "@/stores/user";
-const userStore = useUserStore();  // pinia 还没注册，崩溃
+const userStore = useUserStore();  // pinia 未注册，崩
 
 router.beforeEach((to) => {
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
@@ -2946,14 +2997,16 @@ router.beforeEach((to) => {
 });
 ```
 
+</div>
+
+<div>
+
 <v-click>
 
 ```ts
-// ✅ 守卫内调用 useStore（pinia 已注册）
-import { useUserStore } from "@/stores/user";
-
+// ✅ 守卫内调用 useStore
 router.beforeEach((to) => {
-  const userStore = useUserStore();  // 在函数体内调用
+  const userStore = useUserStore();  // 函数体内
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
     return "/login";
   }
@@ -2964,16 +3017,18 @@ router.beforeEach((to) => {
 
 <v-click>
 
-**根因**：守卫文件可能在 `app.use(pinia)` 之前 import，
-此时 Pinia 实例还未注册，useStore 拿不到上下文。
+**根因**：守卫在 `app.use(pinia)` 之前 import，Pinia 实例未注册。
 
 ```ts
-// main.ts
-app.use(pinia);     // ← 必须在 router 安装前 + 守卫调用前
+app.use(pinia);     // ← 必须在 router 之前
 app.use(router);
 ```
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -3009,6 +3064,10 @@ transition: fade-out
 
 # 常见踩坑（四）：滚动行为不工作
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 ```ts
 const router = createRouter({
   history: createWebHistory(),
@@ -3021,13 +3080,15 @@ const router = createRouter({
 
 <v-click>
 
-**症状**：返回 `{ top: 0 }` 但页面不滚动。
+**症状**：返回 `{ top: 0 }` 但不滚动。
 
-**原因**：scrollBehavior 只操作 `window` 滚动条 ——
-如果你的页面用 `overflow: auto` 的容器（如 el-main）自己处理滚动，
-window 已经不滚了，滚动条在容器内部。
+**原因**：scrollBehavior 只操作 `window`。如果页面用 `overflow: auto` 容器（如 el-main）自己滚动，window 早就不滚了。
 
 </v-click>
+
+</div>
+
+<div>
 
 <v-click>
 
@@ -3040,14 +3101,15 @@ router.afterEach(() => {
 
 // ✅ 或：scrollBehavior 返回 el 选择器
 scrollBehavior(to) {
-  return {
-    el: ".el-main",
-    top: 0,
-  };
+  return { el: ".el-main", top: 0 };
 }
 ```
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -3085,12 +3147,17 @@ transition: fade-out
 
 # 常见踩坑（五）：keep-alive 缓存失效
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 ```vue
 <!-- App.vue：错误用法 -->
 <template>
   <RouterView v-slot="{ Component }">
     <KeepAlive>
-      <component :is="Component" />   <!-- 没 :key 时，相同 Component 不会刷新 -->
+      <component :is="Component" />
+      <!-- 没 :key，相同 Component 不刷新 -->
     </KeepAlive>
   </RouterView>
 </template>
@@ -3098,9 +3165,13 @@ transition: fade-out
 
 <v-click>
 
-**症状**：从 /post/1 跳到 /post/2，组件不刷新；或不希望缓存的页面被缓存。
+**症状**：/post/1 → /post/2 组件不刷新；不希望缓存的页面被缓存。
 
 </v-click>
+
+</div>
+
+<div>
 
 <v-click>
 
@@ -3109,23 +3180,21 @@ transition: fade-out
 <template>
   <RouterView v-slot="{ Component, route }">
     <KeepAlive :include="cachedViews">
-      <component
-        :is="Component"
-        :key="route.fullPath"
-      />
+      <component :is="Component" :key="route.fullPath" />
     </KeepAlive>
   </RouterView>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { useRoute } from "vue-router";
-
 const cachedViews = ["UserList", "ProductList"];
 </script>
 ```
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {
@@ -3338,43 +3407,54 @@ transition: fade-out
 
 # 学习路径
 
+<div class="grid grid-cols-2 gap-x-4">
+
+<div>
+
 ```
 入门（1-2 天）
 ├── 跑通 create-vue 默认模板（含 router）
 ├── 读完官方 Essentials 章节（前 8 节）
-├── 写一个 Todo App：列表 / 详情 / 新建 三页
+├── 写一个 Todo App：列表 / 详情 / 新建
 └── 理解 createRouter / RouterLink / RouterView
 
 进阶（3-5 天）
 ├── 嵌套路由 + 命名视图实战
 ├── 全局 + 路由级 + 组件内三层守卫
 ├── meta 扩展 + TS 类型强化
-├── scrollBehavior + page transition 配合
 └── lazy load + Suspense 数据加载
+```
 
+</div>
+
+<div>
+
+```
 实战（1-2 周）
-├── 写一个完整的管理后台：登录 + 动态路由 + 权限
+├── 管理后台：登录 + 动态路由 + 权限
 ├── 配合 Pinia 做用户态与缓存
-├── 配合 VueUse 做 useRouteQuery 双向绑定
+├── 配合 VueUse 做 useRouteQuery
 └── 性能调优 + bundle 分析
 
 延伸（持续）
 ├── 学 Nuxt（基于 Vue Router 的元框架）
-├── 试 unplugin-vue-router（文件约定 + 类型推导）
-├── 跟进 v5 实验性 Data Loaders 进展
-└── 微前端 / SSR / 移动端等特殊场景
+├── 试 unplugin-vue-router
+└── 跟进 v5 实验性 Data Loaders
 ```
 
 <v-click>
 
 **官方资源**
 
-- 文档：[router.vuejs.org](https://router.vuejs.org)
-- GitHub：[github.com/vuejs/router](https://github.com/vuejs/router)
-- 示例：[github.com/vuejs/router/tree/main/packages/playground](https://github.com/vuejs/router/tree/main/packages/playground)
-- 视频课：Vue Mastery — Vue Router 4 Fundamentals
+- [router.vuejs.org](https://router.vuejs.org)
+- [github.com/vuejs/router](https://github.com/vuejs/router)
+- Vue Mastery — Vue Router 4 Fundamentals
 
 </v-click>
+
+</div>
+
+</div>
 
 <style>
 h1 {

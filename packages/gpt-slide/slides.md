@@ -119,17 +119,10 @@ transition: slide-up
 | `gpt-5` | 256K | 32K | 旗舰复杂任务 |
 | `gpt-5-mini` | 256K | 32K | 日常生产 |
 | `gpt-5-nano` | 128K | 16K | 简单 / 高并发 |
-| `o3` | 200K | 100K | 深度推理（数学 / 物理 / 逻辑） |
+| `o3` | 200K | 100K | 深度推理 |
 | `o4-mini` | 200K | 64K | 推理 + 低成本 |
 | `gpt-4o` | 128K | 16K | 多模态（图 + 音 + 视频帧） |
-| `gpt-4o-mini` | 128K | 16K | 多模态低成本 |
 | `gpt-4o-realtime-preview` | 128K | - | Realtime API（语音） |
-
-<v-click>
-
-旧版仍提供（建议迁移）：`gpt-4-turbo` / `gpt-3.5-turbo` / `o1` / `o1-mini`。
-
-</v-click>
 
 ---
 transition: slide-up
@@ -143,11 +136,9 @@ transition: slide-up
 - **日常生产**：`gpt-5-mini`
 - **旗舰复杂任务**：`gpt-5`（256K 上下文）
 - **数学证明 / 物理推理**：`o3` + `reasoning_effort: "high"`
-- **推理 + 控本**：`o4-mini`
 - **多模态（图 / 音 / 视频）**：`gpt-4o` 系列
 - **语音 Agent / 双向对话**：`gpt-4o-realtime-preview`
-- **图像生成**：`gpt-image-1`（DALL-E 继任者）
-- **STT / TTS**：`whisper-1` / `tts-1` / `tts-1-hd`
+- **图像生成 / STT / TTS**：`gpt-image-1` / `whisper-1` / `tts-1`
 
 </v-clicks>
 
@@ -484,15 +475,7 @@ transition: slide-up
 
 <v-click>
 
-**何时用 o-series**：
-
-| 场景 | 选 |
-|---|---|
-| 数学证明 | `o3` high |
-| 物理 / 化学 / 生物推理 | `o3` medium-high |
-| 复杂业务规则推理 | `o3` medium |
-| 代码生成 | GPT-5（o-series 慢 + 贵） |
-| 简单 QA | `gpt-5-mini` / `nano` |
+**何时用 o-series**：数学证明 → `o3` high；物理 / 化学推理 → `o3` medium-high；复杂业务规则 → `o3` medium；代码生成 → GPT-5（o-series 慢 + 贵）；简单 QA → `gpt-5-mini` / `nano`
 
 </v-click>
 
@@ -756,24 +739,22 @@ transition: slide-up
 # Function Calling
 
 ```python
-tools = [
-    {
-        "type": "function",
-        "function": {
-            "name": "get_weather",
-            "description": "Get current weather",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "city": {"type": "string"},
-                    "unit": {"type": "string", "enum": ["c", "f"]},
-                },
-                "required": ["city"],
+tools = [{
+    "type": "function",
+    "function": {
+        "name": "get_weather",
+        "description": "Get current weather",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city": {"type": "string"},
+                "unit": {"type": "string", "enum": ["c", "f"]},
             },
-            "strict": True,            # GPT-5+ 强 schema 模式
+            "required": ["city"],
         },
-    }
-]
+        "strict": True,            # GPT-5+ 强 schema 模式
+    },
+}]
 
 response = client.chat.completions.create(
     model="gpt-5",
@@ -925,7 +906,7 @@ client = AzureOpenAI(
 )
 
 response = client.chat.completions.create(
-    model="my-gpt5-deploy",       # ← Azure 用部署名，不是 model ID
+    model="my-gpt5-deploy",   # ← Azure 用部署名，不是 model ID
     messages=[...],
 )
 ```
@@ -933,7 +914,6 @@ response = client.chat.completions.create(
 | 维度 | OpenAI 直连 | Azure OpenAI |
 |---|---|---|
 | 模型 ID | `gpt-5` | 部署名（自定义） |
-| Endpoint | `api.openai.com` | `<resource>.openai.azure.com` |
 | Region | 全球（不含大陆） | 含香港 / 新加坡 |
 | 模型更新 | 即时 | 滞后 1-2 月 |
 
@@ -950,8 +930,7 @@ transition: slide-up
 | 内置 image_generation | ✓ | ✗ | ✓（Imagen） |
 | 内置 file_search RAG | ✓ | -（需自建） | ✓（Semantic Retrieval） |
 | Realtime 双向语音 | ✓ | ✗ | ✓（Live API） |
-| 音频输入（STT） | ✓ Whisper | ✗ | ✓ |
-| TTS | ✓ | ✗ | ✓ |
+| 音频 STT / TTS | ✓ Whisper / ✓ | ✗ | ✓ / ✓ |
 | Video 帧 | ✓ 手动抽 | -（仅图） | ✓ 原生 |
 
 ---
@@ -1064,11 +1043,9 @@ import time
 try:
     response = client.chat.completions.create(...)
 except RateLimitError:
-    time.sleep(60)
-    response = client.chat.completions.create(...)
+    time.sleep(60); response = client.chat.completions.create(...)
 except APIStatusError as e:
-    if e.status_code == 503:
-        response = fallback_to_azure(...)
+    if e.status_code == 503: response = fallback_to_azure(...)
 ```
 
 | HTTP | 类型 | 含义 |
@@ -1124,8 +1101,7 @@ transition: slide-up
 |---|---|
 | `POST /v1/chat/completions` | 旧式对话 |
 | `POST /v1/responses` | 新式 Agent / 内置工具 |
-| `POST /v1/embeddings` | 向量嵌入 |
-| `POST /v1/images/generations` | 图像生成 |
+| `POST /v1/embeddings` / `images/generations` | 向量嵌入 / 图像生成 |
 | `POST /v1/audio/speech` / `transcriptions` | TTS / STT |
 | `POST /v1/files` / `batches` | 文件 / Batch |
 | `WS /v1/realtime` | Realtime API（语音） |
@@ -1175,8 +1151,7 @@ transition: slide-up
 | GPT-4-Turbo | 2023 末 | 128K 上下文 / Assistants API |
 | GPT-4o | 2024 中 | 全模态 / Realtime API |
 | o1 / o3 | 2024-2025 | 推理模型（CoT 训练） |
-| GPT-5 | 2025 | 旗舰 + responses API + 内置工具 |
-| GPT-5-mini / nano | 2025 末 | 低成本档 |
+| GPT-5 / mini / nano | 2025 | 旗舰 + responses API + 内置工具 + 低成本档 |
 | o4-mini | 2026 | 推理 + 低成本 |
 
 ---

@@ -99,19 +99,16 @@ level: 2
 
 **优点**
 - 类型推导业界顶配：路径 / search / loader / context 全链路编译期校验
-- File-based + Code-based 双模式，从原型到大型项目都有匹配方案
-- Search params 作为应用状态，内置 schema + 序列化，胜过手写 URLSearchParams
-- Loader 体系完整：并行加载 / SWR / preload / pending / error 边界一应俱全
-- 1.x 稳定线已经成熟，API 几乎不再大改
+- File-based + Code-based 双模式，原型到大型项目都有匹配方案
+- Search params 作为应用状态：schema + 序列化胜过手写 URLSearchParams
+- Loader 体系完整：并行 / SWR / preload / pending / error 边界
 - 与 TanStack Query 协作天然，业界事实标准
-- 不与任何元框架绑定，独立可用（SPA / Vite / Webpack 都行）
+- 1.x 已成熟，API 几乎不再大改，独立可用（不绑定框架）
 
 **缺点**
-- 学习曲线偏陡，loader / beforeLoad / context 概念需要时间消化
+- 学习曲线偏陡，loader / beforeLoad / context 概念需时间消化
 - 类型推导编译开销大，超大项目 IDE 响应需调优
-- 文件路由生成 `routeTree.gen.ts` 偶尔失同步
-- 文档体量大但密度高，初学者容易迷路
-- 招聘候选人少于 React Router，团队上手需培训
+- 文档体量大但密度高，招聘候选人少于 React Router
 - 不带数据变更（mutation）原语，需配 Query 或自己写
 
 </v-clicks>
@@ -249,12 +246,7 @@ import viteReact from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [
     // 文件路由插件 —— 必须在 React 之前
-    tanstackRouter({
-      target: 'react',
-      autoCodeSplitting: true,         // 默认开启路由级 code split
-      // routesDirectory: './src/routes',
-      // generatedRouteTree: './src/routeTree.gen.ts',
-    }),
+    tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     viteReact(),
   ],
 })
@@ -262,12 +254,7 @@ export default defineConfig({
 
 <v-click>
 
-**`tanstackRouter()` 做了什么**：
-
-- 扫描 `src/routes/` 目录的文件结构
-- 自动生成 `routeTree.gen.ts`（**勿手改、加 .gitignore**）
-- 自动按路由切分 chunk，配合 `defaultPreload: 'intent'` 预取
-- HMR 友好，新增 / 删除 / 重命名路由文件自动更新树
+**`tanstackRouter()` 做了什么**：扫描 `src/routes/` 目录结构 → 自动生成 `routeTree.gen.ts`（**勿手改、加 .gitignore**）→ 按路由切分 chunk → HMR 友好（增删改路由文件自动更新树）。
 
 </v-click>
 
@@ -378,20 +365,14 @@ transition: slide-up
 
 ```
 src/routes/
-├── __root.tsx                # 根布局（特殊）
-├── index.tsx                 # /
-├── about.tsx                 # /about
-├── posts.tsx                 # /posts 父布局（可选）
+├── __root.tsx            # 根布局
+├── index.tsx             # /
+├── posts.tsx             # /posts 父布局（可选）
 ├── posts/
-│   ├── index.tsx             # /posts
-│   ├── $postId.tsx           # /posts/:postId
-│   └── new.tsx               # /posts/new
-├── _auth.tsx                 # 路由分组（不影响 URL）
-├── _auth/
-│   ├── login.tsx             # /login
-│   └── signup.tsx            # /signup
-└── rest/
-    └── $.tsx                 # /rest/* (catch-all)
+│   ├── index.tsx         # /posts
+│   └── $postId.tsx       # /posts/:postId
+├── _auth.tsx             # 分组（不影响 URL）
+└── rest/$.tsx            # /rest/* (catch-all)
 ```
 
 <v-click>
@@ -399,10 +380,9 @@ src/routes/
 | 文件名 | 含义 |
 |---|---|
 | `index.tsx` | 当前目录的根路径 |
-| `$param.tsx` | 动态参数（`params.param`） |
+| `$param.tsx` | 动态参数 |
 | `$.tsx` | catch-all 通配 |
-| `_layout.tsx` 前缀 | 分组布局，URL 不含 |
-| `__root.tsx` | 应用根，每项目唯一 |
+| `_layout.tsx` / `__root.tsx` | 分组布局 / 应用根 |
 
 </v-click>
 
@@ -433,11 +413,7 @@ export const Route = createRootRoute({
 
 <v-click>
 
-**核心组件**：
-
-- `<Outlet />` 渲染子路由
-- `activeProps` 自动判断当前 active 状态（含 `inactiveProps` 反向写法）
-- `notFoundComponent` 兜底未匹配路径
+**核心组件**：`<Outlet />` 渲染子路由；`activeProps` 自动判断 active（含 `inactiveProps`）；`notFoundComponent` 兜底未匹配路径。
 
 </v-click>
 
@@ -522,13 +498,8 @@ transition: slide-up
 ```tsx
 import { Link } from '@tanstack/react-router'
 
-// 静态路径
-<Link to="/about">About</Link>
-
-// 动态参数（编译期校验 params 必填）
-<Link to="/posts/$postId" params={{ postId: '1' }}>Post 1</Link>
-
-// 带 search params
+<Link to="/about">About</Link>                                  {/* 静态路径 */}
+<Link to="/posts/$postId" params={{ postId: '1' }}>Post 1</Link> {/* 动态参数 */}
 <Link to="/posts" search={{ page: 2, tag: 'react' }}>Page 2</Link>
 
 // 函数式更新 search
@@ -536,12 +507,8 @@ import { Link } from '@tanstack/react-router'
   Next page
 </Link>
 
-// 当前 active 高亮
-<Link
-  to="/posts"
-  activeProps={{ className: 'font-bold underline' }}
-  activeOptions={{ exact: true }}
->
+// active 高亮
+<Link to="/posts" activeProps={{ className: 'font-bold' }} activeOptions={{ exact: true }}>
   Posts
 </Link>
 ```
@@ -641,9 +608,6 @@ transition: slide-up
 # Search Params：Zod validator
 
 ```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { z } from 'zod'
-
 const searchSchema = z.object({
   page: z.number().int().min(1).catch(1),
   tag: z.string().optional(),
@@ -651,19 +615,14 @@ const searchSchema = z.object({
 })
 
 export const Route = createFileRoute('/posts/')({
-  // 校验 + 转换 URL search params
-  validateSearch: searchSchema,
-
-  // search 变化触发 loader 重跑
+  validateSearch: searchSchema,                  // 校验 + 转换
   loaderDeps: ({ search }) => ({ page: search.page, tag: search.tag }),
-
   loader: async ({ deps }) => fetchPosts(deps),
-
   component: PostsList,
 })
 
 function PostsList() {
-  const search = Route.useSearch()      // 类型: { page, tag?, sort }
+  const search = Route.useSearch()               // 类型: { page, tag?, sort }
   const navigate = Route.useNavigate()
   return (
     <button onClick={() => navigate({ search: (s) => ({ ...s, page: s.page + 1 }) })}>
@@ -708,20 +667,13 @@ transition: slide-up
 # Loaders + beforeLoad
 
 ```tsx
-// src/routes/dashboard.tsx
-import { createFileRoute, redirect } from '@tanstack/react-router'
-
 export const Route = createFileRoute('/dashboard')({
   // 1. beforeLoad —— 路由匹配前跑（权限拦截）
   beforeLoad: async ({ context, location }) => {
     if (!context.user) {
-      throw redirect({
-        to: '/login',
-        search: { redirect: location.href },
-      })
+      throw redirect({ to: '/login', search: { redirect: location.href } })
     }
-    // 返回值合并进子路由 context
-    return { user: context.user }
+    return { user: context.user }  // 合并进子路由 context
   },
 
   // 2. loader —— 数据加载
@@ -735,11 +687,7 @@ export const Route = createFileRoute('/dashboard')({
 
 <v-click>
 
-**执行顺序**：
-
-- `beforeLoad` 自上而下**串行**，可 `throw redirect()` / `throw notFound()` 拦截
-- `loader` 默认**并行**（父子同时跑），可读父级 `context`
-- 任何一层抛错 → 最近 `errorComponent` 兜底
+**执行顺序**：`beforeLoad` 自上而下**串行**（可 `throw redirect()`/`notFound()` 拦截）→ `loader` 默认**并行**（可读父级 context）→ 任何一层抛错走最近 `errorComponent`。
 
 </v-click>
 
@@ -768,11 +716,7 @@ export const Route = createFileRoute('/posts/')({
 
 <v-click>
 
-**心智**：
-
-- 路由的缓存 key 默认 = `路径 + params + loaderDeps`
-- 不在 `loaderDeps` 里的 search params 变化**不会**触发重跑（避免不必要的请求）
-- params 变化 / loaderDeps 变化 → loader 自动重跑
+**心智**：缓存 key 默认 = `路径 + params + loaderDeps`；不在 `loaderDeps` 里的 search 变化**不会**触发重跑；params / loaderDeps 变化 → loader 自动重跑。
 
 </v-click>
 
@@ -792,16 +736,11 @@ transition: slide-up
 export const Route = createFileRoute('/posts/$postId')({
   loader: ({ params }) => fetchPost(params.postId),
 
-  // 1. Pending 占位
-  pendingComponent: () => <Skeleton />,
+  pendingComponent: () => <Skeleton />,                      // Pending 占位
+  errorComponent: ({ error }) => <p>出错了：{error.message}</p>, // 错误兜底
 
-  // 2. 错误兜底
-  errorComponent: ({ error }) => <p>出错了：{error.message}</p>,
-
-  // 3. 慢于此阈值才显示 pending（避免闪烁）
-  pendingMs: 500,
-  // 4. 最小显示时长（避免一闪而过）
-  pendingMinMs: 200,
+  pendingMs: 500,       // 慢于此阈值才显示 pending（避免闪烁）
+  pendingMinMs: 200,    // 最小显示时长（避免一闪而过）
 
   component: PostDetail,
 })
@@ -809,11 +748,7 @@ export const Route = createFileRoute('/posts/$postId')({
 
 <v-click>
 
-**`pendingComponent` 触发时机**：
-
-- 首次进入路由 + loader 未完成
-- 配合 `pendingMs` 阈值，快路由不会闪 skeleton
-- 配合 `pendingMinMs` 最低显示时长，避免视觉突变
+**`pendingComponent` 触发时机**：首次进入路由 + loader 未完成；配合 `pendingMs` 快路由不闪 skeleton；配合 `pendingMinMs` 避免视觉突变。
 
 </v-click>
 
@@ -833,7 +768,7 @@ transition: slide-up
 export const Route = createFileRoute('/posts/$postId')({
   loader: ({ params }) => fetchPost(params.postId),
 
-  // 错误边界（任意一层抛错都会到最近的 errorComponent）
+  // 错误边界（任意一层抛错都到最近的 errorComponent）
   errorComponent: ({ error, reset }) => (
     <div>
       <p>{error.message}</p>
@@ -841,11 +776,8 @@ export const Route = createFileRoute('/posts/$postId')({
     </div>
   ),
 
-  // 数据陈旧时长（SWR 阈值）
-  staleTime: 30_000,            // 30s 内视为 fresh，不重 fetch
+  staleTime: 30_000,            // 30s 内视为 fresh
   gcTime: 5 * 60_000,           // 5min 后回收缓存
-
-  // shouldReload —— 自定义是否重 fetch
   shouldReload: ({ params }) => params.postId === 'critical',
 
   component: PostDetail,
@@ -854,11 +786,7 @@ export const Route = createFileRoute('/posts/$postId')({
 
 <v-click>
 
-**心智**：
-
-- `staleTime` 内重新进入路由 → 用缓存（snappy）
-- `staleTime` 之后 → 显示旧数据 + 后台刷新（SWR）
-- `gcTime` 超时 → 缓存彻底丢弃
+**心智**：`staleTime` 内重新进入 → 用缓存；之后 → 显示旧数据 + 后台刷新（SWR）；`gcTime` 超时 → 缓存丢弃。
 
 </v-click>
 
@@ -870,20 +798,13 @@ transition: slide-up
 
 ```ts
 // vite.config.ts
-tanstackRouter({
-  target: 'react',
-  autoCodeSplitting: true,    // 默认开启：每个 route 一个 chunk
-})
-```
+tanstackRouter({ target: 'react', autoCodeSplitting: true })
 
-```tsx
 // router.tsx
 createRouter({
   routeTree,
-  defaultPreload: 'intent',           // hover / focus 时预加载
-  defaultPreloadStaleTime: 0,         // 预加载数据立即 stale，确保进入再 fetch
-  // defaultPreload: 'viewport',      // 进入视口预加载（aggressive）
-  // defaultPreload: false,           // 关闭预加载
+  defaultPreload: 'intent',        // hover / focus 预加载
+  defaultPreloadStaleTime: 0,      // 进入路由再 fetch
 })
 ```
 
@@ -893,16 +814,9 @@ createRouter({
 
 | 值 | 触发时机 | 适合 |
 |---|---|---|
-| `'intent'` | `<Link>` hover / focus | 默认，最常用 |
-| `'viewport'` | `<Link>` 进入视口 | 列表 / 卡片墙 |
-| `'render'` | `<Link>` 挂载即预取 | 强相关导航 |
-| `false` | 不预加载 | 慢网 / 数据敏感 |
-
-</v-click>
-
-<v-click>
-
-> 💡 **效果**：用户点击 `<Link>` 前数据已经在飞，跳转近乎瞬间。
+| `'intent'` | hover / focus | 默认 |
+| `'viewport'` | 进入视口 | 列表 / 卡片墙 |
+| `'render'` / `false` | 挂载即预取 / 不预加载 | 强相关导航 / 慢网 |
 
 </v-click>
 
@@ -914,30 +828,22 @@ transition: slide-up
 
 ```tsx
 // 1. 根路由声明 context 类型
-import { createRootRouteWithContext } from '@tanstack/react-router'
-
-interface RouterContext {
-  queryClient: QueryClient
-  user: User | null
-}
+interface RouterContext { queryClient: QueryClient; user: User | null }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => <Outlet />,
 })
 
 // 2. 创建 router 时注入
-createRouter({
-  routeTree,
-  context: { queryClient, user: null },
-})
+createRouter({ routeTree, context: { queryClient, user: null } })
 
-// 3. 子路由的 beforeLoad 可读取并扩展
+// 3. 子路由 beforeLoad 可读取并扩展
 export const Route = createFileRoute('/dashboard')({
   beforeLoad: async ({ context }) => {
     const fresh = await context.queryClient.fetchQuery({...})
     return { dashboardData: fresh }   // ← 合并进下游 context
   },
-  loader: ({ context }) => context.dashboardData,  // 子层可见
+  loader: ({ context }) => context.dashboardData,
 })
 ```
 
@@ -955,34 +861,19 @@ transition: slide-up
 
 ```tsx
 // 1. router.tsx —— 共享 queryClient
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-
 const queryClient = new QueryClient()
+export const router = createRouter({ routeTree, context: { queryClient } })
 
-export const router = createRouter({
-  routeTree,
-  context: { queryClient },          // 注入路由 context
-  defaultPreload: 'intent',
-})
-```
-
-```tsx
 // 2. 路由 loader 中 prefetch
 export const Route = createFileRoute('/posts')({
   loader: ({ context: { queryClient } }) =>
-    queryClient.ensureQueryData({
-      queryKey: ['posts'],
-      queryFn: () => getPosts(),
-    }),
+    queryClient.ensureQueryData({ queryKey: ['posts'], queryFn: getPosts }),
   component: PostsList,
 })
 
 function PostsList() {
   // 组件中读同一份 cache，命中即同步返回
-  const { data } = useSuspenseQuery({
-    queryKey: ['posts'],
-    queryFn: () => getPosts(),
-  })
+  const { data } = useSuspenseQuery({ queryKey: ['posts'], queryFn: getPosts })
   return data.map((p) => <Post key={p.id} {...p} />)
 }
 ```
@@ -1001,7 +892,6 @@ transition: slide-up
 
 ```tsx
 // /settings 父布局
-// src/routes/settings.tsx
 export const Route = createFileRoute('/settings')({
   component: () => (
     <div className="flex">
@@ -1017,7 +907,6 @@ export const Route = createFileRoute('/settings')({
 })
 
 // /settings/profile 子页
-// src/routes/settings/profile.tsx
 export const Route = createFileRoute('/settings/profile')({
   component: () => <h2>Profile Page</h2>,
 })
@@ -1025,11 +914,7 @@ export const Route = createFileRoute('/settings/profile')({
 
 <v-click>
 
-**心智**：
-
-- 父级文件存在 → 子级自动嵌套在父的 `<Outlet />` 内
-- 多层嵌套 → 多层 `<Outlet />`，自然形成树状布局
-- `_layout.tsx` 前缀 → 仅布局，URL 不含此段（路由分组）
+**心智**：父级存在 → 子级自动嵌套在父 `<Outlet />` 内；多层嵌套 → 多层 `<Outlet />`；`_layout.tsx` 前缀仅布局，URL 不含此段。
 
 </v-click>
 
@@ -1040,8 +925,6 @@ transition: slide-up
 # 路由守卫：beforeLoad 拦截
 
 ```tsx
-import { redirect, notFound } from '@tanstack/react-router'
-
 // 1. 权限拦截
 export const Route = createFileRoute('/admin')({
   beforeLoad: ({ context }) => {
@@ -1058,14 +941,6 @@ export const Route = createFileRoute('/posts/$id')({
     if (!post) throw notFound()
     return post
   },
-})
-
-// 3. 通用错误 + 重试
-export const Route = createFileRoute('/data')({
-  loader: () => fetchData(),
-  errorComponent: ({ error, reset }) => (
-    <button onClick={reset}>Retry: {error.message}</button>
-  ),
 })
 ```
 
@@ -1118,24 +993,17 @@ transition: slide-up
 
 # vs React Router v7
 
-| 维度 | TanStack Router | React Router v7 (lib mode) |
+| 维度 | TanStack Router | React Router v7 |
 |---|---|---|
 | 路由配置 | 文件 + `createFileRoute` | 配置数组 `createBrowserRouter` |
-| 路由类型 | 编译期路径校验（字面量联合） | 框架模式自动 `+types/` |
-| Search Params | `validateSearch` + Zod 一等公民 | `useSearchParams` 字符串手解析 |
+| Search Params | `validateSearch` + Zod 一等公民 | `useSearchParams` 字符串 |
 | Loaders | `loader` + `loaderDeps` + SWR | `loader` + auto revalidate |
-| 守卫 | `throw redirect()` 异常控制流 | `loader` 内 `throw redirect()` |
 | Preload | `intent` / `viewport` 内置 | 手动 `prefetch` |
-| 数据变更 | 需配 Query 或手写 | `action` + 自动 revalidate |
-| 心智 | "URL 即应用状态" | "URL 即匹配规则" |
+| 数据变更 | 需配 Query | `action` + 自动 revalidate |
 
 <v-click>
 
-**关键区别**：
-
-- **TSR 类型推导更激进**：`<Link>` 路径编译期校验，search 必带 schema
-- **RR 自动 revalidation**：action 完成后自动重跑 loader，TSR 需手动 `invalidate`
-- **TSR 与 TanStack Query 是绝配**，RR 自带数据层不需要 Query
+**关键区别**：TSR 类型推导更激进、Search 必带 schema；RR action 完成自动 revalidate，TSR 需手动 `invalidate`；TSR 与 Query 是绝配。
 
 </v-click>
 
@@ -1145,24 +1013,17 @@ transition: slide-up
 
 # vs Next.js / Vue Router
 
-| 维度 | TanStack Router | Next.js App Router | Vue Router 4 |
+| 维度 | TanStack Router | Next.js App | Vue Router 4 |
 |---|---|---|---|
 | 框架范畴 | 纯路由库 | 元框架（含 SSR） | 纯路由库 |
 | UI 库 | React | React | Vue 3 |
-| 路由配置 | File + Code 双模 | File-based (App) | Code-based 数组 |
-| 类型推导 | 编译期 + Zod | 字符串 + 基础 | 4.x 弱 / 5.x unplugin 加持 |
+| 类型推导 | 编译期 + Zod | 字符串 + 基础 | 4.x 弱 / 5.x unplugin |
 | Search Params | 一等公民 + schema | 字符串手解析 | `route.query` 对象 |
-| 守卫 | `beforeLoad` + 异常 | middleware.ts | `beforeEach` 全局 |
-| 数据加载 | `loader` + Query | RSC async / Route Handler | 无原生（自行写） |
+| 数据加载 | `loader` + Query | RSC async | 无原生 |
 
 <v-click>
 
-**何时选 TanStack Router**：
-
-- React 项目追求**极致类型安全**
-- Search params 是核心交互状态（dashboard / 复杂列表筛选）
-- 已经在用 TanStack Query / Form / Table 全家桶
-- 想脱离 Next.js / Remix 框架锁定，纯 SPA + Vite 起步
+**何时选 TanStack Router**：React + 极致类型安全 / Search params 复杂 / 已在用 Query 全家桶 / 想脱离框架锁定走纯 SPA。
 
 </v-click>
 
@@ -1251,30 +1112,20 @@ navigate({ search: { filter: { tag: 'x', dates: [d1, d2] } } })
 const searchSchema = z.object({
   tag: z.string().optional(),
   from: z.coerce.date().optional(),
-  to: z.coerce.date().optional(),
 })
 ```
 
 <v-click>
 
-**默认序列化策略**：
-
-- 简单类型（string / number / boolean）→ URL safe
-- Array / Object → JSON.stringify
-- Date / Map / Set → 需 `z.coerce.*` 或自定义 `parseSearch` / `stringifySearch`
+**默认序列化策略**：简单类型 URL safe；Array / Object → JSON.stringify；Date / Map / Set → 需 `z.coerce.*` 或自定义 `parseSearch` / `stringifySearch`。
 
 </v-click>
 
 <v-click>
 
-**自定义序列化**：
-
 ```ts
-createRouter({
-  routeTree,
-  parseSearch: (s) => qs.parse(s),
-  stringifySearch: (o) => '?' + qs.stringify(o),
-})
+// 自定义序列化
+createRouter({ routeTree, parseSearch: qs.parse, stringifySearch: (o) => '?' + qs.stringify(o) })
 ```
 
 </v-click>
@@ -1337,11 +1188,7 @@ navigate({ to: '/posts' })           // 此时会重 fetch
 
 <v-click>
 
-**心智**：
-
-- TanStack Router **没有自动 revalidation**（区别于 React Router action）
-- 数据写后，开发者负责 `router.invalidate()` 或配 Query 用 `queryClient.invalidateQueries()`
-- 这是 TSR 设计取舍：显式好过隐式
+**心智**：TSR **没有自动 revalidation**（区别于 RR action）；数据写后开发者负责 `router.invalidate()` 或配 Query 的 `invalidateQueries()`；TSR 设计取舍：显式好过隐式。
 
 </v-click>
 
@@ -1428,39 +1275,24 @@ transition: slide-up
 ```
 入门
 ├── 跑通 npx create-tsrouter-app 默认模板
-├── 读 Overview + Quick Start + File-based Routing
 ├── 写一个 CRUD：Posts 列表 + 详情 + 新建
 └── 理解 createFileRoute + loader + Outlet
 
 进阶
-├── Search Params + validateSearch + Zod schema
-├── loaderDeps + staleTime + SWR 缓存
-├── beforeLoad + redirect + notFound 拦截
-├── Route Context + createRootRouteWithContext
+├── Search Params + validateSearch + Zod
+├── loaderDeps + staleTime + SWR
+├── beforeLoad + redirect / notFound
 └── TanStack Query 集成 ensureQueryData
 
 实战
-├── 错误边界 + pendingComponent + Suspense
-├── Preload 策略：intent / viewport
-├── Code Splitting 与 autoCodeSplitting
-├── router.invalidate() 缓存失效模式
+├── Preload / Code Splitting
+├── router.invalidate() 缓存失效
 └── Devtools 调试 loader 链
-
-延伸
-├── 从 React Router 迁移实操
-├── 与 TanStack Form / Table 集成
-├── 升级到 TanStack Start 走 SSR
-└── 大型项目类型性能调优
 ```
 
 <v-click>
 
-**官方资源**：
-
-- 文档：[tanstack.com/router](https://tanstack.com/router)
-- Examples：[github.com/TanStack/router/tree/main/examples/react](https://github.com/TanStack/router/tree/main/examples/react)
-- Discord：TanStack 官方社区
-- 升级到 Start：[tanstack.com/start](https://tanstack.com/start)
+**官方资源**：[tanstack.com/router](https://tanstack.com/router) · [Examples](https://github.com/TanStack/router/tree/main/examples/react) · [Start](https://tanstack.com/start)
 
 </v-click>
 
