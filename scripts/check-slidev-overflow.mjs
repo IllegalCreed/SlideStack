@@ -53,11 +53,12 @@ async function waitServerReady() {
 async function checkPackage(browser, pkg) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
   const page = await context.newPage();
-  const url = `http://localhost:${SERVE_PORT}/SlideStack/${pkg}/index.html#/1?clicks=999`;
+  const base = `/SlideStack/${pkg}`;
+  const url = `http://localhost:${SERVE_PORT}${base}/index.html`;
   try {
     await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
     // 等 slidev 渲染
-    await page.waitForFunction(() => document.querySelector('.slidev-page')?.getBoundingClientRect().width > 0, { timeout: 15000 });
+    await page.waitForFunction(() => !!document.querySelector('.slidev-slide-content'), { timeout: 15000 });
     // 取总页数
     const total = await page.evaluate(() => {
       const txt = document.querySelector('nav')?.innerText || '';
@@ -68,19 +69,32 @@ async function checkPackage(browser, pkg) {
       await context.close();
       return { pkg, error: 'cannot read total slide count' };
     }
-    // 依次跳转测量
+    // 依次跳转测量 —— Slidev 用 History API，需要 pushState + popstate
     const overflows = [];
     for (let i = 1; i <= total; i++) {
-      await page.evaluate((n) => { location.hash = `/${n}?clicks=999`; }, i);
-      await page.waitForTimeout(350);
-      const r = await page.evaluate(() => {
+      await page.evaluate(({ n, b }) => {
+        history.pushState({}, '', `${b}/${n}?clicks=999`);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      }, { n: i, b: base });
+      // 等 visibleNo 切到 i（slidev transition 有时序，slide 2 首次最慢）
+      try {
+        await page.waitForFunction((expected) => {
+          const v = [...document.querySelectorAll('.slidev-page')].find(p => p.getBoundingClientRect().width > 0);
+          return v?.dataset?.slidevNo === String(expected);
+        }, i, { timeout: 4000, polling: 100 });
+      } catch {
+        // 即便切换超时，仍继续测量（标 mismatch）
+      }
+      // 再等 200ms 让动画收尾
+      await page.waitForTimeout(200);
+      const r = await page.evaluate((expected) => {
         const v = [...document.querySelectorAll('.slidev-page')].find(p => p.getBoundingClientRect().width > 0);
-        if (!v) return { error: 'no visible slide' };
-        const l = v.querySelector('.slidev-layout');
-        if (!l) return { error: 'no layout' };
-        return { layoutH: l.clientHeight, scrollH: l.scrollHeight, over: l.scrollHeight - l.clientHeight };
-      });
-      if (r.error || r.over > 0) overflows.push({ no: i, ...r });
+        const visibleNo = v?.dataset?.slidevNo;
+        const sc = document.querySelector('.slidev-slide-content');
+        if (!sc) return { error: 'no slide-content' };
+        return { visible: visibleNo, clientH: sc.clientHeight, scrollH: sc.scrollHeight, over: sc.scrollHeight - sc.clientHeight, mismatch: visibleNo !== String(expected) };
+      }, i);
+      if (r.error || r.over > 0 || r.mismatch) overflows.push({ no: i, ...r });
     }
     await context.close();
     return { pkg, total, overflows };
