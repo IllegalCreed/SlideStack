@@ -1193,6 +1193,25 @@ importers:
         specifier: ^2.2.472
         version: 2.2.472
 
+  packages/jest-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
   packages/jotai-slide:
     dependencies:
       '@slidev/cli':
@@ -3144,7 +3163,7 @@ importers:
         version: 0.25.0
       vue:
         specifier: ^3.5.34
-        version: 3.5.35(typescript@5.9.3)
+        version: 3.5.35(typescript@6.0.3)
     devDependencies:
       '@iconify/json':
         specifier: ^2.2.472
