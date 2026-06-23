@@ -195,21 +195,21 @@ transition: fade-out
 
 <v-click>
 
-**① 手工测试** <span class="i-carbon-user inline-block align-middle"></span>
+**① 手工测试** 👤
 人去点、去看、去判断。探索性、主观体验、需求走查、准入抽查——靠的是「人」的判断力。
 
 </v-click>
 
 <v-click>
 
-**② MCP 让 AI 跑 e2e** <span class="i-carbon-bot inline-block align-middle"></span>
+**② MCP 让 AI 跑 e2e** 🤖
 Playwright MCP / Chrome DevTools MCP 让 AI 用**自然语言**驱动真实浏览器：导航、点击、填表、断言、截图、读 console、看网络。skills 把常用流程封装起来。
 
 </v-click>
 
 <v-click>
 
-**③ 传统框架 + AI 写用例** <span class="i-carbon-code inline-block align-middle"></span>
+**③ 传统框架 + AI 写用例** 💻
 AI 在懂需求/功能/白盒代码的前提下，按五层 + 提示词流程写**系统化框架用例**（Vitest / Playwright spec），进 CI 当门禁。
 
 </v-click>
