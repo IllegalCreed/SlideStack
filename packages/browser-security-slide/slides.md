@@ -1034,7 +1034,7 @@ HTTPS 页面里的 `http:` 子资源——可被窥探，更可被替换
 | 类别 | 覆盖的资源 | 浏览器行为 |
 | --- | --- | --- |
 | **可升级 upgradable** | `<img src>`（不含 srcset）、CSS 图像、`<audio src>`、`<video src>`、`<source>` | **自动改写为 https 重试**；服务器不支持则加载失败 |
-| **可阻断 blockable** | `<script>`、样式表、`<iframe>`、`fetch`/XHR、全部 CSS `url()`（字体等）、`srcset`/`<picture>`，以及**一切新类型** | **直接阻断，不发请求** |
+| **可阻断 blockable** | `<script>`、样式表、`<iframe>`、`fetch`/XHR、非图像类 CSS `url()`（字体等）、`srcset`/`<picture>`，以及**一切新类型** | **直接阻断，不发请求** |
 
 </v-click>
 
