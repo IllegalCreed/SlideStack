@@ -72,6 +72,25 @@ importers:
         specifier: ^2.2.472
         version: 2.2.472
 
+  packages/alipay-miniprogram-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
   packages/alpine-js-slide:
     dependencies:
       '@slidev/cli':
@@ -300,6 +319,25 @@ importers:
         specifier: ^2.2.472
         version: 2.2.472
 
+  packages/baidu-miniprogram-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
   packages/biome-slide:
     dependencies:
       '@slidev/cli':
@@ -434,6 +472,25 @@ importers:
         version: 2.2.472
 
   packages/bun-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
+  packages/capacitor-slide:
     dependencies:
       '@slidev/cli':
         specifier: 52.15.2
@@ -1041,7 +1098,45 @@ importers:
         specifier: ^2.2.472
         version: 2.2.472
 
+  packages/douyin-miniprogram-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
   packages/editorconfig-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
+  packages/electron-slide:
     dependencies:
       '@slidev/cli':
         specifier: 52.15.2
@@ -1251,6 +1346,25 @@ importers:
         version: 2.2.472
 
   packages/firefox-devtools-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
+  packages/flutter-slide:
     dependencies:
       '@slidev/cli':
         specifier: 52.15.2
@@ -1744,6 +1858,25 @@ importers:
         specifier: ^2.2.472
         version: 2.2.472
 
+  packages/ionic-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
   packages/jenkins-slide:
     dependencies:
       '@slidev/cli':
@@ -2200,6 +2333,25 @@ importers:
         specifier: ^2.2.472
         version: 2.2.472
 
+  packages/lynx-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
   packages/mammoth-slide:
     dependencies:
       '@slidev/cli':
@@ -2308,7 +2460,7 @@ importers:
         version: 0.25.0
       vue:
         specifier: ^3.5.34
-        version: 3.5.35(typescript@5.9.3)
+        version: 3.5.35(typescript@6.0.3)
     devDependencies:
       '@iconify/json':
         specifier: ^2.2.472
@@ -2638,6 +2790,25 @@ importers:
         version: 2.2.472
 
   packages/net-transport-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
+  packages/neutralino-slide:
     dependencies:
       '@slidev/cli':
         specifier: 52.15.2
@@ -3207,6 +3378,25 @@ importers:
         specifier: ^2.2.472
         version: 2.2.472
 
+  packages/qq-miniprogram-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
   packages/qwik-slide:
     dependencies:
       '@slidev/cli':
@@ -3246,6 +3436,25 @@ importers:
         version: 2.2.472
 
   packages/react-devtools-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
+  packages/react-native-slide:
     dependencies:
       '@slidev/cli':
         specifier: 52.15.2
@@ -4024,6 +4233,44 @@ importers:
         specifier: ^2.2.472
         version: 2.2.472
 
+  packages/taro-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
+  packages/tauri-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
   packages/testing-library-slide:
     dependencies:
       '@slidev/cli':
@@ -4253,6 +4500,25 @@ importers:
         version: 2.2.472
 
   packages/unbuild-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
+  packages/uni-app-slide:
     dependencies:
       '@slidev/cli':
         specifier: 52.15.2
@@ -4670,6 +4936,25 @@ importers:
         specifier: ^2.2.472
         version: 2.2.472
 
+  packages/wails-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
   packages/webdriverio-slide:
     dependencies:
       '@slidev/cli':
@@ -4709,6 +4994,25 @@ importers:
         version: 2.2.472
 
   packages/webstorm-slide:
+    dependencies:
+      '@slidev/cli':
+        specifier: 52.15.2
+        version: 52.15.2(@nuxt/kit@3.21.5)(@types/markdown-it@14.1.2)(@types/node@22.19.19)(@vue/compiler-sfc@3.5.35)(esbuild@0.27.2)(markdown-it-async@2.2.0)(markdown-it@14.2.0)(postcss@8.5.15)
+      '@slidev/theme-default':
+        specifier: latest
+        version: 0.25.0
+      '@slidev/theme-seriph':
+        specifier: latest
+        version: 0.25.0
+      vue:
+        specifier: ^3.5.34
+        version: 3.5.35(typescript@6.0.3)
+    devDependencies:
+      '@iconify/json':
+        specifier: ^2.2.472
+        version: 2.2.472
+
+  packages/wechat-miniprogram-slide:
     dependencies:
       '@slidev/cli':
         specifier: 52.15.2
