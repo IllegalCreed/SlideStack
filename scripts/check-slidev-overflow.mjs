@@ -90,9 +90,12 @@ async function checkPackage(browser, pkg) {
       const r = await page.evaluate((expected) => {
         const v = [...document.querySelectorAll('.slidev-page')].find(p => p.getBoundingClientRect().width > 0);
         const visibleNo = v?.dataset?.slidevNo;
+        // .slidev-slide-content 是所有页的公共容器，其 scrollHeight 反映【当前可见页】撑高后的高度（over>0 即当前页溢出）
         const sc = document.querySelector('.slidev-slide-content');
         if (!sc) return { error: 'no slide-content' };
-        return { visible: visibleNo, clientH: sc.clientHeight, scrollH: sc.scrollHeight, over: sc.scrollHeight - sc.clientHeight, mismatch: visibleNo !== String(expected) };
+        // title 必须取可见页 v 自己的标题；不能用 sc.querySelector（公共容器首个 h1 恒为封面标题，会误导定位）
+        const title = (v?.querySelector('h1,h2')?.innerText || '').slice(0, 24);
+        return { visible: visibleNo, title, clientH: sc.clientHeight, scrollH: sc.scrollHeight, over: sc.scrollHeight - sc.clientHeight, mismatch: visibleNo !== String(expected) };
       }, i);
       if (r.error || r.over > 0 || r.mismatch) overflows.push({ no: i, ...r });
     }
@@ -122,7 +125,7 @@ async function main() {
       if (result.error) {
         console.log(`❌ ${pkg.padEnd(30)} (${elapsed}s) ERROR: ${result.error}`);
       } else if (result.overflows.length) {
-        console.log(`⚠️  ${pkg.padEnd(30)} (${elapsed}s) ${result.overflows.length}/${result.total} 页溢出: ${result.overflows.map(o => `#${o.no} (+${o.over}px)`).join(', ')}`);
+        console.log(`⚠️  ${pkg.padEnd(30)} (${elapsed}s) ${result.overflows.length}/${result.total} 页溢出: ${result.overflows.map(o => `#${o.no}「${o.title||''}」(+${o.over}px)`).join(', ')}`);
       } else {
         console.log(`✅ ${pkg.padEnd(30)} (${elapsed}s) ${result.total} 页全部 OK`);
       }
