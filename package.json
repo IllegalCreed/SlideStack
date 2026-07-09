@@ -17,7 +17,11 @@
   },
   "pnpm": {
     "overrides": {
-      "@slidev/cli": "52.15.2"
+      "@babel/core": "7.29.6",
+      "@slidev/cli": "52.15.2",
+      "@comark/markdown-it>js-yaml": "4.2.0",
+      "dompurify": "3.4.11",
+      "gray-matter>js-yaml": "3.15.0"
     }
   }
 }
